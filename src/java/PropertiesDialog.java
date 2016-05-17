@@ -3,11 +3,12 @@ package com.dickimawbooks.makeglossariesgui;
 import java.io.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.HashMap;
 
 import javax.swing.*;
 
 public class PropertiesDialog extends JDialog
-      implements ActionListener
+      implements ActionListener,ItemListener
 {
    public PropertiesDialog(MakeGlossariesGUI application)
    {
@@ -148,8 +149,17 @@ public class PropertiesDialog extends JDialog
       langLabel.setLabelFor(languageBox);
 
       languageBox.setSelectedItem(properties.getDefaultLanguage());
+      languageBox.addItemListener(this);
 
       xindyDefaultsPanel.add(languageBox);
+
+      xindyModuleLayout = new CardLayout();
+      variantPanel = new JPanel(xindyModuleLayout);
+      xindyDefaultsPanel.add(variantPanel);
+
+      initVariants((String)languageBox.getSelectedItem(),
+        properties.getDefaultXindyVariant());
+      updateXindyModule();
 
       JLabel encodingLabel = new JLabel(app.getLabel("properties.encoding"));
       encodingLabel.setDisplayedMnemonic(app.getMnemonic("properties.encoding"));
@@ -206,7 +216,6 @@ public class PropertiesDialog extends JDialog
 
       pack();
       setLocationRelativeTo(app);
-
    }
 
    private File getDir()
@@ -274,6 +283,7 @@ public class PropertiesDialog extends JDialog
          properties.setGermanWordOrdering(germanWordOrderButton.isSelected());
          properties.setDefaultLanguage((String)languageBox.getSelectedItem());
          properties.setDefaultCodePage((String)encodingBox.getSelectedItem());
+         properties.setDefaultXindyVariant(currentVariant.getSelected());
 
          if (homeButton.isSelected())
          {
@@ -312,7 +322,147 @@ public class PropertiesDialog extends JDialog
       setVisible(true);
    }
 
+   public void setXindy(File path)
+   {
+      xindyField.setFile(path);
+   }
+
+   public void setMakeIndex(File path)
+   {
+      makeindexField.setFile(path);
+   }
+
+   private void initVariants(String lang, String defVariant)
+   {
+      addXindyModule("default", null, null);
+
+      addXindyModule("german", new String[]
+        {
+          "braille",
+          "duden",
+          "din5007"
+        },
+        lang.equals("german") ? defVariant : "din5007"
+      );
+
+      addXindyModule("dutch", new String[]
+        {
+          "ij-as-ij",
+          "ij-as-y"
+        },
+        lang.equals("dutch") ? defVariant : null
+      );
+
+      addXindyModule("greek", new String[]
+        {
+          "polytonic",
+          "translit"
+        },
+        lang.equals("greek") ? defVariant : null
+      );
+
+      addXindyModule("gypsy", new String[]
+        {
+          "northrussian"
+        },
+        lang.equals("gypsy") ? defVariant : null
+      );
+
+      addXindyModule("kurdish", new String[]
+        {
+          "bedirxan"
+        },
+        lang.equals("kurdish") ? defVariant : null
+      );
+
+      addXindyModule("mongolian", new String[]
+        {
+          "cyrillic"
+        },
+        lang.equals("mongolian") ? defVariant : null
+      );
+
+      addXindyModule("persian", new String[]
+        {
+          "variant1",
+          "variant2",
+          "variant3"
+        },
+        lang.equals("persian") ? defVariant : null
+      );
+
+      addXindyModule("russian", new String[]
+        {
+          "translit-iso"
+        },
+        lang.equals("russian") ? defVariant : null
+      );
+
+      addXindyModule("slovak", new String[]
+        {
+          "large",
+          "small"
+        },
+        lang.equals("slovak") ? defVariant : null
+      );
+
+      addXindyModule("spanish", new String[]
+        {
+          "modern",
+          "traditional"
+        },
+        lang.equals("spanish") ? defVariant : "modern"
+      );
+
+   }
+
+   private void addXindyModule(String langName, String[] choices)
+   {
+      addXindyModule(langName, choices, null);
+   }
+
+   private void addXindyModule(String langName, String[] choices,
+     String def)
+   {
+      variantPanel.add(
+        new XindyModule(langName, choices, def), langName);
+   }
+
+   public void itemStateChanged(ItemEvent e)
+   {
+      if (e.getSource() == languageBox)
+      {
+         updateXindyModule();
+      }
+   }
+
+   private void updateXindyModule()
+   {
+      String language = (String)languageBox.getSelectedItem();
+
+      for (int i = 0, n = variantPanel.getComponentCount(); i < n; i++)
+      {
+         Component comp = variantPanel.getComponent(i);
+
+         if (comp.getName().equals(language))
+         {
+            currentVariant = (XindyModule)comp;
+            xindyModuleLayout.show(variantPanel, language);
+            return;
+         }
+      }
+
+      currentVariant = (XindyModule)variantPanel.getComponent(0);
+      xindyModuleLayout.first(variantPanel);
+   }
+
    private MakeGlossariesGUI app;
+
+   private CardLayout xindyModuleLayout;
+
+   private JPanel variantPanel;
+
+   private XindyModule currentVariant;
 
    private JRadioButton homeButton, lastButton, customButton;
 
@@ -325,6 +475,8 @@ public class PropertiesDialog extends JDialog
    private JFileChooser fileChooser;
 
    private MakeGlossariesProperties properties;
+
+   // TODO find some way to do this programmatically
 
    private static final String[] knownXindyLanguages = new String[]
    {
@@ -351,6 +503,7 @@ public class PropertiesDialog extends JDialog
       "icelandic",
       "italian",
       "klingon",
+      "korean",
       "kurdish",
       "latin",
       "latvian",
@@ -359,6 +512,7 @@ public class PropertiesDialog extends JDialog
       "macedonian",
       "mongolian",
       "norwegian",
+      "persian",
       "polish",
       "portuguese",
       "romanian",
@@ -379,26 +533,58 @@ public class PropertiesDialog extends JDialog
      "cp1250",
      "cp1251",
      "cp1252",
-     "ij-as-ij-latin1",
-     "ij-as-ij-utf8",
-     "ij-as-y-utf8",
      "iso88595",
      "iso88597",
      "isoir111",
      "koi8-r",
+     "koi8-u",
      "latin1",
      "latin2",
      "latin3",
      "latin4",
      "latin5",
      "latin9",
-     "modern-latin1",
-     "modern-utf8",
-     "polytonic-utf8",
-     "traditional-latin1",
-     "traditional-utf8",
-     "translit-latin4",
-     "translit-utf8",
      "utf8"
    };
 }
+
+class XindyModule extends JPanel
+{
+   public XindyModule(String name)
+   {
+      this(name, null, null);
+   }
+
+   public XindyModule(String name, String[] choices)
+   {
+      this(name, choices, null);
+   }
+
+   public XindyModule(String name, String[] choices, String def)
+   {
+      super();
+      setName(name);
+
+      if (choices != null)
+      {
+         choicesBox = new JComboBox<String>(choices);
+         choicesBox.setEditable(true);
+
+         if (def != null)
+         {
+            choicesBox.setSelectedItem(def);
+         }
+
+         add(choicesBox);
+      }
+   }
+
+   public String getSelected()
+   {
+      return choicesBox == null ? null : 
+       (String)choicesBox.getSelectedItem();
+   }
+
+   private JComboBox<String> choicesBox = null;
+}
+

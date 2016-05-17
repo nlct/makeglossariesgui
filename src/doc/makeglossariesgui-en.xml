@@ -21,7 +21,24 @@
   <document>
    <node tag="introduction" type="chapter" title="Introduction">
      <p>
-     The <LaTeX /> <sty>glossaries</sty> package 
+     The <LaTeX /> <sty>glossaries</sty> package has three methods
+     of generating a glossary (list of abbreviations, terms or symbols):
+     directly using <LaTeX />, using makeindex or using xindy.
+     The first option requires two <LaTeX/> runs (as with cross-references),
+     the last two options requires a <LaTeX/> run followed by running
+     the indexing application (makeindex or xindy), followed by another
+     <LaTeX/> run. The <sty>glossaries</sty> package provides a Perl
+     script called makeglossaries that's intended to simply this step
+     for options 2 and 3. However, sometimes things can go wrong and users
+     may not be able to work out why. The makeglossaries script tries to
+     diagnose problems, but not everyone wants to install Perl for some
+     reason (which is a shame, as there are some useful <TeX/>-related
+     Perl scripts, including xindy).
+     </p>
+     <p>
+     If things go wrong, <app/> can be used instead of makeglossaries to
+     diagnose problems and build the required glossary files. It's 
+     written in Java, so you'll need the Java Runtime Environment installed.
      </p>
      <p>The <app/> 
      application runs in <acr tag="gui" /> mode by default, but can
@@ -43,6 +60,9 @@
        <dt><opt tag="help"/> (or <tt>-h</tt>)</dt>
        <dd>Print a brief summary of available options to STDOUT and exit.</dd>
      </dl>
+     </p>
+     <p>
+     This manual is still under construction.
      </p>
    </node>
    <node type="chapter" tag="licence" title="Licence" >

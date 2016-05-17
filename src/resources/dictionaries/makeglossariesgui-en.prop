@@ -51,6 +51,11 @@ about.translator_info=
 # file filter
 filter.aux=Auxiliary (AUX) Files
 
+# application selector
+appselect.title=Select Application
+appselect.pathlabel=Select path to application
+appselect.pathlabel.mnemonic=P
+
 # Main panel
 main.title=General Information
 main.title.mnemonic=I
@@ -118,9 +123,9 @@ properties.xindy=Path to Xindy:
 properties.xindy.mnemonic=X
 properties.german_word_order=German Word Order
 properties.german_word_order.mnemonic=G
-properties.language=Default Language
-properties.language.mnemonic=F
-properties.encoding=Default Encoding
+properties.language=Language
+properties.language.mnemonic=G
+properties.encoding=Encoding
 properties.encoding.mnemonic=E
 
 # Error messages

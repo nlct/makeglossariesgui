@@ -3,7 +3,7 @@ DICTDIR=../resources/dictionaries
 TARGETBACKREF=../../doc
 MAINCLASS=../java/MakeGlossariesGUI.java
 
-all	: images en
+all	: en
 
 en	: $(TARGETDIR)/makeglossariesgui-en/makeglossariesgui.html \
 	  makeglossariesgui-en.pdf
@@ -36,9 +36,6 @@ $(TARGETDIR)/makeglossariesgui-en/images/	:
 	mkdir -p $(TARGETDIR)/makeglossariesgui-en
 	cd $(TARGETDIR)/makeglossariesgui-en/ ; \
 	ln -s ../$(TARGETBACKREF)/images
-
-images	:
-	ln -s ../images
 
 clean	:
 	\rm -f makeglossariesgui-en.{tex,aux,log,pdf,glg,glo,gls,ist,ilg,ind,idx,acr,acn,alg}

@@ -162,6 +162,18 @@ public class MakeGlossariesProperties extends Properties
       setProperty("fontname", name);
    }
 
+   public String getDefaultXindyVariant()
+   {
+      String prop = getProperty("variant");
+
+      return "".equals(prop) ? null : prop;
+   }
+
+   public void setDefaultXindyVariant(String variant)
+   {
+      setProperty("variant", variant==null?"":variant);
+   }
+
    public String getDefaultLanguage()
    {
       String prop = getProperty("language");
@@ -315,9 +327,19 @@ public class MakeGlossariesProperties extends Properties
       setProperty("directory.setting", "last");
    }
 
+   public void setMakeIndexApp(File pathToApp)
+   {
+      setMakeIndexApp(pathToApp.getAbsolutePath());
+   }
+
    public void setMakeIndexApp(String pathToApp)
    {
       setProperty("makeindex", pathToApp);
+   }
+
+   public void setXindyApp(File pathToApp)
+   {
+      setXindyApp(pathToApp.getAbsolutePath());
    }
 
    public void setXindyApp(String pathToApp)

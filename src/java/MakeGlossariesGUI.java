@@ -39,7 +39,8 @@ public class MakeGlossariesGUI extends JFrame
             +e.getMessage());
       }
 
-      setIconImage(new ImageIcon(getClass().getResource("/icons/makeglossariesgui-logosmall.png")).getImage());
+      setIconImage(new ImageIcon(getClass().getResource(
+        "/icons/makeglossariesgui-logosmall.png")).getImage());
 
       try
       {
@@ -150,6 +151,8 @@ public class MakeGlossariesGUI extends JFrame
 
       propertiesDialog = new PropertiesDialog(this);
 
+      appSelector = new AppSelector(this);
+
       pack();
       setLocationRelativeTo(null);
       setVisible(true);
@@ -160,6 +163,22 @@ public class MakeGlossariesGUI extends JFrame
       if ((xindy == null || xindy.equals(""))
        &&(makeindex == null || makeindex.equals("")))
       {
+         File file = appSelector.findApp("makeindex");
+
+         if (file != null)
+         {
+            properties.setMakeIndexApp(file);
+            propertiesDialog.setMakeIndex(file);
+         }
+
+         file = appSelector.findApp("xindy");
+
+         if (file != null)
+         {
+            properties.setXindyApp(file);
+            propertiesDialog.setXindy(file);
+         }
+
          propertiesDialog.display();
       }
    }
@@ -893,6 +912,8 @@ public class MakeGlossariesGUI extends JFrame
    private Hashtable<String,String> languageMap;
 
    private JToolBar toolBar;
+
+   private AppSelector appSelector;
 
    private HelpBroker mainHelpBroker;
    private CSH.DisplayHelpFromSource csh;

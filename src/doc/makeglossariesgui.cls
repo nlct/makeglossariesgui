@@ -1,5 +1,5 @@
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{datatooltk}[2013/06/06]
+\ProvidesClass{makeglossariesgui}[2016/05/17]
 
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{scrreprt}}
 

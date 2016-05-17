@@ -101,6 +101,18 @@ public class FileField extends JPanel
       textField.setText(name);
    }
 
+   public void setFile(File file)
+   {
+      setFileName(file.getAbsolutePath());
+
+      File parent = file.getParentFile();
+
+      if (parent != null)
+      {
+         fileChooser.setCurrentDirectory(parent);
+      }
+   }
+
    public void setEnabled(boolean flag)
    {
       super.setEnabled(flag);
