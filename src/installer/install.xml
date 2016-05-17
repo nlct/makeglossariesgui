@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+
+<!-- 
+    Installation file for makeglossariesgui.
+-->
+
+<izpack:installation version="5.0" xmlns:izpack="http://izpack.org/schema/installation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://izpack.org/schema/installation http://izpack.org/schema/5.0/izpack-installation-5.0.xsd">
+
+  <properties>
+    <property name="info.appName" value="makeglossariesgui"/>
+    <property name="info.url" value="http://www.dickimaw-books.com/apps/makeglossariesgui/"/>
+    <property name="project.version" value="2.0" />
+  </properties>
+
+    <!-- 
+        The info section.
+    -->
+    <info>
+        <appname>@{info.appName}</appname>
+        <appversion>@{project.version}</appversion>
+        <authors>
+            <author name="Nicola L. C. Talbot" email="www.dickimaw-books.com/contact.html"/>
+        </authors>
+        <url>@{info.url}</url>
+        <javaversion>1.8</javaversion>
+        <run-privileged condition="izpack.windowsinstall.vista|izpack.macinstall"/>
+    </info>
+
+    <guiprefs width="640" height="480" resizable="yes">
+     <splash>images/makeglossariesgui-splash.png</splash>
+    </guiprefs>
+
+   <variables>
+        <variable name="DesktopShortcutCheckboxEnabled" value="true"/>
+   </variables>
+
+    <locale>
+        <langpack iso3="eng"/>
+    </locale>
+
+    <resources>
+        <res id="LicencePanel.licence" src="doc/LICENSE"/>
+        <res id="InfoPanel.info" src="doc/README"/>
+        <res id="shortcutSpec.xml" src="installer/shortcutSpec.xml"/>
+        <res id="Unix_shortcutSpec.xml" src="installer/unix_shortcutSpec.xml"/>
+
+    </resources>
+
+    <panels>
+        <panel classname="HelloPanel"/>
+        <panel classname="InfoPanel"/>
+        <panel classname="LicencePanel"/>
+        <panel classname="TargetPanel"/>
+        <panel classname="PacksPanel"/>
+        <panel classname="InstallPanel"/>
+        <panel classname="ShortcutPanel"/>
+        <panel classname="FinishPanel"/>
+    </panels>
+
+    <packs>
+        <pack name="Base" required="yes">
+            <description>The base files</description>
+            <file src="doc/README" targetdir="$INSTALL_PATH"/>
+            <file src="doc/LICENSE" targetdir="$INSTALL_PATH"/>
+            <file src="lib" targetdir="$INSTALL_PATH"/>
+            <fileset dir="bin" excludes="**/*.bat"
+              targetdir="$INSTALL_PATH/bin"/>
+            <fileset dir="bin" includes="**/*.bat"
+              targetdir="$INSTALL_PATH/bin">
+                <os family="windows"/>
+            </fileset>
+            <executable targetfile="$INSTALL_PATH/bin/makeglossariesgui"
+            stage="never"/>
+            <executable targetfile="$INSTALL_PATH/bin/makeglossariesgui-gui"
+            stage="never"/>
+        </pack>
+        <pack name="Documentation GB" required="no" preselected="no">
+            <description>The makeglossariesgui documentation</description>
+            <fileset dir="doc" includes="**/*-en-GB.pdf" targetdir="$INSTALL_PATH/doc"/>
+        </pack>
+        <pack name="Documentation US" required="no" preselected="no">
+            <description>The makeglossariesgui documentation</description>
+            <fileset dir="doc" includes="**/*-en-US.pdf" targetdir="$INSTALL_PATH/doc"/>
+        </pack>
+        <pack name="Source" required="no" preselected="no">
+            <description>The source code</description>
+            <file src="doc/createmakeglossariesguidocs" targetdir="$INSTALL_PATH/src/doc" />
+            <file src="doc/images" targetdir="$INSTALL_PATH/src/doc" />
+            <fileset dir="." includes="**/Makefile" 
+              targetdir="$INSTALL_PATH/src" />
+            <fileset dir="." includes="**/README" 
+              targetdir="$INSTALL_PATH/src" />
+            <fileset dir="." includes="**/LICENSE" 
+              targetdir="$INSTALL_PATH/src" />
+            <fileset dir="." includes="**/*.xml" 
+              targetdir="$INSTALL_PATH/src" />
+            <file src="bin" targetdir="$INSTALL_PATH/src" />
+            <file src="images" targetdir="$INSTALL_PATH/src" />
+            <file src="java" targetdir="$INSTALL_PATH/src" />
+            <fileset dir="resources" targetdir="$INSTALL_PATH/src/resources"
+              includes="**/*.prop" />
+            <fileset dir="tests" targetdir="$INSTALL_PATH/src/tests"
+              includes="**/*.tex" />
+        </pack>
+    </packs>
+
+    <natives>
+     <native type="izpack" name="ShellLink.dll"/>
+     <native type="izpack" name="ShellLink_x64.dll"/>
+    </natives>
+
+</izpack:installation>

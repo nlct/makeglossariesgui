@@ -1,0 +1,163 @@
+# English language file for makeglossaries-gui
+
+# File menu
+file=File
+file.mnemonic=F
+file.open=Open...
+file.open.mnemonic=O
+file.open.tooltip=Load an auxiliary (.aux) file
+file.open.alttext=Load File
+file.reload=Reload
+file.reload.mnemonic=R
+file.reload.tooltip=Reload current file
+file.reload.alttext=Reload
+file.recent=Recent
+file.recent.mnemonic=T
+file.quit=Quit
+file.quit.mnemonic=Q
+
+# Settings menu
+settings=Settings
+settings.mnemonic=S
+settings.incsize=Increase Font Size
+settings.incsize.mnemonic=I
+settings.incsize.tooltip=Increase font size
+settings.incsize.alttext=Increase Font Size
+settings.decsize=Decrease Font Size
+settings.decsize.mnemonic=D
+settings.decsize.tooltip=Decrease font size
+settings.decsize.alttext=Decrease Font Size
+settings.editproperties=Edit Properties...
+settings.editproperties.mnemonic=E
+
+# Help menu
+help=Help
+help.mnemonic=H
+help.about=About
+help.about.mnemonic=A
+help.license=License
+help.license.mnemonic=L
+help.manual=Manual
+help.manual.mnemonic=M
+help.manual.tooltip=Manual
+help.manual.alttext=Help
+
+# about dialog
+about.title=About $1
+about.version=Version $1
+about.copyright=Copyright $1 $2
+about.translator_info=
+
+# file filter
+filter.aux=Auxiliary (AUX) Files
+
+# Main panel
+main.title=General Information
+main.title.mnemonic=I
+main.aux=Main AUX File:
+main.order=Order:
+main.ist=Style File:
+main.list=Defined Glossaries:
+main.indexer=Index Format:
+main.glossary=Glossary $1:
+main.glossary.log=Transcript:
+main.glossary.gls=Output:
+main.glossary.glo=Input:
+main.glossary.language=Language:
+main.glossary.codepage=Code Page:
+main.up_to_date=Up to date
+main.out_of_date=Out of date
+main.empty=Empty
+main.num_entries=Number of Entries:
+main.view=View
+main.details=Details
+
+# Entry viewer
+entry.title=Glossary '$1'
+entry.label=Entry Tag
+entry.count=Occurrences
+entry.find=Find
+entry.find.tooltip=Find entry
+entry.find_label=Tag:
+entry.find_label.mnemonic=T
+
+# Diagnostics panel
+diagnostics.title=Diagnostics
+diagnostics.title.mnemonic=D
+diagnostics.no_glossaries=Either your document hasn't loaded the glossaries package, or you have selected the wrong auxiliary file.
+diagnostics.not_aux=The file you have selected doesn't seem to be an auxiliary (.aux) file.
+diagnostics.no_makeglossaries=Your document doesn't seem to have used \\makeglossaries.
+diagnostics.no_errors=No errors detected. If you are missing entries, check that you have used the entries in the text via commands such as \\gls and \\glsadd.
+diagnostics.no_indexer=Use the Settings menu to set the correct path to the $1 executable.
+diagnostics.language_no_glossary=Check you have spelt the name of the glossary label correctly when using \\GlsSetXdyLanguage[$2]{$1} or check that you have defined glossary '$2'.
+diagnostics.codepage_no_glossary=Check you have spelt the name of the glossary label correctly when using \\GlsSetXdyCodePage[$2]{$1} or check that you have defined glossary '$2'.
+diagnostics.no_codepage=You need to specify the code page (e.g. 'utf8' or 'latin1') either using the inputenc package or setting it via \\GlsSetXdyCodePage.
+diagnostics.makeindex_reject_all=Makeindex has rejected all entries in glossary '$1'.
+diagnostics.bad_attributes=The file '$1' doesn't seem to be a valid $2 style file. When you set the style name, make sure you use \\SetStyleFile instead of redefining \\istfilename and avoid using \\glsxindytrue or \\glsxindyfalse.
+diagnostics.no_entries=There were no entries listed for glossary '$1'. Check that you have used commands like \\gls or \\glsadd.
+diagnostics.no_entries_main=There were no entries listed for the main glossary. Check that you have used commands like \\gls or \\glsadd. If you don't want to use this glossary, add the 'nomain' package option to your document.
+diagnostics.app_err=$1 reported the following error:$2
+diagnostics.app_err_null=I'm stumped. Nothing was detected on the error output stream.
+diagnostics.unknown_language_or_codepage=Xindy doesn't have a module for the combination of language '$1' and codepage '$2'. Use \\GlsSetXdyLanguage and/or \\GlsSetXdyCodePage to select the closest matching known language and codepage combination.
+diagnostics.io_error=An I/O error occurred. Use the Settings menu to check the paths to makeindex and xindy are correct, and check that the applications have the correct permissions. If you are using xindy, make sure that you also have Perl installed.
+diagnostics.interrupt=Something interrupted the process thread.
+diagnostics.no_ist=The style file can't be found. If you have used \\noist, you have to supply your own style file.
+
+# Properties dialog
+properties.title=MakeGlossariesGUI Properties
+properties.start_dir=Start Up Directory:
+properties.dir.home=Home
+properties.dir.home.mnemonic=H
+properties.dir.last=Last Used Directory 
+properties.dir.last.mnemonic=L
+properties.dir.custom=Custom:
+properties.dir.custom.mnemonic=U
+properties.makeindex=Path to Makeindex:
+properties.makeindex.mnemonic=M
+properties.xindy=Path to Xindy:
+properties.xindy.mnemonic=X
+properties.german_word_order=German Word Order
+properties.german_word_order.mnemonic=G
+properties.language=Default Language
+properties.language.mnemonic=F
+properties.encoding=Default Encoding
+properties.encoding.mnemonic=E
+
+# Error messages
+error.title=Error
+error.no_such_file=File not found.
+error.no_xindy=Can't find Xindy application.
+error.no_makeindex=Can't find Makeindex application.
+error.no_glossaries=No glossaries defined.
+error.invalid_order=Invalid order (must be either 'letter' or 'word').
+error.missing_order=Missing order.
+error.missing_ist=Missing style file.
+error.cant_determine_indexer=Can't determine indexer.
+error.unknown=Unknown
+error.missing_dir_name=Missing directory name.
+error.no_such_directory='$1' doesn't exist or isn't a directory.
+error.language_no_glossary=Language is set to '$1' for glossary '$2', but no such glossary exists.
+error.codepage_no_glossary=Codepage is set to '$1' for glossary '$2', but no such glossary exists.
+error.entries_rejected=$1 entries were rejected.
+error.entry_rejected=1 entry was rejected.
+error.no_entries=No entries were found for glossary '$1'.
+error.app_failed=$1 failed with exit code $2.
+error.no_indexer_app=Unable to run $1. No such file: '$2'.
+error.interrupt=The process was interrupted.
+error.no_such_entry=Can't find entry '$1'.
+error.io.helpset=Unable to load helpset.
+error.no_ist=The style file '$1' doesn't exist.
+
+# Fatal errors
+error.fatal.title=Fatal Error
+error.fatal.info=A fatal error has occurred. $1 will have to quit.
+
+# Button labels
+button.okay=Okay 
+button.okay.mnemonic=O
+button.cancel=Cancel
+button.cancel.mnemonic=C
+button.select=Select
+button.select.mnemonic=S
+button.help=Help
+button.help.mnemonic=P

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+
+<izpack:shortcuts version="5.0" xmlns:izpack="http://izpack.org/schema/shortcuts" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://izpack.org/schema/shortcuts http://izpack.org/schema/5.0/izpack-shortcuts-5.0.xsd">
+
+  <skipIfNotSupported/>
+  <programGroup defaultName="DickimawBooks\DatatoolTk"
+                location="startMenu"/>
+  <shortcut
+    name="DatatoolTk GUI"
+    target="$JAVA_HOME\bin\javaw.exe"
+    commandLine="-splash:&quot;$INSTALL_PATH\lib\makeglossariesgui-splash.png&quot; -jar &quot;$INSTALL_PATH\lib\makeglossariesgui.jar&quot;"
+    workingDirectory="$INSTALL_PATH"
+    description="GUI to accompany glossaries.sty"
+    iconFile="$INSTALL_PATH\lib\resources\icons\makeglossariesgui.ico"
+    iconIndex="0"
+    initialState="normal"
+    programGroup="yes"
+    desktop="yes"
+    applications="no"
+    startMenu="no"
+    startup="no">
+
+    <createForPack name="Base"/>
+  </shortcut>
+
+  <shortcut
+    name="MakeGlossariesGUI Uninstaller"
+    programGroup="yes"
+    desktop="no"
+    applications="no"
+    startMenu="no"
+    startup="no"
+    target="$INSTALL_PATH\Uninstaller\uninstaller.jar"
+    commandLine=""
+    iconFile="%SystemRoot%\system32\SHELL32.dll"
+    iconIndex="31"
+    description="Uninstall DatatoolTk"
+    initialState="noShow"
+  >
+
+    <createForPack name="Base"/>
+  </shortcut>
+
+  <shortcut
+    name="MakeGlossariesGUI Documentation"
+    programGroup="yes"
+    desktop="no"
+    applications="no"
+    startMenu="no"
+    startup="no"
+    target="$INSTALL_PATH\doc\makeglossariesgui-en-GB.pdf"
+    commandLine=""
+    encoding="UTF-8"
+    iconFile="%SystemRoot%\system32\SHELL32.dll"
+    iconIndex="23"
+    description="MakeGlossariesGUI user manual (PDF format)">
+
+    <createForPack name="Documentation GB"/>
+  </shortcut>
+
+  <shortcut
+    name="MakeGlossariesGUI Documentation"
+    programGroup="yes"
+    desktop="no"
+    applications="no"
+    startMenu="no"
+    startup="no"
+    target="$INSTALL_PATH\doc\makeglossariesgui-en-US.pdf"
+    commandLine=""
+    encoding="UTF-8"
+    iconFile="%SystemRoot%\system32\SHELL32.dll"
+    iconIndex="23"
+    description="MakeGlossariesGUI user manual (PDF format)">
+
+    <createForPack name="Documentation US"/>
+  </shortcut>
+
+</izpack:shortcuts>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE manual SYSTEM "makeglossariesgui.dtd">
+<manual fontenc="T1">
+  <preamble>
+    <!-- Document Info -->
+    <title>User Manual for <dict tag="appname"/> version 
+      <dict tag="appversion" /></title>
+    <author>Nicola L. C. Talbot<br/><url www="www.dickimaw-books.com" /></author>
+<!--
+    <author>Another Author<br />Affliation or URL</author>
+    <author>Translated by Some One<br />Affliation or URL</author>
+-->
+    <date><dict tag="appdate" /></date>
+    <!-- Define Acronyms -->
+    <newacro short="GUI" long="graphical user interface" tag="gui" />
+    <!-- Define Terms. If a description is included it's a glossary
+         term otherwise it goes in the index -->
+    <newterm tag="cwd" text="current working directory" 
+      description="The directory in which the application was started"/>
+  </preamble>
+  <document>
+   <node tag="introduction" type="chapter" title="Introduction">
+     <p>
+     The <LaTeX /> <sty>glossaries</sty> package 
+     </p>
+     <p>The <app/> 
+     application runs in <acr tag="gui" /> mode by default, but can
+     be run in batch mode using the <opt tag="batch"/> command line option.
+     Command line invocation:
+     </p>
+     <p align="center">
+      <app/> [<meta>options</meta>]
+     </p>
+     <p noindent="true">
+     Available options:
+     <dl>
+       <dt><opt tag="batch"/> (or <tt>-b</tt>)</dt>
+       <dd>
+       Invoke <app/> in batch mode (default).
+       </dd>
+       <dt><opt tag="version"/> (or <tt>-v</tt>)</dt>
+       <dd>Print the version details to STDOUT and exit.</dd>
+       <dt><opt tag="help"/> (or <tt>-h</tt>)</dt>
+       <dd>Print a brief summary of available options to STDOUT and exit.</dd>
+     </dl>
+   </node>
+   <node type="chapter" tag="licence" title="Licence" >
+   <p>
+   <app/> is licensed under the terms of the GNU General Public License.
+   <app/> depends on the following third party libraries whose jar files are
+   in the <tt>lib</tt> directory: Java Help 
+   (<url www="https://javahelp.java.net/"/>) and
+   the Java Look and Feel Graphics Repository (<url www="http://www.oracle.com/technetwork/java/index-138612.html"/>).
+   </p>
+     <verbtabinput src="LICENSE"/>
+   </node>
+   <printglossary />
+   <printacronyms />
+   <printindex />
+  </document>
+</manual>
