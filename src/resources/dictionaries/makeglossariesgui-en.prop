@@ -161,3 +161,20 @@ button.select=Select
 button.select.mnemonic=S
 button.help=Help
 button.help.mnemonic=P
+
+# Context labels in manual
+manual.title=Manual
+manual.figure=Figure
+manual.table=Table
+manual.next=Next
+manual.prev=Previous
+manual.home=Home
+manual.options=Options
+manual.toc=Table of Contents
+manual.index=Index
+manual.search=Search
+manual.idxpackage=package
+manual.idxenv=environment
+manual.example=Example
+manual.seealso=See also:
+

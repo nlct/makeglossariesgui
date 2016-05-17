@@ -4,7 +4,7 @@ IZPACKDIR=/usr/local/IzPack
 test	: app
 	bin/makeglossariesgui
 
-app	: lib lib/makeglossariesgui.jar lib/resources lib/makeglossariesgui-splash.png
+app	: lib lib/icons lib/makeglossariesgui.jar lib/resources lib/makeglossariesgui-splash.png
 
 dist	: ../dist/makeglossariesgui-installer.jar
 	cp doc/makeglossariesgui-en-GB.pdf ../dist
@@ -15,6 +15,9 @@ dist	: ../dist/makeglossariesgui-installer.jar
 
 lib	:
 	mkdir -p lib
+
+lib/icons	:
+		cd lib; ln -s ../images/icons
 
 lib/resources   :
 	cd lib; ln -s ../resources
@@ -32,16 +35,15 @@ lib/makeglossariesgui.jar	: java/Manifest.txt \
 	make -C doc
 	cd classes; \
 	jar cmf ../java/Manifest.txt ../lib/makeglossariesgui.jar \
-	com/dickimawbooks/makeglossariesgui/*.class \
-	com/dickimawbooks/makeglossariesgui/*/*.class 
+	com/dickimawbooks/makeglossariesgui/*.class 
 
 classes/com/dickimawbooks/makeglossariesgui/MakeGlossariesGUI.class	: classes/com/dickimawbooks/makeglossariesgui \
-	java/*.java java/*/*.java \
+	java/*.java \
 	lib/javahelp2.jar lib/jlfgr-1_0.jar
 	cd java; \
 	javac -d ../classes \
 	 -Xlint:unchecked -Xlint:deprecation \
-	-cp ../lib/javahelp2.jar:../lib/jlfgr-1_0.jar *.java */*.java
+	-cp ../lib/javahelp2.jar:../lib/jlfgr-1_0.jar *.java 
 
 classes/com/dickimawbooks/makeglossariesgui	:
 	mkdir -p classes/com/dickimawbooks/makeglossariesgui

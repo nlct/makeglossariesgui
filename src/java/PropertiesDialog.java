@@ -143,7 +143,7 @@ public class PropertiesDialog extends JDialog
       langLabel.setDisplayedMnemonic(app.getMnemonic("properties.language"));
       xindyDefaultsPanel.add(langLabel);
 
-      languageBox = new JComboBox(knownXindyLanguages);
+      languageBox = new JComboBox<String>(knownXindyLanguages);
       languageBox.setEditable(true);
       langLabel.setLabelFor(languageBox);
 
@@ -155,7 +155,7 @@ public class PropertiesDialog extends JDialog
       encodingLabel.setDisplayedMnemonic(app.getMnemonic("properties.encoding"));
       xindyDefaultsPanel.add(encodingLabel);
 
-      encodingBox = new JComboBox(knownEncodings);
+      encodingBox = new JComboBox<String>(knownEncodings);
       encodingBox.setEditable(true);
       encodingLabel.setLabelFor(encodingBox);
       encodingBox.setSelectedItem(properties.getDefaultCodePage());
@@ -318,7 +318,7 @@ public class PropertiesDialog extends JDialog
 
    private JCheckBox germanWordOrderButton;
 
-   private JComboBox languageBox, encodingBox;
+   private JComboBox<String> languageBox, encodingBox;
 
    private FileField customField, makeindexField, xindyField;
 

@@ -43,6 +43,7 @@
        <dt><opt tag="help"/> (or <tt>-h</tt>)</dt>
        <dd>Print a brief summary of available options to STDOUT and exit.</dd>
      </dl>
+     </p>
    </node>
    <node type="chapter" tag="licence" title="Licence" >
    <p>

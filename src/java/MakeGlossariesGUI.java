@@ -39,7 +39,7 @@ public class MakeGlossariesGUI extends JFrame
             +e.getMessage());
       }
 
-      setIconImage(new ImageIcon(getClass().getResource("/icons/logosmall.png")).getImage());
+      setIconImage(new ImageIcon(getClass().getResource("/icons/makeglossariesgui-logosmall.png")).getImage());
 
       try
       {
@@ -639,11 +639,11 @@ public class MakeGlossariesGUI extends JFrame
       String lang = locale.getLanguage();
 
       InputStream in = 
-         getClass().getResourceAsStream("/resources/dictionaries/makeglossaries-"+lang+".prop");
+         getClass().getResourceAsStream("/resources/dictionaries/makeglossariesgui-"+lang+".prop");
 
       if (in == null && !lang.equals("en"))
       {
-         in = getClass().getResourceAsStream("/resources/dictionaries/makeglossaries-en.prop");
+         in = getClass().getResourceAsStream("/resources/dictionaries/makeglossariesgui-en.prop");
       }
 
       BufferedReader reader = new BufferedReader(new InputStreamReader(in));
@@ -871,6 +871,8 @@ public class MakeGlossariesGUI extends JFrame
    private static final String appName = "MakeGlossariesGUI";
 
    private static final String appVersion = "1.0";
+
+   private static final String appDate = "2016-05-17";
 
    private GlossariesPanel mainPanel;
 

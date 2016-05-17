@@ -1,0 +1,2 @@
+Main-Class: com/dickimawbooks/makeglossariesgui/MakeGlossariesGUI
+Class-Path: . javahelp2.jar jlfgr-1_0.jar
