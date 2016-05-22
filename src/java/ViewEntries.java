@@ -16,32 +16,46 @@ public class ViewEntries extends JFrame
 
       app = application;
       glossary = g;
+      entryLabels = glossary.getEntryLabels();
 
       setIconImage(app.getIconImage());
 
       TableModel model = new AbstractTableModel()
       {
-         public int getRowCount() {return glossary.getNumEntries();}
-         public int getColumnCount() {return 2;}
+         public int getRowCount() {return entryLabels.length;}
+         public int getColumnCount() {return 3;}
          public boolean isCellEditable(int row, int column) {return false;}
 
          public Object getValueAt(int row, int column)
          {
+            String label = entryLabels[row];
+
             if (column == 0)
             {
-               return glossary.getEntryLabel(row);
+               return label;
             }
-            else
+            else if (column == 1)
             {
-               return glossary.getEntryCount(row);
+               return glossary.getEntrySort(label);
             }
+            else if (column == 2)
+            {
+               return glossary.getEntryCount(label);
+            }
+
+            return null;
          }
 
          public String getColumnName(int columnIndex)
          {
-            return columnIndex == 0 ?
-               app.getLabel("entry.label"):
-               app.getLabel("entry.count");
+            switch (columnIndex)
+            {
+               case 0: return app.getLabel("entry.label");
+               case 1: return app.getLabel("entry.sort");
+               case 2: return app.getLabel("entry.count");
+            }
+
+            return null;
          }
       };
 
@@ -67,6 +81,7 @@ public class ViewEntries extends JFrame
          KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK));
 
       pack();
+      setLocationRelativeTo(application);
    }
 
    private JButton addButton(String label, String imageName, KeyStroke keyStroke)
@@ -134,6 +149,8 @@ public class ViewEntries extends JFrame
    }
 
    private Glossary glossary;
+
+   private String[] entryLabels;
 
    private JTable table;
 

@@ -625,6 +625,11 @@ public class MakeGlossariesGUI extends JFrame
       error(this, e.getMessage());
    }
 
+   public void error(String message)
+   {
+      error(this, message);
+   }
+
    public void error(Component parent, String message)
    {
       JOptionPane.showMessageDialog(parent, message, getLabel("error.title"),

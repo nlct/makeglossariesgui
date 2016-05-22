@@ -9,38 +9,38 @@ public class Glossary
    public Glossary(MakeGlossariesInvoker invoker, String label, String transExt,
       String glsExt, String gloExt)
    {
-      app = invoker;
+      this.invoker = invoker;
       this.label = label;
       this.transExt = transExt;
       this.glsExt = glsExt;
       this.gloExt = gloExt;
 
-      entryTable = new Hashtable<String,Integer>();
+      entryTable = new Hashtable<String,GlossaryEntry>();
    }
 
    public void xindy(File dir, String baseName, 
       boolean isWordOrder, String istName)
       throws IOException,InterruptedException,GlossaryException
    {
-      File xindyApp = new File(app.getXindyApp());
+      File xindyApp = new File(invoker.getXindyApp());
 
       if (!xindyApp.exists())
       {
-         throw new GlossaryException(app.getLabelWithValues(
+         throw new GlossaryException(invoker.getLabelWithValues(
             "error.no_indexer_app", "xindy", xindyApp.getAbsolutePath()),
-            app.getLabelWithValue("diagnostics.no_indexer", "xindy"));
+            invoker.getLabelWithValue("diagnostics.no_indexer", "xindy"));
       }
 
       String transFileName = baseName+"."+transExt;
 
       if (language == null || language.equals(""))
       {
-         language = app.getDefaultLanguage();
+         language = invoker.getDefaultLanguage();
       }
 
       if (codepage == null || codepage.equals(""))
       {
-         codepage = app.getDefaultCodePage();
+         codepage = invoker.getDefaultCodePage();
       }
 
       String style = istName;
@@ -97,6 +97,7 @@ public class Glossary
       StringBuilder processErrors = null;
 
       String unknownMod = null;
+      boolean emptySortFound = false;
 
       while ((line = in.readLine()) != null)
       {
@@ -111,8 +112,26 @@ public class Glossary
 
          if (matcher.matches())
          {
-            unknownMod = app.getLabelWithValues("diagnostics.unknown_language_or_codepage",
+            unknownMod = invoker.getLabelWithValues("diagnostics.unknown_language_or_codepage",
                matcher.group(1), matcher.group(2));
+         }
+         else
+         {
+            matcher = emptySortPattern.matcher(line);
+
+            if (matcher.matches())
+            {
+               emptySortFound = true;
+            }
+            else
+            {
+               matcher = collapsedSortPattern.matcher(line);
+
+               if (matcher.matches())
+               {
+                  emptySortFound = true;
+               }
+            }
          }
       }
 
@@ -139,44 +158,93 @@ public class Glossary
          in.close();
       }
 
+      if (emptySortFound)
+      {
+         addErrorMessage(invoker.getLabel("error.empty_sort"));
+      }
+
+      boolean deprecated = false;
+      boolean depCheck = false;
+
       if (gloFile.exists())
       {
          in = new BufferedReader(new FileReader(gloFile));
 
          while ((line = in.readLine()) != null)
          {
-            Matcher matcher = entryPattern.matcher(line);
+            Matcher matcher;
+
+            boolean retry = false;
+
+            if (depCheck)
+            {
+               matcher = (deprecated ? makeindexOldEntryPattern.matcher(line):
+                          xindyEntryPattern.matcher(line));
+            }
+            else
+            {
+               matcher = xindyEntryPattern.matcher(line);
+
+               depCheck = true;
+
+               if (!matcher.matches())
+               {
+                  matcher = xindyOldEntryPattern.matcher(line);
+                  retry = true;
+               }
+            }
 
             if (matcher.matches())
             {
-               String key = matcher.group(1);
-
-               Integer n = entryTable.get(key);
-
-               if (n == null)
+               if (retry)
                {
-                  n = new Integer(1);
-               }
-               else
-               {
-                  n = new Integer(n.intValue()+1);
+                  deprecated = true;
                }
 
-               entryTable.put(key, n);
+               String sort = matcher.group(1);
+               String key = matcher.group(2);
+
+               GlossaryEntry entry = entryTable.get(key);
+
+               if (entry == null)
+               {
+                  sort = sort.replaceAll("\\\\\\\\", "\\\\");
+                  entry = new GlossaryEntry(key, sort);
+                  entryTable.put(key, entry);
+
+                  if (emptySortFound)
+                  {
+                     matcher = xindyEmptySortPattern.matcher(sort);
+
+                     if (matcher.matches())
+                     {
+                        addDiagnosticMessage(invoker.getLabelWithValues(
+                          "diagnostics.empty_sort", 
+                           sort, key));
+                     }
+                  }
+               }
+
+               entry.increment();
             }
          }
 
          in.close();
       }
 
+      if (deprecated)
+      {
+         addDiagnosticMessage(invoker.getLabel("diagnostics.deprecated"));
+      }
+
       if (exitCode > 0)
       {
-         addErrorMessage(app.getLabelWithValues("error.app_failed",
+         addErrorMessage(invoker.getLabelWithValues("error.app_failed",
             "Xindy", ""+exitCode));
 
          if (unknownVar != null)
          {
-            addDiagnosticMessage(app.getLabelWithValues
+            addDiagnosticMessage(invoker.getLabelWithValues
                ("diagnostics.bad_attributes", istName, "xindy"));
          }
          else if (unknownMod != null)
@@ -185,17 +253,17 @@ public class Glossary
          }
          else if (processErrors != null)
          {
-            addDiagnosticMessage(app.getLabelWithValues("diagnostics.app_err",
+            addDiagnosticMessage(invoker.getLabelWithValues("diagnostics.app_err",
                "Xindy", processErrors.toString()));
          }
          else
          {
-            addDiagnosticMessage(app.getLabel("diagnostics.app_err_null"));
+            addDiagnosticMessage(invoker.getLabel("diagnostics.app_err_null"));
          }
       }
       else if (entryTable.size() == 0)
       {
-         addDiagnosticMessage(app.getLabelWithValue("diagnostics.no_entries",
+         addDiagnosticMessage(invoker.getLabelWithValue("diagnostics.no_entries",
             label));
       }
    }
@@ -203,13 +271,13 @@ public class Glossary
    public void makeindex(File dir, String baseName, boolean isWordOrder, String istName)
       throws IOException,InterruptedException,GlossaryException
    {
-      File makeindexApp = new File(app.getMakeIndexApp());
+      File makeindexApp = new File(invoker.getMakeIndexApp());
 
       if (!makeindexApp.exists())
       {
-         throw new GlossaryException(app.getLabelWithValues(
+         throw new GlossaryException(invoker.getLabelWithValues(
             "error.no_indexer_app", "makeindex", makeindexApp.getAbsolutePath()),
-            app.getLabelWithValue("diagnostics.no_indexer", "makeindex"));
+            invoker.getLabelWithValue("diagnostics.no_indexer", "makeindex"));
       }
 
       String transFileName = baseName+"."+transExt;
@@ -218,7 +286,7 @@ public class Glossary
 
       String[] cmdArray;
 
-      if (app.useGermanWordOrdering())
+      if (invoker.useGermanWordOrdering())
       {
          if (isWordOrder)
          {
@@ -269,7 +337,7 @@ public class Glossary
          };
       }
 
-      app.getMessageSystem().aboutToExec(cmdArray, dir);
+      invoker.getMessageSystem().aboutToExec(cmdArray, dir);
 
       Process p = Runtime.getRuntime().exec(cmdArray, null, dir);
 
@@ -336,30 +404,57 @@ public class Glossary
 
       in.close();
 
+      boolean deprecated = false;
+      boolean depCheck = false;
+
       if (gloFile.exists())
       {
          in = new BufferedReader(new FileReader(gloFile));
 
          while ((line = in.readLine()) != null)
          {
-            Matcher matcher = entryPattern.matcher(line);
+            Matcher matcher;
+            boolean depRetry = false;
+
+            if (depCheck)
+            {
+               matcher = (deprecated ?
+                          makeindexOldEntryPattern.matcher(line) :
+                          makeindexEntryPattern.matcher(line));
+            }
+            else
+            {
+               matcher = makeindexEntryPattern.matcher(line);
+
+               depCheck = true;
+
+               if (!matcher.matches())
+               {
+                  matcher = makeindexOldEntryPattern.matcher(line);
+
+                  depRetry = true;
+               }
+            }
 
             if (matcher.matches())
             {
-               String key = matcher.group(1);
-
-               Integer n = entryTable.get(key);
-
-               if (n == null)
+               if (depRetry)
                {
-                  n = new Integer(1);
-               }
-               else
-               {
-                  n = new Integer(n.intValue()+1);
+                  deprecated = true;
                }
 
-               entryTable.put(key, n);
+               String sort = matcher.group(1);
+               String key = matcher.group(2);
+
+               GlossaryEntry entry = entryTable.get(key);
+
+               if (entry == null)
+               {
+                  entry = new GlossaryEntry(key, sort);
+                  entryTable.put(key, entry);
+               }
+
+               entry.increment();
             }
          }
 
@@ -368,39 +463,39 @@ public class Glossary
 
       if (exitCode > 0)
       {
-         addErrorMessage(app.getLabelWithValues("error.app_failed",
+         addErrorMessage(invoker.getLabelWithValues("error.app_failed",
             "Makeindex", ""+exitCode));
 
          if (processErrors != null)
          {
-            addDiagnosticMessage(app.getLabelWithValues("diagnostics.app_err",
+            addDiagnosticMessage(invoker.getLabelWithValues("diagnostics.app_err",
                "Makeindex", processErrors.toString()));
          }
          else
          {
-            addDiagnosticMessage(app.getLabel("diagnostics.app_err_null"));
+            addDiagnosticMessage(invoker.getLabel("diagnostics.app_err_null"));
          }
       }
       else if (numRejected > 0)
       {
          if (numRejected == 1)
          {
-            addErrorMessage(app.getLabel("error.entry_rejected"));
+            addErrorMessage(invoker.getLabel("error.entry_rejected"));
          }
          else
          {
-            addErrorMessage(app.getLabelWithValue("error.entries_rejected", rejected));
+            addErrorMessage(invoker.getLabelWithValue("error.entries_rejected", rejected));
          }
 
          if (numAccepted == 0)
          {
-            addDiagnosticMessage(app.getLabelWithValue("diagnostics.makeindex_reject_all",
+            addDiagnosticMessage(invoker.getLabelWithValue("diagnostics.makeindex_reject_all",
                label));
          }
 
          if (numIgnored > 0)
          {
-            addDiagnosticMessage(app.getLabelWithValues
+            addDiagnosticMessage(invoker.getLabelWithValues
                ("diagnostics.bad_attributes", istName, "makeindex"));
          }
       }
@@ -408,15 +503,15 @@ public class Glossary
       {
          if (label.equals("main"))
          {
-            addDiagnosticMessage(app.getLabel("diagnostics.no_entries_main"));
+            addDiagnosticMessage(invoker.getLabel("diagnostics.no_entries_main"));
          }
          else
          {
-            addDiagnosticMessage(app.getLabelWithValue("diagnostics.no_entries",
+            addDiagnosticMessage(invoker.getLabelWithValue("diagnostics.no_entries",
                label));
          }
 
-         addErrorMessage(app.getLabelWithValue("error.no_entries", label));
+         addErrorMessage(invoker.getLabelWithValue("error.no_entries", label));
       }
    }
 
@@ -425,20 +520,69 @@ public class Glossary
       return entryTable.size();
    }
 
+   public String[] getEntryLabels()
+   {
+      int n = entryTable.size();
+
+      String[] array = new String[n];
+
+      int i = 0;
+
+      for (Enumeration<String> en = entryTable.keys(); en.hasMoreElements();)
+      {
+         array[i] = en.nextElement();
+         i++;
+      }
+
+      return array;
+   }
+
+   public Integer getEntryCount(String key)
+   {
+      GlossaryEntry entry = entryTable.get(key);
+
+      return entry == null ? 0 : entry.getCount();
+   }
+
+   public String getEntrySort(String key)
+   {
+      GlossaryEntry entry = entryTable.get(key);
+
+      return entry == null ? null : entry.getSort();
+   }
+
    public Integer getEntryCount(int entryIdx)
    {
       int i = 0;
 
-      for (Enumeration<Integer> en = entryTable.elements(); en.hasMoreElements();)
+      for (Enumeration<GlossaryEntry> en = entryTable.elements();
+         en.hasMoreElements();)
       {
-         Integer val = en.nextElement();
+         GlossaryEntry val = en.nextElement();
 
-         if (i == entryIdx) return val;
+         if (i == entryIdx) return val.getCount();
 
          i++;
       }
 
       return 0;
+   }
+
+   public String getEntrySort(int entryIdx)
+   {
+      int i = 0;
+
+      for (Enumeration<GlossaryEntry> en = entryTable.elements();
+         en.hasMoreElements();)
+      {
+         GlossaryEntry val = en.nextElement();
+
+         if (i == entryIdx) return val.getSort();
+
+         i++;
+      }
+
+      return null;
    }
 
    public String getEntryLabel(int entryIdx)
@@ -475,7 +619,7 @@ public class Glossary
 
    public void setLanguage(String language)
    {
-      this.language = app.getLanguage(language);
+      this.language = invoker.getLanguage(language);
    }
 
    public void setCodePage(String codepage)
@@ -486,14 +630,14 @@ public class Glossary
    public String displayCodePage()
    {
       return codepage == null ?
-         "<font class=error>"+app.getLabel("error.unknown")+"</font>" :
+         "<font class=error>"+invoker.getLabel("error.unknown")+"</font>" :
          codepage;
    }
 
    public String displayLanguage()
    {
       return language == null ?
-         "<font class=error>"+app.getLabel("error.unknown")+"</font>" :
+         "<font class=error>"+invoker.getLabel("error.unknown")+"</font>" :
          language;
    }
 
@@ -547,9 +691,9 @@ public class Glossary
 
    private StringBuilder errorMessage, diagnosticMessage;
 
-   private Hashtable<String,Integer> entryTable;
+   private Hashtable<String,GlossaryEntry> entryTable;
 
-   private MakeGlossariesInvoker app;
+   private MakeGlossariesInvoker invoker;
 
    private static final Pattern makeindexAcceptedPattern 
       = Pattern.compile(".*(\\d+)\\s+entries\\s+accepted.*(\\d+)\\s+rejected.*");
@@ -560,9 +704,62 @@ public class Glossary
    private static final Pattern xindyIstPattern
       = Pattern.compile(".*variable (.*) has no value.*");
 
+   private static final Pattern emptySortPattern
+      = Pattern.compile(".*Would replace complete index key by empty string.*");
+
+   private static final Pattern collapsedSortPattern
+      = Pattern.compile(".*index 0 should be less than the length of the string.*");
+
    private static final Pattern xindyModulePattern
       = Pattern.compile(".*Cannot\\s+locate\\s+xindy\\s+module\\s+for\\s+language\\s+([a-zA-Z0-9\\-]+)\\s+in\\s+codepage\\s+([a-zA-Z0-9\\-]+)..*");
 
-   private static final Pattern entryPattern
-      = Pattern.compile(".*\\\\glossaryentryfield\\{([^\\}]+)\\}.*");
+   private static final Pattern makeindexOldEntryPattern
+      = Pattern.compile("\\\\glossaryentry\\{(.*?)\\?\\\\glossaryentryfield\\{(.*?)\\}.*");
+
+   private static final Pattern makeindexEntryPattern
+      = Pattern.compile("\\\\glossaryentry\\{(.*?)\\?\\\\glossentry\\{(.*?)\\}.*");
+
+   private static final Pattern xindyOldEntryPattern = Pattern.compile(
+   "\\(indexentry\\s+:tkey\\s*\\(\\s*\\(\\s*\"(.*?)\"\\s+\"\\\\\\\\glossaryentryfield\\{(.*?)\\}.*\".*");
+
+   private static final Pattern xindyEntryPattern = Pattern.compile(
+   "\\(indexentry\\s+:tkey\\s*\\(\\s*\\(\\s*\"(.*?)\"\\s+\"\\\\\\\\glossentry\\{(.*?)\\}.*\".*");
+
+   private static final Pattern xindyEmptySortPattern = Pattern.compile(
+   "(?:\\$|\\{\\\\[a-zA-Z@]+ *\\}|\\\\[a-zA-Z@]+ *)+");
+
 }
+
+class GlossaryEntry
+{
+   public GlossaryEntry(String label, String sort)
+   {
+      this.label = label;
+      this.sort = sort;
+      this.count = 0;
+   }
+
+   public void increment()
+   {
+      count++;
+   }
+
+   public int getCount()
+   {
+      return count;
+   }
+
+   public String getSort()
+   {
+      return sort;
+   }
+
+   public String getLabel()
+   {
+      return label;
+   }
+
+   int count = 0;
+   String label, sort;
+}
+

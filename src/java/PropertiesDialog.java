@@ -143,7 +143,7 @@ public class PropertiesDialog extends JDialog
       xindyDefaultsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
       xindyBox.add(xindyDefaultsPanel);
 
-      JLabel langLabel = new JLabel(app.getLabel("properties.language"));
+      langLabel = new JLabel(app.getLabel("properties.language"));
       langLabel.setDisplayedMnemonic(app.getMnemonic("properties.language"));
       xindyDefaultsPanel.add(langLabel);
 
@@ -164,7 +164,7 @@ public class PropertiesDialog extends JDialog
         properties.getDefaultXindyVariant());
       updateXindyModule();
 
-      JLabel encodingLabel = new JLabel(app.getLabel("properties.encoding"));
+      encodingLabel = new JLabel(app.getLabel("properties.encoding"));
       encodingLabel.setDisplayedMnemonic(app.getMnemonic("properties.encoding"));
       xindyDefaultsPanel.add(encodingLabel);
 
@@ -174,6 +174,12 @@ public class PropertiesDialog extends JDialog
       encodingBox.setSelectedItem(properties.getDefaultCodePage());
 
       xindyDefaultsPanel.add(encodingBox);
+
+      overrideBox = new JCheckBox(app.getLabel("properties", "override"), properties.isOverride());
+      overrideBox.setMnemonic(app.getMnemonic("properties", "override"));
+      overrideBox.setActionCommand("override");
+      overrideBox.addActionListener(this);
+      box.add(overrideBox);
 
       dim = xindyLabel.getPreferredSize();
       maxWidth = (int)Math.max(maxWidth, dim.getWidth());
@@ -219,7 +225,10 @@ public class PropertiesDialog extends JDialog
       buttonPanel.add(helpButton);
 
       pack();
+
       setLocationRelativeTo(app);
+
+      updateOverride();
    }
 
    private File getDir()
@@ -280,6 +289,10 @@ public class PropertiesDialog extends JDialog
       {
          setVisible(false);
       }
+      else if (action.equals("override"))
+      {
+         updateOverride();
+      }
       else if (action.equals("okay"))
       {
          properties.setMakeIndexApp(makeindexField.getFileName());
@@ -288,6 +301,7 @@ public class PropertiesDialog extends JDialog
          properties.setDefaultLanguage((String)languageBox.getSelectedItem());
          properties.setDefaultCodePage((String)encodingBox.getSelectedItem());
          properties.setDefaultXindyVariant(currentVariant.getSelected());
+         properties.setOverride(overrideBox.isSelected());
 
          if (homeButton.isSelected())
          {
@@ -324,6 +338,26 @@ public class PropertiesDialog extends JDialog
    public void display()
    {
       setVisible(true);
+   }
+
+   private void updateOverride()
+   {
+      boolean enable = overrideBox.isSelected();
+
+      germanWordOrderButton.setEnabled(enable);
+      langLabel.setEnabled(enable);
+      languageBox.setEnabled(enable);
+      encodingLabel.setEnabled(enable);
+      encodingBox.setEnabled(enable);
+
+      if (enable)
+      {
+         updateXindyModule();
+      }
+      else
+      {
+         xindyModuleLayout.first(variantPanel);
+      }
    }
 
    public void setXindy(File path)
@@ -466,6 +500,8 @@ public class PropertiesDialog extends JDialog
 
    private JPanel variantPanel;
 
+   JLabel langLabel, encodingLabel;
+
    private XindyModule currentVariant;
 
    private JRadioButton homeButton, lastButton, customButton;
@@ -477,6 +513,8 @@ public class PropertiesDialog extends JDialog
    private FileField customField, makeindexField, xindyField;
 
    private JFileChooser fileChooser;
+
+   private JCheckBox overrideBox;
 
    private MakeGlossariesProperties properties;
 

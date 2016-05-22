@@ -4,11 +4,11 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-public class MakeGlossariesInvoker implements GlossaryMessage
+public class MakeGlossariesInvoker
 {
-   public MakeGlossariesInvoker()
+   public MakeGlossariesInvoker(GlossaryMessage msgSys)
    {
-      setMessageSystem(this);
+      setMessageSystem(msgSys);
 
       try
       {
@@ -16,7 +16,7 @@ public class MakeGlossariesInvoker implements GlossaryMessage
       }
       catch (IOException e)
       {
-         error(String.format("Unable to load dictionary file:%n%s",
+         msgSys.error(String.format("Unable to load dictionary file:%n%s",
             e.getMessage()));
       }
 
@@ -28,7 +28,8 @@ public class MakeGlossariesInvoker implements GlossaryMessage
       }
       catch (IOException e)
       {
-         error(getLabelWithValue("error.prop_io", e.getMessage()));
+         msgSys.error(
+           getLabelWithValue("error.prop_io", e.getMessage()));
          properties = new MakeGlossariesProperties();
       }
    }
@@ -82,7 +83,7 @@ public class MakeGlossariesInvoker implements GlossaryMessage
 
       if (errMess != null)
       {
-         error(errMess);
+         getMessageSystem().error(errMess);
       }
 
       getMessageSystem().showMessages();
@@ -176,7 +177,46 @@ public class MakeGlossariesInvoker implements GlossaryMessage
    {
       String prop = getLabel(label);
 
-      return prop.replaceAll("\\$1", value1).replaceAll("\\$2", value2);
+      StringBuilder builder = new StringBuilder(prop.length());
+
+      for (int i = 0; i < prop.length(); i++)
+      {
+         char c = prop.charAt(i);
+
+         if (c == '$')
+         {
+            i++;
+
+            if (i == prop.length())
+            {
+               builder.append(c);
+            }
+            else
+            {
+              char c2 = prop.charAt(i);
+
+              if (c2 == '1')
+              {
+                 builder.append(value1);
+              }
+              else if (c2 == '2')
+              {
+                 builder.append(value2);
+              }
+              else
+              {
+                 builder.append(c);
+                 builder.append(c2);
+              }
+            }
+         }
+         else
+         {
+            builder.append(c);
+         }
+      }
+
+      return builder.toString();
    }
 
    public MakeGlossariesProperties getProperties()
@@ -189,59 +229,14 @@ public class MakeGlossariesInvoker implements GlossaryMessage
       return properties.getDefaultLanguage();
    }
 
+   public String getDefaultXindyVariant()
+   {
+      return properties.getDefaultXindyVariant();
+   }
+
    public String getDefaultCodePage()
    {
       return properties.getDefaultCodePage();
-   }
-
-   public void error(String message)
-   {
-      System.err.println(message);
-   }
-
-   public void error(Exception e)
-   {
-      System.err.println(e.getMessage());
-   }
-
-   public void message(GlossaryException e)
-   {
-      if (!quiet)
-      {
-         System.out.println(e.getMessage());
-         System.out.println(e.getDiagnosticMessage());
-      }
-   }
-
-   public void message(String msg)
-   {
-      if (!quiet)
-      {
-         System.out.println(msg);
-      }
-   }
-
-   public void aboutToExec(String[] cmdArray, File dir)
-   {
-      if (!quiet)
-      {
-         for (int i = 0, n = cmdArray.length-1; i < cmdArray.length; i++)
-         {
-            if (i == n)
-            {
-               System.out.println(cmdArray[i]);
-            }
-            else
-            {
-               System.out.print(cmdArray[i]);
-               System.out.print(" ");
-            }
-         }
-      }
-   }
-
-   public void showMessages()
-   {
    }
 
    private void loadDictionary()
@@ -368,7 +363,8 @@ public class MakeGlossariesInvoker implements GlossaryMessage
 
    public static void main(String[] args)
    {
-      MakeGlossariesInvoker invoker = new MakeGlossariesInvoker();
+      GlossaryBatchMessage msgSys = new GlossaryBatchMessage();
+      MakeGlossariesInvoker invoker = new MakeGlossariesInvoker(msgSys);
 
       boolean doBatch = false;
 
@@ -396,7 +392,7 @@ public class MakeGlossariesInvoker implements GlossaryMessage
          }
          else if (args[i].equals("--quiet"))
          {
-            invoker.quiet = false;
+            msgSys.setQuiet(false);
          }
          else if (args[i].startsWith("-"))
          {
@@ -447,6 +443,4 @@ public class MakeGlossariesInvoker implements GlossaryMessage
    private Hashtable<String,String> languageMap;
 
    private GlossaryMessage messageSystem;
-
-   private boolean quiet = false;
 }

@@ -1,0 +1,22 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[xindy]{glossaries}
+
+\makeglossaries
+
+\newglossaryentry{S}{name={\S},
+ description={section symbol}}
+
+\newglossaryentry{alpha}{name={\ensuremath{\alpha}},
+ description={alpha}}
+
+\newglossaryentry{beta}{name={$\beta$},text={\beta},
+ description={beta}}
+
+\begin{document}
+Test: \gls{S}, $\gls{alpha}$, $\gls{beta}$.
+
+\printglossaries
+
+\end{document}

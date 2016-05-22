@@ -61,6 +61,7 @@ public class MakeGlossariesProperties extends Properties
       setDefaultHomeDir();
       setProperty("language", Locale.getDefault().getDisplayLanguage().toLowerCase());
       setProperty("codepage", "utf8");
+      setProperty("override", "false");
       setProperty("german-wordorder", "false");
       setProperty("fontsize", "12");
       setProperty("fontname", "Serif");
@@ -196,6 +197,18 @@ public class MakeGlossariesProperties extends Properties
    public void setDefaultCodePage(String codepage)
    {
       setProperty("codepage", codepage);
+   }
+
+   public void setOverride(boolean override)
+   {
+      setProperty("override", override?"true":"false");
+   }
+
+   public boolean isOverride()
+   {
+      String prop = getProperty("override");
+
+      return prop == null ? false : Boolean.parseBoolean(prop);
    }
 
    public static MakeGlossariesProperties fetchProperties()

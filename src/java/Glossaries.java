@@ -8,17 +8,17 @@ import javax.swing.text.Element;
 
 public class Glossaries
 {
-   public Glossaries(MakeGlossariesInvoker application, String istName, String order)
+   public Glossaries(MakeGlossariesInvoker invoker, String istName, String order)
    {
-      app = application;
+      this.invoker = invoker;
       this.istName = istName;
       this.order = order;
       glossaryList = new Vector<Glossary>();
    }
 
-   public Glossaries(MakeGlossariesInvoker application)
+   public Glossaries(MakeGlossariesInvoker invoker)
    {
-      app = application;
+      this.invoker = invoker;
       glossaryList = new Vector<Glossary>();
    }
 
@@ -52,16 +52,21 @@ public class Glossaries
       return null;
    }
 
-   public static Glossaries loadGlossaries(MakeGlossariesInvoker application, File file)
+   public static Glossaries loadGlossaries(MakeGlossariesInvoker invoker, File file)
       throws IOException
    {
-      Glossaries glossaries = new Glossaries(application);
+      Glossaries glossaries = new Glossaries(invoker);
 
-      application.getMessageSystem().message(
-       application.getLabelWithValue("message.loading", file.toString()));
+      Hashtable<String,String> languages = new Hashtable<String,String>();
+      Hashtable<String,String> codePages = new Hashtable<String,String>();
+
+      invoker.getMessageSystem().message(
+       invoker.getLabelWithValue("message.loading", file.toString()));
       BufferedReader in = new BufferedReader(new FileReader(file));
 
       String line;
+
+      boolean override = invoker.getProperties().isOverride();
 
       while ((line = in.readLine()) != null)
       {
@@ -69,7 +74,7 @@ public class Glossaries
 
          if (matcher.matches())
          {
-            glossaries.add(new Glossary(application, matcher.group(1), matcher.group(2),
+            glossaries.add(new Glossary(invoker, matcher.group(1), matcher.group(2),
               matcher.group(3), matcher.group(4)));
          }
 
@@ -87,21 +92,75 @@ public class Glossaries
             glossaries.order = matcher.group(1);
          }
 
-         matcher = languagePattern.matcher(line);
-
-         if (matcher.matches())
+         if (!override)
          {
-            String label = matcher.group(1);
+            matcher = languagePattern.matcher(line);
+
+            if (matcher.matches())
+            {
+               String label = matcher.group(1);
+
+               String language = matcher.group(2);
+
+               if (language.isEmpty())
+               {
+                  language = invoker.getDefaultLanguage();
+
+                  String variant = invoker.getDefaultXindyVariant();
+
+                  if (variant != null && !variant.isEmpty())
+                  {
+                     language = String.format("%s-%s", language, variant);
+                  }
+
+                  glossaries.addErrorMessage(invoker.getLabelWithValue(
+                     "error.no_language", label));
+                  glossaries.addDiagnosticMessage(invoker.getLabelWithValues(
+                     "diagnostics.no_language", label, language));
+               }
+
+               languages.put(label, language);
+            }
+
+            matcher = codepagePattern.matcher(line);
+
+            if (matcher.matches())
+            {
+               String label = matcher.group(1);
+
+               String code = matcher.group(2);
+
+               if (code.isEmpty())
+               {
+                  code = invoker.getDefaultCodePage();
+
+                  glossaries.addErrorMessage(invoker.getLabelWithValue(
+                     "error.no_codepage", label));
+                  glossaries.addDiagnosticMessage(invoker.getLabelWithValues(
+                     "diagnostics.no_codepage", label, code));
+               }
+
+               codePages.put(label, code);
+            }
+         }
+      }
+
+      in.close();
+
+      if (!override)
+      {
+         for (Enumeration<String> en = languages.keys(); en.hasMoreElements();)
+         {
+            String label = en.nextElement();
+            String language = languages.get(label);
 
             Glossary g = glossaries.getGlossary(label);
 
-            String language = matcher.group(2);
-
             if (g == null)
             {
-               glossaries.addErrorMessage(application.getLabelWithValues(
+               glossaries.addErrorMessage(invoker.getLabelWithValues(
                   "error.language_no_glossary", language, label));
-               glossaries.addDiagnosticMessage(application.getLabelWithValues(
+               glossaries.addDiagnosticMessage(invoker.getLabelWithValues(
                   "diagnostics.language_no_glossary", language, label));
             }
             else
@@ -110,21 +169,18 @@ public class Glossaries
             }
          }
 
-         matcher = codepagePattern.matcher(line);
-
-         if (matcher.matches())
+         for (Enumeration<String> en = codePages.keys(); en.hasMoreElements();)
          {
-            String label = matcher.group(1);
+            String label = en.nextElement();
+            String code = codePages.get(label);
 
             Glossary g = glossaries.getGlossary(label);
 
-            String code = matcher.group(2);
-
             if (g == null)
             {
-               glossaries.addErrorMessage(application.getLabelWithValues(
+               glossaries.addErrorMessage(invoker.getLabelWithValues(
                   "error.codepage_no_glossary", code, label));
-               glossaries.addDiagnosticMessage(application.getLabelWithValues(
+               glossaries.addDiagnosticMessage(invoker.getLabelWithValues(
                   "diagnostics.codepage_no_glossary", code, label));
             }
             else
@@ -133,8 +189,6 @@ public class Glossaries
             }
          }
       }
-
-      in.close();
 
       return glossaries;
    }
@@ -149,7 +203,7 @@ public class Glossaries
          throw new GlossaryException(mess);
       }
 
-      File file = app.getFile();
+      File file = invoker.getFile();
 
       String baseName = file.getName();
 
@@ -162,6 +216,22 @@ public class Glossaries
 
       File dir = file.getParentFile();
 
+      String lang = null;
+      String codePage = null;
+
+      if (invoker.getProperties().isOverride())
+      {
+         lang = invoker.getDefaultLanguage();
+         codePage = invoker.getDefaultCodePage();
+
+         String variant = invoker.getDefaultXindyVariant();
+
+         if (variant != null && !variant.isEmpty())
+         {
+            lang = String.format("%s-%s", lang, variant);
+         }
+      }
+
       for (int i = 0, n = getNumGlossaries(); i < n; i++)
       {
          Glossary g = getGlossary(i);
@@ -170,6 +240,16 @@ public class Glossaries
          {
             if (useXindy())
             {
+               if (lang != null)
+               {
+                  g.setLanguage(lang);
+               }
+
+               if (codePage != null)
+               {
+                  g.setCodePage(codePage);
+               }
+
                g.xindy(dir, baseName, isWordOrder(), istName);
             }
             else
@@ -190,8 +270,8 @@ public class Glossaries
 
             if (!istFile.exists())
             {
-               throw new GlossaryException(app.getLabelWithValue("error.no_ist", istName),
-                  app.getLabel("diagnostics.no_ist"));
+               throw new GlossaryException(invoker.getLabelWithValue("error.no_ist", istName),
+                  invoker.getLabel("diagnostics.no_ist"));
             }
             else
             {
@@ -225,7 +305,7 @@ public class Glossaries
    public String getDisplayGlossaryListError()
    {
       return getNumGlossaries() == 0 ?
-         app.getLabel("error.no_glossaries"):
+         invoker.getLabel("error.no_glossaries"):
          null;
    }
 
@@ -255,14 +335,14 @@ public class Glossaries
 
    public String getOrderError()
    {
-      if (order == null) return app.getLabel("error.missing_order");
+      if (order == null) return invoker.getLabel("error.missing_order");
 
-      return isValidOrder() ? null : app.getLabel("error.invalid_order");
+      return isValidOrder() ? null : invoker.getLabel("error.invalid_order");
    }
 
    public String displayFormat()
    {
-      if (istName == null) return app.getLabel("error.unknown");
+      if (istName == null) return invoker.getLabel("error.unknown");
 
       return useXindy() ? "xindy" : "makeindex";
    }
@@ -274,7 +354,7 @@ public class Glossaries
 
    public String getIstNameError()
    {
-      return istName == null ? app.getLabel("error.missing_ist") : null;
+      return istName == null ? invoker.getLabel("error.missing_ist") : null;
    }
 
    public boolean useXindy()
@@ -288,21 +368,21 @@ public class Glossaries
    {
       if (istName == null)
       {
-         return app.getLabel("error.cant_determine_indexer");
+         return invoker.getLabel("error.cant_determine_indexer");
       }
 
       if (useXindy())
       {
-         if (app.getXindyApp() == null)
+         if (invoker.getXindyApp() == null)
          {
-            return app.getLabel("error.no_xindy");
+            return invoker.getLabel("error.no_xindy");
          }
       }
       else
       {
-         if (app.getMakeIndexApp() == null)
+         if (invoker.getMakeIndexApp() == null)
          {
-            return app.getLabel("error.no_makeindex");
+            return invoker.getLabel("error.no_makeindex");
          }
       }
 
@@ -320,13 +400,13 @@ public class Glossaries
       {
          if (glossaryList.size() == 0)
          {
-            return app.getFileName().toLowerCase().endsWith(".aux") ?
-                   app.getLabel("diagnostics.no_glossaries"):
-                   app.getLabel("diagnostics.not_aux");
+            return invoker.getFileName().toLowerCase().endsWith(".aux") ?
+                   invoker.getLabel("diagnostics.no_glossaries"):
+                   invoker.getLabel("diagnostics.not_aux");
          }
          else
          {
-            return app.getLabel("diagnostics.no_makeglossaries");
+            return invoker.getLabel("diagnostics.no_makeglossaries");
          }
       }
 
@@ -334,7 +414,7 @@ public class Glossaries
 
       if (mess != null)
       {
-         return mess + "\n" + app.getLabelWithValue("diagnostics.no_indexer", 
+         return mess + "\n" + invoker.getLabelWithValue("diagnostics.no_indexer", 
             displayFormat());
       }
 
@@ -416,14 +496,14 @@ public class Glossaries
 
    public String getFieldLabel(int i)
    {
-      return app.getLabel("main", fields[i]);
+      return invoker.getLabel("main", fields[i]);
    }
 
    public String getField(int i)
    {
       switch (i)
       {
-         case AUX: return app.getFileName();
+         case AUX: return invoker.getFileName();
          case ORDER: return getOrder();
          case IST: return getIstName();
          case INDEXER: return displayFormat();
@@ -437,8 +517,8 @@ public class Glossaries
    {
       switch (i)
       {
-         case AUX: return app.getFileName() == null ?
-            app.getLabel("error.no_such_file") :
+         case AUX: return invoker.getFileName() == null ?
+            invoker.getLabel("error.no_such_file") :
             null;
          case ORDER: return getOrderError();
          case IST: return getIstNameError();
@@ -482,5 +562,5 @@ public class Glossaries
 
    public static final int AUX=0, ORDER=1, IST=2, INDEXER=3, GLOSSARIES=4;
 
-   private MakeGlossariesInvoker app;
+   private MakeGlossariesInvoker invoker;
 }
