@@ -8,7 +8,7 @@ import javax.swing.text.Element;
 
 public class Glossaries
 {
-   public Glossaries(MakeGlossariesGUI application, String istName, String order)
+   public Glossaries(MakeGlossariesInvoker application, String istName, String order)
    {
       app = application;
       this.istName = istName;
@@ -16,7 +16,7 @@ public class Glossaries
       glossaryList = new Vector<Glossary>();
    }
 
-   public Glossaries(MakeGlossariesGUI application)
+   public Glossaries(MakeGlossariesInvoker application)
    {
       app = application;
       glossaryList = new Vector<Glossary>();
@@ -52,11 +52,13 @@ public class Glossaries
       return null;
    }
 
-   public static Glossaries loadGlossaries(MakeGlossariesGUI application, File file)
+   public static Glossaries loadGlossaries(MakeGlossariesInvoker application, File file)
       throws IOException
    {
       Glossaries glossaries = new Glossaries(application);
 
+      application.getMessageSystem().message(
+       application.getLabelWithValue("message.loading", file.toString()));
       BufferedReader in = new BufferedReader(new FileReader(file));
 
       String line;
@@ -97,9 +99,9 @@ public class Glossaries
 
             if (g == null)
             {
-               glossaries.addErrorMessage(MakeGlossariesGUI.getLabelWithValues(
+               glossaries.addErrorMessage(application.getLabelWithValues(
                   "error.language_no_glossary", language, label));
-               glossaries.addDiagnosticMessage(MakeGlossariesGUI.getLabelWithValues(
+               glossaries.addDiagnosticMessage(application.getLabelWithValues(
                   "diagnostics.language_no_glossary", language, label));
             }
             else
@@ -120,9 +122,9 @@ public class Glossaries
 
             if (g == null)
             {
-               glossaries.addErrorMessage(MakeGlossariesGUI.getLabelWithValues(
+               glossaries.addErrorMessage(application.getLabelWithValues(
                   "error.codepage_no_glossary", code, label));
-               glossaries.addDiagnosticMessage(MakeGlossariesGUI.getLabelWithValues(
+               glossaries.addDiagnosticMessage(application.getLabelWithValues(
                   "diagnostics.codepage_no_glossary", code, label));
             }
             else
@@ -223,7 +225,7 @@ public class Glossaries
    public String getDisplayGlossaryListError()
    {
       return getNumGlossaries() == 0 ?
-         MakeGlossariesGUI.getLabel("error.no_glossaries"):
+         app.getLabel("error.no_glossaries"):
          null;
    }
 
@@ -253,14 +255,14 @@ public class Glossaries
 
    public String getOrderError()
    {
-      if (order == null) return MakeGlossariesGUI.getLabel("error.missing_order");
+      if (order == null) return app.getLabel("error.missing_order");
 
-      return isValidOrder() ? null : MakeGlossariesGUI.getLabel("error.invalid_order");
+      return isValidOrder() ? null : app.getLabel("error.invalid_order");
    }
 
    public String displayFormat()
    {
-      if (istName == null) return MakeGlossariesGUI.getLabel("error.unknown");
+      if (istName == null) return app.getLabel("error.unknown");
 
       return useXindy() ? "xindy" : "makeindex";
    }
@@ -272,7 +274,7 @@ public class Glossaries
 
    public String getIstNameError()
    {
-      return istName == null ? MakeGlossariesGUI.getLabel("error.missing_ist") : null;
+      return istName == null ? app.getLabel("error.missing_ist") : null;
    }
 
    public boolean useXindy()
@@ -286,7 +288,7 @@ public class Glossaries
    {
       if (istName == null)
       {
-         return MakeGlossariesGUI.getLabel("error.cant_determine_indexer");
+         return app.getLabel("error.cant_determine_indexer");
       }
 
       if (useXindy())
@@ -336,7 +338,7 @@ public class Glossaries
             displayFormat());
       }
 
-      mess = diagnosticMessages;
+      mess = getDiagnosticMessages();
 
       for (int i = 0, n = getNumGlossaries(); i < n; i++)
       {
@@ -350,7 +352,7 @@ public class Glossaries
             }
             else
             {
-               mess += "\n"+errmess;
+               mess = String.format("%s%n%s", mess, errmess);
             }
          }
       }
@@ -358,15 +360,20 @@ public class Glossaries
       return mess;
    }
 
+   private String getDiagnosticMessages()
+   {
+      return diagnosticMessages == null ? null : diagnosticMessages.toString();
+   }
+
    public void addDiagnosticMessage(String mess)
    {
       if (diagnosticMessages == null)
       {
-         diagnosticMessages = mess;
+         diagnosticMessages = new StringBuilder(mess);
       }
       else
       {
-         diagnosticMessages += "\n" + mess;
+         diagnosticMessages.append(String.format("%n%s", mess));
       }
    }
 
@@ -374,17 +381,17 @@ public class Glossaries
    {
       if (errorMessages == null)
       {
-         errorMessages = mess;
+         errorMessages = new StringBuilder(mess);
       }
       else
       {
-         errorMessages += "\n" + mess;
+         errorMessages.append(String.format("%n%s", mess));
       }
    }
 
    public String getErrorMessages()
    {
-      return errorMessages;
+      return errorMessages == null ? null : errorMessages.toString();
    }
 
    public static int getNumFields()
@@ -407,9 +414,9 @@ public class Glossaries
       return doc.getElement(fields[i]+"label");
    }
 
-   public static String getFieldLabel(int i)
+   public String getFieldLabel(int i)
    {
-      return MakeGlossariesGUI.getLabel("main", fields[i]);
+      return app.getLabel("main", fields[i]);
    }
 
    public String getField(int i)
@@ -447,7 +454,7 @@ public class Glossaries
 
    private String order;
 
-   private String errorMessages = null, diagnosticMessages;
+   private StringBuilder errorMessages, diagnosticMessages;
 
    private static final Pattern newGlossaryPattern
       = Pattern.compile("\\\\@newglossary\\{([^\\}]+)\\}\\{([^\\}]+)\\}\\{([^\\}]+)\\}\\{([^\\}]+)\\}");
@@ -475,5 +482,5 @@ public class Glossaries
 
    public static final int AUX=0, ORDER=1, IST=2, INDEXER=3, GLOSSARIES=4;
 
-   private MakeGlossariesGUI app;
+   private MakeGlossariesInvoker app;
 }

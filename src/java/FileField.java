@@ -8,25 +8,30 @@ import javax.swing.*;
 public class FileField extends JPanel
   implements ActionListener
 {
-   public FileField(Container parent, JFileChooser fileChooser)
+   public FileField(MakeGlossariesGUI application,
+     Container parent, JFileChooser fileChooser)
    {
-      this(parent, null, fileChooser, JFileChooser.FILES_ONLY);
+      this(application, parent, null, fileChooser, JFileChooser.FILES_ONLY);
    }
 
-   public FileField(Container parent, JFileChooser fileChooser, int mode)
+   public FileField(MakeGlossariesGUI application, 
+     Container parent, JFileChooser fileChooser, int mode)
    {
-      this(parent, null, fileChooser, mode);
+      this(application, parent, null, fileChooser, mode);
    }
 
-   public FileField(Container parent, String fileName, JFileChooser fileChooser)
+   public FileField(MakeGlossariesGUI application,
+     Container parent, String fileName, JFileChooser fileChooser)
    {
-      this(parent, fileName, fileChooser, JFileChooser.FILES_ONLY);
+      this(application, parent, fileName, fileChooser, JFileChooser.FILES_ONLY);
    }
 
-   public FileField(Container parent, String fileName, JFileChooser fileChooser, int mode)
+   public FileField(MakeGlossariesGUI application, 
+     Container parent, String fileName, JFileChooser fileChooser, int mode)
    {
       super();
 
+      this.application = application;
       this.fileChooser = fileChooser;
       this.parent = parent;
       this.mode = mode;
@@ -62,9 +67,11 @@ public class FileField extends JPanel
 
          fileChooser.setFileSelectionMode(mode);
 
-         fileChooser.setApproveButtonMnemonic(MakeGlossariesGUI.getMnemonic("button.select"));
+         fileChooser.setApproveButtonMnemonic(
+           application.getMnemonic("button.select"));
 
-         if (fileChooser.showDialog(parent, MakeGlossariesGUI.getLabel("button.select"))
+         if (fileChooser.showDialog(parent, 
+              application.getLabel("button.select"))
             == JFileChooser.APPROVE_OPTION)
          {
             textField.setText(fileChooser.getSelectedFile().getAbsolutePath());
@@ -130,4 +137,6 @@ public class FileField extends JPanel
    private Container parent;
 
    private int mode;
+
+   private MakeGlossariesGUI application;
 }

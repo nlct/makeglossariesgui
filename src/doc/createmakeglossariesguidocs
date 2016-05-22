@@ -10,7 +10,7 @@ if ($#ARGV > 1 || $#ARGV < 0)
 
 my $targetdir = '../resources/helpsets';
 my $dictdir = '../resources/dictionaries';
-my $mainclass = '../java/MakeGlossariesGUI.java';
+my $mainclass = '../java/MakeGlossariesInvoker.java';
 my $base = 'makeglossariesgui';
 
 my $fontenc = 'T1';

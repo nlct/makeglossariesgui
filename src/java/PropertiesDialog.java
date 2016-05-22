@@ -78,7 +78,8 @@ public class PropertiesDialog extends JDialog
       dim = customButton.getPreferredSize();
       maxWidth = (int)Math.max(maxWidth, dim.getWidth());
 
-      customField = new FileField(this, fileChooser, JFileChooser.DIRECTORIES_ONLY);
+      customField = new FileField(app, this, fileChooser,
+        JFileChooser.DIRECTORIES_ONLY);
       panel.add(customField);
 
       if (setting.equals("home"))
@@ -112,7 +113,9 @@ public class PropertiesDialog extends JDialog
       dim = makeindexLabel.getPreferredSize();
       maxWidth = (int)Math.max(maxWidth, dim.getWidth());
 
-      makeindexField = new FileField(this, properties.getMakeIndexApp(), fileChooser);
+      makeindexField = new FileField(app, this,
+        properties.getMakeIndexApp(),
+        fileChooser);
       makeindexLabel.setLabelFor(makeindexField.getTextField());
       panel.add(makeindexField);
 
@@ -175,7 +178,8 @@ public class PropertiesDialog extends JDialog
       dim = xindyLabel.getPreferredSize();
       maxWidth = (int)Math.max(maxWidth, dim.getWidth());
 
-      xindyField = new FileField(this, properties.getXindyApp(), fileChooser);
+      xindyField = new FileField(app, this,
+        properties.getXindyApp(), fileChooser);
       xindyLabel.setLabelFor(xindyField.getTextField());
       panel.add(xindyField);
 

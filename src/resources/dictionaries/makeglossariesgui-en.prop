@@ -44,7 +44,7 @@ help.manual.alttext=Help
 
 # about dialog
 about.title=About $1
-about.version=Version $1
+about.version=Version $1 ($2)
 about.copyright=Copyright $1 $2
 about.translator_info=
 
@@ -55,6 +55,8 @@ filter.aux=Auxiliary (AUX) Files
 appselect.title=Select Application
 appselect.pathlabel=Select path to application
 appselect.pathlabel.mnemonic=P
+
+app.title=$1 - $2
 
 # Main panel
 main.title=General Information
@@ -128,6 +130,9 @@ properties.language.mnemonic=G
 properties.encoding=Encoding
 properties.encoding.mnemonic=E
 
+# batch mode messages
+message.loading=Loading '$1'
+
 # Error messages
 error.title=Error
 error.no_such_file=File not found.
@@ -152,6 +157,10 @@ error.interrupt=The process was interrupted.
 error.no_such_entry=Can't find entry '$1'.
 error.io.helpset=Unable to load helpset.
 error.no_ist=The style file '$1' doesn't exist.
+error.prop_io=Unable to load properties: $1
+error.unknown_opt=Unknown option '$1'. (Use '--help' for help.)
+error.one_input=Only one input file permitted. (Use '--help' for help.)
+error.input_required=Input file required for batch mode. (Use '--help' for help.)
 
 # Fatal errors
 error.fatal.title=Fatal Error

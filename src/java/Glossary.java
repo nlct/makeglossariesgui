@@ -6,10 +6,10 @@ import java.util.regex.*;
 
 public class Glossary
 {
-   public Glossary(MakeGlossariesGUI application, String label, String transExt,
+   public Glossary(MakeGlossariesInvoker invoker, String label, String transExt,
       String glsExt, String gloExt)
    {
-      app = application;
+      app = invoker;
       this.label = label;
       this.transExt = transExt;
       this.glsExt = glsExt;
@@ -94,7 +94,7 @@ public class Glossary
 
       BufferedReader in = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 
-      String processErrors = null;
+      StringBuilder processErrors = null;
 
       String unknownMod = null;
 
@@ -102,12 +102,10 @@ public class Glossary
       {
          if (processErrors == null)
          {
-            processErrors = "\n" + line;
+            processErrors = new StringBuilder();
          }
-         else
-         {
-            processErrors += "\n" + line;
-         }
+
+         processErrors.append(String.format("%n%s", line));
 
          Matcher matcher = xindyModulePattern.matcher(line);
 
@@ -188,7 +186,7 @@ public class Glossary
          else if (processErrors != null)
          {
             addDiagnosticMessage(app.getLabelWithValues("diagnostics.app_err",
-               "Xindy", processErrors));
+               "Xindy", processErrors.toString()));
          }
          else
          {
@@ -271,6 +269,8 @@ public class Glossary
          };
       }
 
+      app.getMessageSystem().aboutToExec(cmdArray, dir);
+
       Process p = Runtime.getRuntime().exec(cmdArray, null, dir);
 
       int exitCode = p.waitFor();
@@ -279,18 +279,16 @@ public class Glossary
 
       BufferedReader in = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 
-      String processErrors = null;
+      StringBuilder processErrors = null;
 
       while ((line = in.readLine()) != null)
       {
          if (processErrors == null)
          {
-            processErrors = "\n" + line;
+            processErrors = new StringBuilder();
          }
-         else
-         {
-            processErrors += "\n" + line;
-         }
+
+         processErrors.append(String.format("%n%s", line));
       }
 
       in.close();
@@ -376,7 +374,7 @@ public class Glossary
          if (processErrors != null)
          {
             addDiagnosticMessage(app.getLabelWithValues("diagnostics.app_err",
-               "Makeindex", processErrors));
+               "Makeindex", processErrors.toString()));
          }
          else
          {
@@ -503,17 +501,17 @@ public class Glossary
    {
       if (errorMessage == null)
       {
-         errorMessage = mess;
+         errorMessage = new StringBuilder(mess);
       }
       else
       {
-         errorMessage += "\n" + mess;
+         errorMessage.append(String.format("%n%s", mess));
       }
    }
 
    public String getErrorMessages()
    {
-      return errorMessage;
+      return errorMessage == null ? null : errorMessage.toString();
    }
 
    public String getLanguage()
@@ -528,18 +526,18 @@ public class Glossary
 
    public String getDiagnosticMessages()
    {
-      return diagnosticMessage;
+      return diagnosticMessage == null ? null : diagnosticMessage.toString();
    }
 
    public void addDiagnosticMessage(String mess)
    {
       if (diagnosticMessage == null)
       {
-         diagnosticMessage = mess;
+         diagnosticMessage = new StringBuilder(mess);
       }
       else
       {
-         diagnosticMessage += "\n" + mess;
+         diagnosticMessage.append(String.format("%n%s", mess));
       }
    }
 
@@ -547,11 +545,11 @@ public class Glossary
 
    private String language, codepage;
 
-   private String errorMessage, diagnosticMessage;
+   private StringBuilder errorMessage, diagnosticMessage;
 
    private Hashtable<String,Integer> entryTable;
 
-   private MakeGlossariesGUI app;
+   private MakeGlossariesInvoker app;
 
    private static final Pattern makeindexAcceptedPattern 
       = Pattern.compile(".*(\\d+)\\s+entries\\s+accepted.*(\\d+)\\s+rejected.*");

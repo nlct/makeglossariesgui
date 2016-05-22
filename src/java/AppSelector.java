@@ -30,6 +30,7 @@ public class AppSelector extends JDialog
    public AppSelector(MakeGlossariesGUI application)
    {
       super(application, application.getLabel("appselect.title"), true);
+      app = application;
 
       message = new JLabel(application.getLabel("appselect.pathlabel"));
       message.setDisplayedMnemonic(application.getMnemonic("appselect.pathlabel"));
@@ -38,7 +39,7 @@ public class AppSelector extends JDialog
 
       fileChooser = new JFileChooser();
 
-      fileField = new FileField(this, fileChooser);
+      fileField = new FileField(application, this, fileChooser);
 
       getContentPane().add(fileField, "Center");
 
@@ -139,8 +140,7 @@ public class AppSelector extends JDialog
 
          if (selectedFile == null || selectedFile.equals(""))
          {
-            app.error(this,
-               MakeGlossariesGUI.getLabel("error.no_file"));
+            app.error(this, app.getLabel("error.no_file"));
          }
          else
          {

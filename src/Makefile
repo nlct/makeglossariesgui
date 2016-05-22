@@ -1,4 +1,4 @@
-APP_VERSION:=$(shell grep "public static final String appVersion" java/MakeGlossariesGUI.java | sed "s/public\sstatic\sfinal\sString\sappVersion=//" | tr -d "\"\; ")
+APP_VERSION:=$(shell grep "public static final String appVersion" java/MakeGlossariesInvoker.java | sed "s/public\sstatic\sfinal\sString\sappVersion=//" | tr -d "\"\; ")
 IZPACKDIR=/usr/local/IzPack
 
 test	: app
@@ -30,14 +30,14 @@ lib/makeglossariesgui-splash.png	: lib
 
 lib/makeglossariesgui.jar	: java/Manifest.txt \
 			resources/icons \
-			classes/com/dickimawbooks/makeglossariesgui/MakeGlossariesGUI.class \
+			classes/com/dickimawbooks/makeglossariesgui/MakeGlossariesInvoker.class \
 			doc/createmakeglossariesguidocs doc/makeglossariesgui-*.xml doc/makeglossariesgui.dtd
 	make -C doc
 	cd classes; \
 	jar cmf ../java/Manifest.txt ../lib/makeglossariesgui.jar \
 	com/dickimawbooks/makeglossariesgui/*.class 
 
-classes/com/dickimawbooks/makeglossariesgui/MakeGlossariesGUI.class	: classes/com/dickimawbooks/makeglossariesgui \
+classes/com/dickimawbooks/makeglossariesgui/MakeGlossariesInvoker.class	: classes/com/dickimawbooks/makeglossariesgui \
 	java/*.java \
 	lib/javahelp2.jar lib/jlfgr-1_0.jar
 	cd java; \

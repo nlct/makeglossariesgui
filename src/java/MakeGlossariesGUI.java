@@ -13,11 +13,14 @@ import javax.swing.event.*;
 import javax.help.*;
 
 public class MakeGlossariesGUI extends JFrame
-  implements ActionListener,MenuListener
+  implements ActionListener,MenuListener,GlossaryMessage
 {
-   public MakeGlossariesGUI()
+   public MakeGlossariesGUI(MakeGlossariesInvoker invoker)
    {
-      super(appName);
+      super(invoker.appName);
+      this.invoker = invoker;
+
+      invoker.setMessageSystem(this);
 
       setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
@@ -28,16 +31,6 @@ public class MakeGlossariesGUI extends JFrame
             quit();
          }
       });
-
-      try
-      {
-         loadDictionary();
-      }
-      catch (IOException e)
-      {
-         error(this, "Unable to load dictionary file:\n"
-            +e.getMessage());
-      }
 
       setIconImage(new ImageIcon(getClass().getResource(
         "/icons/makeglossariesgui-logosmall.png")).getImage());
@@ -51,20 +44,9 @@ public class MakeGlossariesGUI extends JFrame
          error(this, e.getMessage());
       }
 
-      initLanguageMappings();
-
-      try
-      {
-         properties = MakeGlossariesProperties.fetchProperties();
-      }
-      catch (IOException e)
-      {
-         error(this, "Unable to load properties:\n"+e.getMessage());
-         properties = new MakeGlossariesProperties();
-      }
-
-      toolBar = new JToolBar(properties.getToolBarOrientation());
-      getContentPane().add(toolBar, properties.getToolBarPosition());
+      toolBar = new JToolBar(invoker.getProperties().getToolBarOrientation());
+      getContentPane().add(toolBar, 
+        invoker.getProperties().getToolBarPosition());
 
       JMenuBar mBar = new JMenuBar();
       setJMenuBar(mBar);
@@ -124,9 +106,9 @@ public class MakeGlossariesGUI extends JFrame
       scrollPane = new JScrollPane(mainPanel);
       scrollPane.setPreferredSize(new Dimension(800,600));
 
-      setFont(new Font(properties.getFontName(),
-         properties.getFontStyle(),
-         properties.getFontSize()));
+      setFont(new Font(invoker.getProperties().getFontName(),
+         invoker.getProperties().getFontStyle(),
+         invoker.getProperties().getFontSize()));
 
       scrollPane.setName(getLabel("main.title"));
       tabbedPane.add(scrollPane, 0);
@@ -146,7 +128,8 @@ public class MakeGlossariesGUI extends JFrame
 
       auxFileFilter = new AuxFileFilter(getLabel("filter.aux"));
 
-      fileChooser = new JFileChooser(properties.getDefaultDirectory());
+      fileChooser = new JFileChooser(
+         invoker.getProperties().getDefaultDirectory());
       fileChooser.setFileFilter(auxFileFilter);
 
       propertiesDialog = new PropertiesDialog(this);
@@ -167,7 +150,7 @@ public class MakeGlossariesGUI extends JFrame
 
          if (file != null)
          {
-            properties.setMakeIndexApp(file);
+            invoker.getProperties().setMakeIndexApp(file);
             propertiesDialog.setMakeIndex(file);
          }
 
@@ -175,7 +158,7 @@ public class MakeGlossariesGUI extends JFrame
 
          if (file != null)
          {
-            properties.setXindyApp(file);
+            invoker.getProperties().setXindyApp(file);
             propertiesDialog.setXindy(file);
          }
 
@@ -193,7 +176,7 @@ public class MakeGlossariesGUI extends JFrame
       {
          int idx = Integer.parseInt(action);
 
-         File file = new File(properties.getRecentFileName(idx));
+         File file = new File(invoker.getProperties().getRecentFileName(idx));
 
          fileChooser.setCurrentDirectory(file.getParentFile());
 
@@ -228,7 +211,7 @@ public class MakeGlossariesGUI extends JFrame
          String name = font.getFontName();
 
          setFont(new Font(name, style, size));
-         properties.setFontSize(size);
+         invoker.getProperties().setFontSize(size);
 
          updateAll();
       }
@@ -245,7 +228,7 @@ public class MakeGlossariesGUI extends JFrame
          }
 
          setFont(new Font(name, style, size));
-         properties.setFontSize(size);
+         invoker.getProperties().setFontSize(size);
 
          updateAll();
       }
@@ -257,32 +240,37 @@ public class MakeGlossariesGUI extends JFrame
       {
          String[] str;
 
-         String translator = dictionary.getProperty("about.translator_info");
+         String translator = getLabelOrDef("about.translator_info", null);
 
          if (translator == null || translator.equals(""))
          {
             str = new String[]
             {
-               appName,
-               getLabelWithValue("about.version", appVersion),
-               getLabelWithValues("about.copyright", "Nicola L. C. Talbot", "2011/09/16"),
-               "http://theoval.cmp.uea.ac.uk/~nlct/"
+               invoker.appName,
+               getLabelWithValues("about.version", invoker.appVersion,
+                  invoker.appDate),
+               getLabelWithValues("about.copyright", "Nicola L. C. Talbot",
+                  "2011/09/16"),
+               "http://www.dickimaw-books.com/"
             };
          }
          else
          {
             str = new String[]
             {
-               appName,
-               getLabelWithValue("about.version", appVersion),
-               getLabelWithValues("about.copyright", "Nicola L. C. Talbot", "2011/09/16"),
-               "http://theoval.cmp.uea.ac.uk/~nlct/",
+               invoker.appName,
+               getLabelWithValues("about.version", invoker.appVersion,
+                invoker.appDate),
+               getLabelWithValues("about.copyright", "Nicola L. C. Talbot",
+                "2011/09/16"),
+               "http://www.dickimaw-books.com/",
                translator
             };
          }
 
          JOptionPane.showMessageDialog(this, str,
-            getLabelWithValue("about.title", appName), JOptionPane.PLAIN_MESSAGE);
+            getLabelWithValue("about.title", invoker.appName),
+            JOptionPane.PLAIN_MESSAGE);
       }
       else if (action.equals("license"))
       {
@@ -312,7 +300,7 @@ public class MakeGlossariesGUI extends JFrame
 
       if (source == recentM)
       {
-         properties.setRecentFiles(recentM, this);
+         invoker.getProperties().setRecentFiles(recentM, this);
       }
    }
 
@@ -328,6 +316,8 @@ public class MakeGlossariesGUI extends JFrame
    {
       try
       {
+         MakeGlossariesProperties properties = invoker.getProperties();
+
          properties.setToolBarPosition((String)
             ((BorderLayout)getContentPane().getLayout()).getConstraints(toolBar));
          properties.setToolBarOrientation(toolBar.getOrientation());
@@ -343,27 +333,27 @@ public class MakeGlossariesGUI extends JFrame
 
    public void load(File file)
    {
-      currentFileName = file.getAbsolutePath();
+      setTitle(getLabelWithValues("app.title", invoker.appName, file.getName()));
 
-      setTitle(appName+" - "+file.getName());
-
-      properties.addRecentFile(currentFileName);
-
+      invoker.setFile(file);
+      invoker.getProperties().addRecentFile(file.getAbsolutePath());
       reload(file);
    }
 
    public void reload()
    {
-      reload(new File(currentFileName));
+      reload(invoker.getFile());
    }
 
-   public void reload(File file)
+   public void reload(final File file)
    {
-      Thread thread = new ProcessThread(this, file);
-
-      thread.start();
-
-      thread = null;
+      SwingUtilities.invokeLater(new Runnable()
+      {
+         public void run()
+         {
+            invoker.reload(file);
+         }
+      });
    }
 
    public void updateAll()
@@ -386,9 +376,9 @@ public class MakeGlossariesGUI extends JFrame
    {
       diagnosticArea.setFont(getFont());
 
-      if (glossaries != null)
+      if (invoker.getGlossaries() != null)
       {
-         String diagnostics = glossaries.getDiagnostics();
+         String diagnostics = invoker.getGlossaries().getDiagnostics();
 
          if (diagnostics == null)
          {
@@ -470,8 +460,9 @@ public class MakeGlossariesGUI extends JFrame
    private JMenuItem createMenuButtonItem(String parentLabel, String label,
       KeyStroke keyStroke, String imageName, ActionListener listener)
    {
-      String tooltip = dictionary.getProperty(parentLabel+"."+label+".tooltip");
-      String altText = dictionary.getProperty(parentLabel+"."+label+".altText");
+      String tooltip = getLabelOrDef(parentLabel+"."+label+".tooltip",
+        null);
+      String altText = getLabelOrDef(parentLabel+"."+label+".altText", null);
 
       JMenuItem item = createMenuItem(parentLabel, label, keyStroke, tooltip, listener);
 
@@ -507,96 +498,63 @@ public class MakeGlossariesGUI extends JFrame
       return item;
    }
 
-   public static String getLabel(String label)
+   public String getLabelOrDef(String label, String def)
    {
-      return getLabel(null, label);
+      return invoker.getLabelOrDef(label, def);
    }
 
-   public static String getLabel(String parent, String label)
+   public String getLabel(String label)
    {
-      if (parent != null)
-      {
-         label = parent+"."+label;
-      }
-
-      String prop = dictionary.getProperty(label);
-
-      if (prop == null)
-      {
-         System.err.println("No such dictionary property '"+label+"'");
-         return "?"+label+"?";
-      }
-
-      return prop;
+      return invoker.getLabel(label);
    }
 
-   public static char getMnemonic(String label)
+   public String getLabel(String parent, String label)
    {
-      return getMnemonic(null, label);
+      return invoker.getLabel(parent, label);
    }
 
-   public static char getMnemonic(String parent, String label)
+   public char getMnemonic(String label)
    {
-      String prop = getLabel(parent, label+".mnemonic");
-
-      if (prop.equals(""))
-      {
-         System.err.println("Empty dictionary property '"+prop+"'");
-         return label.charAt(0);
-      }
-
-      return prop.charAt(0);
+      return invoker.getMnemonic(label);
    }
 
-   public static int getMnemonicInt(String label)
+   public char getMnemonic(String parent, String label)
    {
-      return getMnemonicInt(null, label);
+      return invoker.getMnemonic(parent, label);
    }
 
-   public static int getMnemonicInt(String parent, String label)
+   public int getMnemonicInt(String label)
    {
-      String prop = getLabel(parent, label+".mnemonic");
-
-      if (prop.equals(""))
-      {
-         System.err.println("Empty dictionary property '"+prop+"'");
-         return label.codePointAt(0);
-      }
-
-      return prop.codePointAt(0);
+      return invoker.getMnemonicInt(label);
    }
 
-   public static String getLabelWithValue(String label, String value)
+   public int getMnemonicInt(String parent, String label)
    {
-      String prop = getLabel(label);
-
-      return prop.replaceAll("\\$1", value);
+      return invoker.getMnemonicInt(parent, label);
    }
 
-   public static String getLabelWithValues(String label, String value1,
+   public String getLabelWithValue(String label, String value)
+   {
+      return invoker.getLabelWithValue(label, value);
+   }
+
+   public String getLabelWithValues(String label, String value1,
       String value2)
    {
-      String prop = getLabel(label);
-
-      return prop.replaceAll("\\$1", value1).replaceAll("\\$2", value2);
-   }
-
-   public int getFontSize()
-   {
-      return getFont().getSize();
+      return invoker.getLabelWithValues(label, value1, value2);
    }
 
    public String getDefaultLanguage()
    {
-      return properties.getDefaultLanguage();
+      return invoker.getDefaultLanguage();
    }
 
    public String getDefaultCodePage()
    {
-      return properties.getDefaultCodePage();
+      return invoker.getDefaultCodePage();
    }
 
-   public static JButton createActionButton(String label, ActionListener listener,
+   public JButton createActionButton(String label, ActionListener listener,
      KeyStroke keyStroke, String toolTipText)
    {
       JButton button = new JButton(getLabel("button", label));
@@ -622,64 +580,72 @@ public class MakeGlossariesGUI extends JFrame
       return button;
    }
 
-   public static JButton createOkayButton(ActionListener listener)
+   public JButton createOkayButton(ActionListener listener)
    {
       return createActionButton("okay", listener, 
          KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), null);
    }
 
-   public static JButton createCancelButton(ActionListener listener)
+   public JButton createCancelButton(ActionListener listener)
    {
       return createActionButton("cancel", listener, 
          KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), null);
    }
 
-   public static void error(Component parent, String message)
+   public void showMessages()
+   {
+      try
+      {
+         updateInfoPanel();
+      }
+      catch (Exception e)
+      {
+         error(e);
+      }
+
+      updateDiagnostics();
+   }
+
+   public void aboutToExec(String[] cmdArray, File dir)
+   {
+   }
+
+   public void message(String msg)
+   {
+   }
+
+   public void message(GlossaryException e)
+   {
+      error(e);
+      selectDiagnosticComponent();
+   }
+
+   public void error(Exception e)
+   {
+      error(this, e.getMessage());
+   }
+
+   public void error(Component parent, String message)
    {
       JOptionPane.showMessageDialog(parent, message, getLabel("error.title"),
          JOptionPane.ERROR_MESSAGE);
    }
 
-   public static void fatalError(Exception e)
+   public void fatalError(Exception e)
    {
       JOptionPane.showMessageDialog(null,
-        getLabelWithValue("error.fatal.info", appName)+"\n"+e.getMessage(),
+        String.format("%s%n%s",
+          getLabelWithValue("error.fatal.info", invoker.appName),
+          e.getMessage()),
         getLabel("error.fatal.title"), JOptionPane.ERROR_MESSAGE);
 
       e.printStackTrace();
       System.exit(1);
    }
 
-   private void loadDictionary()
-      throws IOException
-   {
-      Locale locale = Locale.getDefault();
-
-      String lang = locale.getLanguage();
-
-      InputStream in = 
-         getClass().getResourceAsStream("/resources/dictionaries/makeglossariesgui-"+lang+".prop");
-
-      if (in == null && !lang.equals("en"))
-      {
-         in = getClass().getResourceAsStream("/resources/dictionaries/makeglossariesgui-en.prop");
-      }
-
-      BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-
-      dictionary = new Properties();
-      dictionary.load(reader);
-
-      reader.close();
-
-      in.close();
-   }
-
    private String loadTemplate(String templateName)
      throws IOException
    {
-      String templateContents = "";
-
       InputStream in = 
          getClass().getResourceAsStream("/resources/"+templateName+"-template.html");
 
@@ -691,17 +657,18 @@ public class MakeGlossariesGUI extends JFrame
       BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 
       String line;
+      StringBuilder builder = new StringBuilder();
 
       while ((line = reader.readLine()) != null)
       {
-         templateContents += line;
+         builder.append(line);
       }
 
       reader.close();
 
       in.close();
 
-      return templateContents;
+      return builder.toString();
    }
 
    private void initTemplates()
@@ -728,54 +695,47 @@ public class MakeGlossariesGUI extends JFrame
 
    public Glossaries getGlossaries()
    {
-      return glossaries;
+      return invoker.getGlossaries();
    }
 
    public MakeGlossariesProperties getProperties()
    {
-      return properties;
+      return invoker.getProperties();
    }
 
    public String getFileName()
    {
-      return currentFileName;
+      return invoker.getFileName();
    }
 
    public File getFile()
    {
-      return new File(currentFileName);
+      return invoker.getFile();
    }
 
    public File getCurrentDirectory()
    {
-      File file = getFile().getParentFile();
-
-      if (file == null)
-      {
-         file = new File(properties.getDefaultDirectory());
-      }
-
-      return file;
+      return invoker.getCurrentDirectory();
    }
 
    public String getCurrentDirectoryName()
    {
-      return getCurrentDirectory().getAbsolutePath();
+      return invoker.getCurrentDirectoryName();
    }
 
    public String getXindyApp()
    {
-      return properties.getXindyApp();
+      return invoker.getXindyApp();
    }
 
    public String getMakeIndexApp()
    {
-      return properties.getMakeIndexApp();
+      return invoker.getMakeIndexApp();
    }
 
    public boolean useGermanWordOrdering()
    {
-      return properties.useGermanWordOrdering();
+      return invoker.useGermanWordOrdering();
    }
 
    public void selectDiagnosticComponent()
@@ -787,26 +747,6 @@ public class MakeGlossariesGUI extends JFrame
       throws BadLocationException,IOException
    {
       mainPanel.updateInfo();
-   }
-
-   private void initLanguageMappings()
-   {
-      languageMap = new Hashtable<String,String>();
-
-      languageMap.put("american", "english");
-      languageMap.put("british", "english");
-      languageMap.put("francais", "french");
-      languageMap.put("frenchb", "french");
-      languageMap.put("germanb", "german");
-      languageMap.put("magyar", "hungarian");
-      languageMap.put("ngermanb", "german");
-      languageMap.put("norsk", "norwegian");
-      languageMap.put("portuges", "portuguese");
-      languageMap.put("russianb", "russian");
-      languageMap.put("UKenglish", "english");
-      languageMap.put("ukraineb", "ukrainian");
-      languageMap.put("USenglish", "english");
-      languageMap.put("usorbian", "upper-sorbian");
    }
 
    private void initHelp()
@@ -867,31 +807,33 @@ public class MakeGlossariesGUI extends JFrame
 
    public String getLanguage(String language)
    {
-      String map = languageMap.get(language);
-
-      return map == null ? language : map;
+      return invoker.getLanguage(language);
    }
 
-   public static void main(String[] args)
+   public static void createAndShowGUI(final MakeGlossariesInvoker invoker)
    {
-      new MakeGlossariesGUI();
+      SwingUtilities.invokeLater(new Runnable()
+      {
+         public void run()
+         {
+            try
+            {
+               new MakeGlossariesGUI(invoker);
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
+               JOptionPane.showMessageDialog(null, e.toString(),
+                 "Error", JOptionPane.ERROR_MESSAGE);
+            }
+         }
+      });
    }
+
 
    private JFileChooser fileChooser;
 
    private AuxFileFilter auxFileFilter;
-
-   private String currentFileName = null;
-
-   private MakeGlossariesProperties properties;
-
-   private static Properties dictionary;
-
-   private static final String appName = "MakeGlossariesGUI";
-
-   private static final String appVersion = "1.0";
-
-   private static final String appDate = "2016-05-17";
 
    private GlossariesPanel mainPanel;
 
@@ -901,15 +843,11 @@ public class MakeGlossariesGUI extends JFrame
 
    private JTextArea diagnosticArea;
 
-   protected Glossaries glossaries;
-
    private JMenu recentM;
 
    private PropertiesDialog propertiesDialog;
 
    private String mainInfoTemplate, glossaryInfoTemplate;
-
-   private Hashtable<String,String> languageMap;
 
    private JToolBar toolBar;
 
@@ -917,4 +855,6 @@ public class MakeGlossariesGUI extends JFrame
 
    private HelpBroker mainHelpBroker;
    private CSH.DisplayHelpFromSource csh;
+
+   private MakeGlossariesInvoker invoker;
 }

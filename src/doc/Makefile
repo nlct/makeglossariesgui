@@ -1,7 +1,7 @@
 TARGETDIR=../resources/helpsets
 DICTDIR=../resources/dictionaries
 TARGETBACKREF=../../doc
-MAINCLASS=../java/MakeGlossariesGUI.java
+MAINCLASS=../java/MakeGlossariesInvoker.java
 
 all	: en
 

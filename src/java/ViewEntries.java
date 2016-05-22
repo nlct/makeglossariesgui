@@ -12,7 +12,7 @@ public class ViewEntries extends JFrame
 {
    public ViewEntries(MakeGlossariesGUI application, Glossary g, Font font)
    {
-      super(MakeGlossariesGUI.getLabelWithValue("entry.title", g.label));
+      super(application.getLabelWithValue("entry.title", g.label));
 
       app = application;
       glossary = g;
@@ -40,8 +40,8 @@ public class ViewEntries extends JFrame
          public String getColumnName(int columnIndex)
          {
             return columnIndex == 0 ?
-               MakeGlossariesGUI.getLabel("entry.label"):
-               MakeGlossariesGUI.getLabel("entry.count");
+               app.getLabel("entry.label"):
+               app.getLabel("entry.count");
          }
       };
 

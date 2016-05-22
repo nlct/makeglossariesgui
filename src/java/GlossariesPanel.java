@@ -274,7 +274,7 @@ public class GlossariesPanel extends JEditorPane
       {
          if (url == null)
          {
-            Glossary g = app.glossaries.getGlossary(evt.getDescription());
+            Glossary g = app.getGlossaries().getGlossary(evt.getDescription());
 
             if (g != null)
             {
@@ -289,7 +289,7 @@ public class GlossariesPanel extends JEditorPane
             }
             catch (Exception e)
             {
-               app.error(app, e.getMessage());
+               app.error(e);
             }
          }
       }

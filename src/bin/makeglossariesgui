@@ -1,5 +1,4 @@
 #!/bin/sh
 
 bindir=`dirname $0`
-java -splash:"$bindir/../lib/makeglossariesgui-splash.png" -jar "$bindir/../lib/makeglossariesgui.jar" $@
-
+java -jar "$bindir/../lib/makeglossariesgui.jar" $@

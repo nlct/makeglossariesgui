@@ -360,6 +360,11 @@ public class MakeGlossariesProperties extends Properties
 
    public void addRecentFile(String fileName)
    {
+      if (fileName == null)
+      {
+         throw new NullPointerException();
+      }
+
       recentList.remove(fileName); // just in case it's already in the list
       recentList.add(fileName);
    }
