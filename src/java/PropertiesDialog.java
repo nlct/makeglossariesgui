@@ -221,7 +221,7 @@ public class PropertiesDialog extends JDialog
 
       JButton helpButton = new JButton(app.getLabel("button.help"));
       helpButton.setMnemonic(app.getMnemonic("button.help"));
-      app.enableHelpOnButton(helpButton, "sec:properties");
+      app.enableHelpOnButton(helpButton, "properties");
       buttonPanel.add(helpButton);
 
       pack();

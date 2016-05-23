@@ -279,6 +279,97 @@ public class Glossaries
             }
          }
       }
+
+      // Now check the log file for any problems
+
+      File log = new File(dir, baseName+".log");
+
+      if (!log.exists())
+      {
+         addDiagnosticMessage(invoker.getLabelWithValue(
+           "diagnostics.no_log", log.getAbsolutePath()));
+         return;
+      }
+
+      BufferedReader reader = null;
+
+      try
+      {
+         reader = new BufferedReader(new FileReader(log));
+
+         String line;
+
+         while ((line = reader.readLine()) != null)
+         {
+            Matcher m = glossariesStyPattern.matcher(line);
+
+            if (m.matches())
+            {
+               Calendar cal = Calendar.getInstance();
+
+               String year = m.group(1);
+               String mon  = m.group(2);
+               String day  = m.group(3);
+               String vers = m.group(4);
+
+               try
+               {
+                  cal.set(Integer.parseInt(year),
+                          Integer.parseInt(mon),
+                          Integer.parseInt(day));
+               }
+               catch (NumberFormatException e)
+               {// shouldn't happen
+                  invoker.getMessageSystem().debug(e);
+               }
+
+               Calendar v416 = Calendar.getInstance();
+               v416.set(2015, 7, 8);
+
+               if (cal.before(v416))
+               {
+                  addDiagnosticMessage(invoker.getLabelWithValues(
+                    "diagnostics.oldversion", vers, 
+                    // use same format as LaTeX package info:
+                    String.format("%s/%s/%s", year, mon, day)
+                  ));
+               }
+            }
+            else
+            {
+               m = wrongGloTypePattern.matcher(line);
+
+               if (m.matches())
+               {
+                  String type = m.group(2);
+
+                  addDiagnosticMessage(invoker.getLabelWithValue(
+                    "diagnostics.wrong_type", type));
+                  addErrorMessage(invoker.getLabelWithValue(
+                    "error.wrong_type", type));
+               }
+               else
+               {
+                  m = docDefsPattern.matcher(line);
+
+                  if (m.matches())
+                  {
+                     File f = new File(dir, baseName+".glsdefs");
+
+                     addDiagnosticMessage(invoker.getLabelWithValue(
+                       "diagnostics.doc_defs", file.getAbsolutePath()));
+                  }
+               }
+            }
+         }
+      }
+      finally
+      {
+         if (reader != null)
+         {
+            reader.close();
+         }
+      }     
    }
 
    public String displayGlossaryList()
@@ -550,6 +641,18 @@ public class Glossaries
 
    private static final Pattern codepagePattern
       = Pattern.compile("\\\\@gls@codepage\\{([^\\}]+)\\}\\{([^\\}]*)\\}");
+
+   private static final Pattern glossariesStyPattern
+      = Pattern.compile("Package: glossaries (\\d+)\\/(\\d+)\\/(\\d+) v([\\d\\.a-z]+) \\(NLCT\\).*");
+
+   private static final Pattern glossariesXtrStyPattern
+      = Pattern.compile("Package: glossaries-extra (\\d+)\\/(\\d+)\\/(\\d+) v([\\d\\.a-z]+) \\(NLCT\\).*");
+
+   private static final Pattern wrongGloTypePattern
+      = Pattern.compile("No file (.*?)\\.\\\\@glotype@(.*?)@in\\s*\\.");
+
+   private static final Pattern docDefsPattern
+      = Pattern.compile("\\\\openout\\d+\\s*=\\s*`.*\\.glsdefs'.");
 
    private static final String[] fields =
    {

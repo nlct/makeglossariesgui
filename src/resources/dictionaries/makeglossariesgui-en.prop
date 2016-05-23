@@ -52,7 +52,7 @@ about.translator_info=
 syntax.cmdline=makeglossariesgui [<options>] [<filename>]
 syntax.filename=<filename> is required with the $1 option. The ".aux" extension may be omitted.
 syntax.options=Options:
-syntax.batch=$1\t\trun in batch mode
+syntax.batch=$1 (or $2)\t\trun in batch mode
 syntax.gui=$1\t\trun in GUI mode (default)
 syntax.quiet=$1\t\tsuppress messages (except errors) to stdout
 syntax.help=$1 (or $2)\t\tprint the help message
@@ -124,6 +124,10 @@ diagnostics.interrupt=Something interrupted the process thread.
 diagnostics.no_ist=The style file can't be found. If you have used \\noist, you have to supply your own style file.
 diagnostics.empty_sort=Xindy won't accept the sort value '$1' (for entry '$2') as it's treated as an empty string. This is because xindy ignores (La)TeX commands within the sort field, and once these commands have been stripped the sort field becomes empty. You will need to explicitly set the sort field using the 'sort' key in the entry definition.
 diagnostics.deprecated=You seem to be using a very old version of glossaries.sty. This may cause some complications from bugs or limitations associated with that version.
+diagnostics.oldversion=You are using version $1 ($2) of glossaries.sty. There have been some bug fixes in newer versions that may have addressed some issues you might be facing.
+diagnostics.wrong_type=It looks as though you might have done something like \\printglossary[type={$1}], but there's no '$1' glossary.
+diagnostics.no_log=I can't find the log file '$1', so I can't search for any more problems.
+diagnostics.doc_defs=It seems you have defined terms in the document rather than in the preamble. This can cause complications. If you really want them in the document, you may need to delete the file '$1' if something goes wrong or rebuild the document after making any modifications to the entry definitions. Remember that you can define terms in a separate file and load them using \\loadglsentries{filename}.
 
 # Properties dialog
 properties.title=MakeGlossariesGUI Properties
@@ -173,6 +177,7 @@ error.no_entries=No entries were found for glossary '$1'.
 error.empty_sort=Xindy has ignored one or more entries with empty sort strings.
 error.app_failed=$1 failed with exit code $2.
 error.no_indexer_app=Unable to run $1. No such file: '$2'.
+error.wrong_type=No glossary '$1'.
 error.interrupt=The process was interrupted.
 error.no_such_entry=Can't find entry '$1'.
 error.io.helpset=Unable to load helpset.

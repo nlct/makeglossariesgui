@@ -376,7 +376,7 @@ public class MakeGlossariesInvoker
       System.out.println(getLabelWithValues("syntax.version", 
          "--version", "-v"));
       System.out.println(getLabelWithValue("syntax.debug", "--debug"));
-      System.out.println(getLabelWithValue("syntax.batch", "--batch"));
+      System.out.println(getLabelWithValues("syntax.batch", "--batch", "-b"));
       System.out.println(getLabelWithValue("syntax.gui", "--gui"));
       System.out.println(getLabelWithValue("syntax.quiet", "--quiet"));
       
@@ -440,7 +440,7 @@ public class MakeGlossariesInvoker
             invoker.version();
             System.exit(0);
          }
-         else if (args[i].equals("--batch"))
+         else if (args[i].equals("--batch") || args[i].equals("-b"))
          {
             doBatch = true;
          }

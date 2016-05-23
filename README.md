@@ -6,6 +6,4 @@ MakeGlossariesGUI.
 
 TODO:
 finish documentation
-add DragNDrog support
 add more diagnostic tests
-add --batch option

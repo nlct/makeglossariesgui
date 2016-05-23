@@ -17,44 +17,82 @@
          term otherwise it goes in the index -->
     <newterm tag="cwd" text="current working directory" 
       description="The directory in which the application was started"/>
+    <newterm tag="makeglossaries" text="makeglossaries" 
+      description="a Perl script provided with the glossaries package
+      which runs either makeindex or xindy, depending on the
+      settings in the .aux file"/>
+    <newterm tag="makeglossarieslite" text="makeglossaries-lite.lua" 
+      description="a Lua script provided with the glossaries package
+      as a light-weight alternative to makeglossaries"/>
+    <newterm tag="makeindex" text="makeindex" 
+      description="an indexing application"/>
+    <newterm tag="xindy" text="xindy" 
+      description="an indexing application written in Perl"/>
   </preamble>
   <document>
    <node tag="introduction" type="chapter" title="Introduction">
      <p>
      The <LaTeX /> <sty>glossaries</sty> package has three methods
      of generating a glossary (list of abbreviations, terms or symbols):
-     directly using <LaTeX />, using makeindex or using xindy.
-     The first option requires two <LaTeX/> runs (as with cross-references),
-     the last two options requires a <LaTeX/> run followed by running
-     the indexing application (makeindex or xindy), followed by another
-     <LaTeX/> run. The <sty>glossaries</sty> package provides a Perl
-     script called makeglossaries that's intended to simply this step
-     for options 2 and 3. However, sometimes things can go wrong and users
-     may not be able to work out why. The makeglossaries script tries to
-     diagnose problems, but not everyone wants to install Perl for some
-     reason (which is a shame, as there are some useful <TeX/>-related
-     Perl scripts, including xindy).
+     directly using <LaTeX />, using <term tag="makeindex"/> or using 
+     <term tag="xindy"/>.  The first option requires two <LaTeX/> runs
+     (as with cross-references), the last two options requires a <LaTeX/> 
+     run followed by running the indexing application (<term tag="makeindex"/>
+     or <term tag="xindy"/>), followed by another <LaTeX/> run. 
      </p>
      <p>
-     If things go wrong, <app/> can be used instead of makeglossaries to
-     diagnose problems and build the required glossary files. It's 
-     written in Java, so you'll need the Java Runtime Environment installed.
+     The <sty>glossaries</sty> package provides a Perl script called 
+     <term tag="makeglossaries"/> that's intended to simplify this step
+     for options 2 and 3. However, sometimes things can go wrong and users
+     may not be able to work out why. The <term tag="makeglossaries"/> 
+     script tries to diagnose problems, but not everyone wants to install 
+     Perl for some reason (which is a shame, as there are some useful 
+     <TeX/>-related Perl scripts, including <term tag="xindy"/>). 
+     The <sty>glossaries</sty> package also provides a light-weight Lua 
+     alternative, <term tag="makeglossarieslite"/>, but that doesn't provide 
+     any diagnostics. <app/> is a Java application that (when run in batch 
+     mode) can be used instead of <term tag="makeglossaries"/> or 
+     <term tag="makeglossarieslite"/>, although the overhead of using Java 
+     is naturally a lot higher than Perl or Lua. However <app/>'s primary
+     purpose is a <acr tag="gui"/> tool for determining what's gone wrong
+     when the glossary doesn't appear or is incomplete.
      </p>
-     <p>The <app/> 
-     application runs in <acr tag="gui" /> mode by default, but can
-     be run in batch mode using the <opt tag="batch"/> command line option.
+     <p>
+     Since <app/> is written in Java, you'll need the Java Runtime Environment 
+     installed.
+     </p>
+     <p>The <app/> application runs in <acr tag="gui" /> mode by default, but 
+     can be run in batch mode using the <opt tag="batch"/> command line option.
      Command line invocation:
      </p>
      <p align="center">
-      <app/> [<meta>options</meta>]
+      <tt>makeglossariesgui</tt> [<meta>options</meta>] [<meta>filename</meta>]
      </p>
      <p noindent="true">
+     The <meta>filename</meta> must be supplied when run in batch mode, but
+     is optional in <acr tag="gui"/> mode. The <meta>filename</meta> should
+     be the auxiliary file produced by the <LaTeX/> run, but may also be
+     the <tt>.tex</tt> file if it has the same basename as the auxiliary file.
+     The <tt>.aux</tt> extension may be omitted. Unlike 
+     <term tag="makeglossaries"/> and <term tag="makeglossarieslite"/>, 
+     <meta>filename</meta> may include the directory path.
+     </p>
+     <p>
      Available options:
      <dl>
        <dt><opt tag="batch"/> (or <tt>-b</tt>)</dt>
        <dd>
-       Invoke <app/> in batch mode (default).
+       Invoke <app/> in batch mode (<meta>filename</meta> must be supplied).
        </dd>
+       <dt><opt tag="gui"/></dt>
+       <dd>
+       Invoke <app/> in <acr tag="gui"/> mode (default).
+       </dd>
+       <dt><opt tag="quiet"/></dt>
+       <dd>Suppress (non-error) messages that would otherwise have been written
+       to STDOUT.</dd>
+       <dt><opt tag="debug"/></dt>
+       <dd>Print debug messages to STDOUT.</dd>
        <dt><opt tag="version"/> (or <tt>-v</tt>)</dt>
        <dd>Print the version details to STDOUT and exit.</dd>
        <dt><opt tag="help"/> (or <tt>-h</tt>)</dt>
@@ -62,8 +100,289 @@
      </dl>
      </p>
      <p>
-     This manual is still under construction.
+     When run in batch mode, <app/> behaves much like 
+     <term tag="makeglossaries"/>. It reads the auxiliary file to determine
+     whether to use <term tag="makeindex"/> or <term tag="xindy"/> and
+     what options to pass to them. The <ref text="settings" tag="properties"/>
+     will be honoured.
      </p>
+   </node>
+   <node type="chapter" tag="main" title="Main Panel">
+   <p>
+   A file can be loaded from the command line invocation 
+   (see <ref tag="introduction"/>) or in the <acr tag="gui"/> using the 
+   <menu tag="file.open"/> menu item. You can also use the load file button
+   on the toolbar or drag and drop the file onto the main window.
+   </p>
+   <example>
+   <p>
+   Suppose you have the following document (called, say, <tt>basic-sample.tex</tt>):
+   </p>
+   <pre>
+\documentclass{article}
+
+\usepackage{glossaries}
+
+\makeglossaries
+
+\newglossaryentry{sample}{name={sample},
+ description={an example}}
+
+\begin{document}
+A \gls{sample} document.
+
+\printglossaries
+
+\end{document}
+   </pre>
+   <p>
+   First run <LaTeX/> the usual way. This should create the auxiliary file
+   <tt>basic-sample.aux</tt> as well as some other files including 
+   <tt>basic-sample.glo</tt> and <tt>basic-sample.ist</tt>. Now load the auxiliary file
+   (<tt>basic-sample.aux</tt>) into <app/>. (Since the main <tt>.tex</tt> file
+   has the same basename as the <tt>.aux</tt> file, you can also use that.
+   <app/> will interpret this as meaning you want the <tt>.aux</tt> file
+   associated with that <tt>.tex</tt> file.)
+   </p>
+   <p>
+   Once <app/> has successfully loaded the file, it will run 
+   <term tag="makeindex"/> on the associated <tt>.glo</tt> file (with the
+   <tt>.ist</tt> file as the style).
+   In this case, there are no problems with the document and the
+   <tt>.tex</tt> file is now ready for another <LaTeX/> run. The general
+   information panel (<ref tag="basicsample"/>) shows a summary of 
+   document glossaries. In this case, there's only one glossary (the
+   <tt>main</tt> one).
+   </p>
+   <p>
+   <float type="figure" tag="basicsample"
+     caption="General Information Panel (Basic Sample)" pos="htbp">
+   <image src="images/basic-sample.png" scale="0.8"
+          alt="image of general information panel"/>
+   </float>
+   </p>
+   <p>
+   Only one entry has been indexed in the <tt>main</tt> glossary. You
+   can find out more information by clicking on the <dq>Details</dq>
+   link, which will open the window shown in <ref tag="basicsampledetails"/>.
+   </p>
+   <p>
+   <float type="figure" tag="basicsampledetails"
+     caption="Entry Details (Basic Sample)" pos="htbp">
+   <image src="images/basic-sample-details.png" 
+          alt="image of details window"/>
+   </float>
+   </p>
+   <p>
+   Since only one entry has been used, there's only one row. The first
+   column lists the entry's label, the second column lists the entry's sort
+   field and the third column shows the number of times that entry was indexed
+   in the document. If you have a long list of entries, you can use the search
+   box to find an entry according to it's label. (An exact match on the label
+   is required.)
+   </p>
+   </example>
+   <p>
+   If you have defined an entry in your document, but it's not listed in
+   the details window for the relevant glossary, then it hasn't been indexed
+   in your document. Remember that the commands described in section<nbsp/>9
+   (Using Glossary Terms Without Links) of the <sty>glossaries</sty> manual
+   don't index the terms. These essentially are all the commands in the
+   form <backslash/><tt>glsentry</tt><meta>field</meta> or
+   <backslash/><tt>glossentryname</tt><meta>field</meta>, such as
+   <cs tag="glsentrytext"/> or <cs tag="glsentrylong"/>
+   or <cs tag="glossentryname"/>, and their case-changing variants. 
+   Also <cs tag="glsentrytitlecase"/> and
+   <cs tag="glshyperlink"/>.
+   </p>
+   <p>
+   If you're using the <sty>glossaries-extra</sty> package, remember that
+   the <tt>noindex</tt> option will suppress indexing.
+   </p>
+   <example>
+   <p>
+   Now let's consider the following document (called, say, 
+   <tt>missing-sort.tex</tt>):
+   </p>
+   <pre>
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[xindy]{glossaries}
+
+\makeglossaries
+
+\newglossaryentry{S}{name={\S},
+ description={section symbol}}
+
+\newglossaryentry{alpha}{name={\ensuremath{\alpha}},
+ description={alpha}}
+
+\newglossaryentry{beta}{name={$\beta$},text={\beta},
+ description={beta}}
+
+\begin{document}
+Test: \gls{S}, $\gls{alpha}$, $\gls{beta}$.
+
+\printglossaries
+
+\end{document}
+   </pre>
+   <p>
+   As before, run <LaTeX/> as usual on this document. Since the xindy
+   package option has been used, this will create a <tt>.xdy</tt> file
+   instead of a <tt>.ist</tt> file and the <tt>.glo</tt>
+   file is now in <term tag="xindy"/>'s format. There are, however, problems
+   with this document. The <sty>glossaries</sty> manual advises using the
+   <tt>sort</tt> key for entries that contain special characters or commands
+   in the entry's name. This document hasn't followed that advice, and
+   xindy will complain. The <tt>S</tt> entry just causes a warning:
+   </p>
+<pre>
+Would replace complete index key with empty string, ignoring
+</pre>
+   <p noindent="true">
+   and the <tt>S</tt> entry is ignored. The <tt>alpha</tt> and <tt>beta</tt>
+   entries cause an error:
+   </p>
+<pre>
+index 0 should be less than the length of the string
+</pre>
+   <p noindent="true">
+   Again the entries are ignored, but the message is fairly cryptic.
+   If we load the auxiliary file (<tt>missing-sort.aux</tt>) into
+   <app/>, these problems are detected, and the following error message is 
+   displayed:
+   </p>
+   <pre>
+Xindy has ignored one or more entries with empty sort strings.
+Xindy failed with exit code 1.
+   </pre>
+   <p>
+   Once this error message has been dismissed, the <dq>Diagnostics</dq> tab
+   should automatically be selected (see <ref tag="missingsortdiagnostics"/>).
+   This identifies the problem entries and recommends a solution, in this case, 
+   add the <tt>sort</tt> key to the entry definition. The actual warning and
+   error message reported by <term tag="xindy"/> are shown at the end.
+   </p>
+   <p>
+   <float type="figure" tag="missingsortdiagnostics"
+     caption="Diagnostics Panel" pos="htbp">
+   <image src="images/missing-sort-diagnostics.png" 
+          alt="image of diagnostics panel"/>
+   </float>
+   </p>
+   <p>
+   (You can adjust the font size using the increase or decrease buttons, or 
+   the <menu tag="settings.incsize"/> or <menu tag="settings.decsize"/> menu
+   items.)
+   </p>
+   </example>
+   <p>
+   <app/> actually performs more problem checking than 
+   <term tag="makeglossaries"/> as it also tries to parse
+   the log file for certain messages. This is illustrated in
+   the next example, which won't generate any error messages
+   from <term tag="makeglossaries"/>.
+   </p>
+   <example>
+   <p>
+   Spot what's wrong with the following document:
+   </p>
+<pre>
+\documentclass{article}
+
+\usepackage{glossaries}
+
+\makeglossaries
+
+\newglossaryentry{sample}{name={sample},
+ description={an example}}
+
+\begin{document}
+A \gls{sample} document.
+
+\printglossary[type=acronym]
+
+\end{document}
+</pre>
+   <p>
+   If you use the normal method of <LaTeX/>, 
+   <term tag="makeglossaries"/>, <LaTeX/>, you won't get any
+   error messages, but the glossary won't be displayed. Why not?
+   If we switch from
+   </p>
+<pre>
+\usepackage{glossaries}
+</pre>
+   <p noindent="true">
+   to
+   </p>
+<pre>
+\usepackage{glossaries-extra}
+</pre>
+   <p noindent="true">
+   then we do finally get an error:
+   </p>
+<pre>
+! Package glossaries-extra Error: Glossary type `acronym' doesn't exist.
+</pre>
+   <p>
+   The <sty>glossaries-extra</sty> package is stricter than
+   the base <sty>glossaries</sty> package. The problem here
+   is that I've used <tt>type=acronym</tt>, but there's no
+   glossary with that label. (I haven't used the <tt>acronym</tt>
+   option.) If you're not using the extension package, this is
+   harder to pick up, but <app/> will notify you of the problem.
+   This example document will trigger the error
+   </p>
+<pre>
+No glossary 'acronym'.
+</pre>
+  <p noindent="false">
+  and the diagnostics panel will show the message:
+  </p>
+<pre>
+It looks as though you might have done something like 
+\printglossary[type={acronym}], but there's no 'acronym' 
+glossary.
+</pre>
+   <p>
+   If you switch to the <dq>General Information</dq> panel,
+   the labels for the glossaries defined in the document are
+   listed next to <dq><dict tag="main.list"/></dq> so you
+   can check the indicated type against it. In this example,
+   the list has only the single label <dq>main</dq>.
+   </p>
+   </example>
+   </node>
+   <node type="chapter" tag="properties" title="Settings" >
+   <p>
+   The application settings can be adjusted through the <menu tag="settings"/>
+   menu. The <menu tag="settings.incsize"/> or <menu tag="settings.decsize"/> 
+   menu items can be used to change the font size used in the 
+   <dq>General Information</dq> and <dq>Diagnostics</dq> panels. The
+   <menu tag="settings.editproperties"/> menu item will open the 
+   <dq>Properties</dq> dialog window (see <ref tag="propertiesdialog"/>).
+   </p>
+   <p>
+   <float type="figure" tag="propertiesdialog"
+     caption="Properties Dialog" pos="htbp">
+   <image src="images/properties.png" alt="image of properties dialog"/>
+   </float>
+   </p>
+   <p>
+   You can specify the directory to use on start up. This is the 
+   directory the file chooser will be set to initially. You can also
+   specify the path to <term tag="makeindex"/> and <term tag="xindy"/>.
+   <app/> will try to determine this information from your system's path.
+   </p>
+   <p>
+   <app/> will try to determine the language and input encoding from the
+   <tt>.aux</tt> file, but you can override this if you want to. Make sure
+   that the <dq>Override</dq> check box is selected, and change the
+   language and encoding as appropriate.
+   </p>
    </node>
    <node type="chapter" tag="licence" title="Licence" >
    <p>
