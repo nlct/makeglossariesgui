@@ -77,6 +77,13 @@ public class MakeGlossariesInvoker
 
    public void reload(File file) 
    {
+      if (!file.exists())
+      {
+         getMessageSystem().error(getLabelWithValue(
+           "error.io.file_doesnt_exist", file.getAbsolutePath()));
+         return;
+      }
+
       try
       {
          glossaries = Glossaries.loadGlossaries(this, file);
@@ -249,6 +256,16 @@ public class MakeGlossariesInvoker
       return properties;
    }
 
+   public boolean isDocDefCheckOn()
+   {
+      return properties.isDocDefsCheckOn();
+   }
+
+   public boolean isMissingLangCheckOn()
+   {
+      return properties.isMissingLangCheckOn();
+   }
+
    public String getDefaultLanguage()
    {
       return properties.getDefaultLanguage();
@@ -301,11 +318,16 @@ public class MakeGlossariesInvoker
 
    public File getFile()
    {
-      return new File(currentFileName);
+      return currentFileName == null ? null : new File(currentFileName);
    }
 
    public File getCurrentDirectory()
    {
+      if (currentFileName == null)
+      {
+         return new File(properties.getDefaultDirectory());
+      }
+
       File file = getFile().getParentFile();
 
       if (file == null)
@@ -420,33 +442,36 @@ public class MakeGlossariesInvoker
       debug = isSet;
    }
 
+   public boolean isBatchMode()
+   {
+      return batchMode;
+   }
+
    public static void main(String[] args)
    {
       MakeGlossariesInvoker invoker = new MakeGlossariesInvoker();
-
-      boolean doBatch = false;
 
       for (int i = 0; i < args.length; i++)
       {
          if (args[i].equals("--help") || args[i].equals("-h"))
          {
-            doBatch = true;
+            invoker.batchMode = true;
             invoker.help();
             System.exit(0);
          }
          else if (args[i].equals("--version") || args[i].equals("-v"))
          {
-            doBatch = true;
+            invoker.batchMode = true;
             invoker.version();
             System.exit(0);
          }
          else if (args[i].equals("--batch") || args[i].equals("-b"))
          {
-            doBatch = true;
+            invoker.batchMode = true;
          }
          else if (args[i].equals("--gui"))
          {
-            doBatch = false;
+            invoker.batchMode = false;
          }
          else if (args[i].equals("--quiet"))
          {
@@ -473,7 +498,7 @@ public class MakeGlossariesInvoker
          }
       }
 
-      if (doBatch)
+      if (invoker.batchMode)
       {
          if (invoker.getFileName() == null)
          {
@@ -501,7 +526,7 @@ public class MakeGlossariesInvoker
 
    public static final String appDate = "2016-05-23";
 
-   private boolean quiet=false, debug=false; 
+   private boolean quiet=false, debug=false, batchMode=false; 
 
    protected Glossaries glossaries;
 

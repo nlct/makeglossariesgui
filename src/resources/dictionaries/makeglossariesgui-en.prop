@@ -114,8 +114,8 @@ diagnostics.codepage_no_glossary=Check you have spelt the name of the glossary l
 diagnostics.no_codepage=You need to specify the code page (e.g. 'utf8' or 'latin1') either using the inputenc package or setting it via \\GlsSetXdyCodePage. I've used the fallback '$2' instead.
 diagnostics.makeindex_reject_all=Makeindex has rejected all entries in glossary '$1'.
 diagnostics.bad_attributes=The file '$1' doesn't seem to be a valid $2 style file. When you set the style name, make sure you use \\SetStyleFile instead of redefining \\istfilename and avoid using \\glsxindytrue or \\glsxindyfalse.
-diagnostics.no_entries=There were no entries listed for glossary '$1'. Check that you have used commands like \\gls or \\glsadd.
-diagnostics.no_entries_main=There were no entries listed for the main glossary. Check that you have used commands like \\gls or \\glsadd. If you don't want to use this glossary, add the 'nomain' package option to your document.
+diagnostics.no_entries=There were no entries listed for glossary '$1'. Remember that you must index entries for them to appear in the glossary using the commands provided by the glossaries package. Entries that have been defined but not indexed won't be listed. Check that you have used commands like \\gls or \\glsadd.
+diagnostics.no_entries_main=There were no entries listed for the main glossary. Remember that you must index entries for them to appear in the glossary using the commands provided by the glossaries package. Entries that have been defined but not indexed won't be listed. Check that you have used commands like \\gls or \\glsadd. If you don't want to use this glossary, add the 'nomain' package option to your document.
 diagnostics.app_err=$1 reported the following error:$2
 diagnostics.app_err_null=I'm stumped. Nothing was detected on the error output stream.
 diagnostics.unknown_language_or_codepage=Xindy doesn't have a module for the combination of language '$1' and codepage '$2'. Use \\GlsSetXdyLanguage and/or \\GlsSetXdyCodePage to select the closest matching known language and codepage combination.
@@ -126,8 +126,13 @@ diagnostics.empty_sort=Xindy won't accept the sort value '$1' (for entry '$2') a
 diagnostics.deprecated=You seem to be using a very old version of glossaries.sty. This may cause some complications from bugs or limitations associated with that version.
 diagnostics.oldversion=You are using version $1 ($2) of glossaries.sty. There have been some bug fixes in newer versions that may have addressed some issues you might be facing.
 diagnostics.wrong_type=It looks as though you might have done something like \\printglossary[type={$1}], but there's no '$1' glossary.
+diagnostics.wrong_type_noidx=It looks as though you might have done something like \\printnoidxglossary[type={$1}], but there's no '$1' glossary.
 diagnostics.no_log=I can't find the log file '$1', so I can't search for any more problems.
 diagnostics.doc_defs=It seems you have defined terms in the document rather than in the preamble. This can cause complications. If you really want them in the document, you may need to delete the file '$1' if something goes wrong or rebuild the document after making any modifications to the entry definitions. Remember that you can define terms in a separate file and load them using \\loadglsentries{filename}.
+diagnostics.missing_lang=You don't have any glossaries support for language '$1'. This could simply mean that you need to install 'glossaries-$1' using your TeX package manager. However, if 'glossaries-$1' isn't listed (or http://ctan.org/pkg/glossaries-$1 doesn't exist), it most likely means '$1' isn't supported, in which case see section 1.3 (Multi-Lingual Support) of the glossaries user manual for further help.
+diagnostics.missing_sty=The package '$1' is required but doesn't seem to be installed. Use your TeX package manager to install it. If your package manager can't find it, try searching for it on CTAN http://ctan.org/search/?phrase=$1
+diagnostics.noidx=It seems you've used \\makenoidxglossaries, which means you don't need xindy or makeindex, you just need a second LaTeX run to get the glossary up to date.
+diagnostics.shell_disabled=It seems that TeX refused to run the system command '$1'. This could be because the shell escape has been disabled or it could be that TeX is running in restricted mode and the given system command isn't a trusted application.
 
 # Properties dialog
 properties.title=MakeGlossariesGUI Properties
@@ -138,7 +143,7 @@ properties.dir.last=Last Used Directory
 properties.dir.last.mnemonic=L
 properties.dir.custom=Custom:
 properties.dir.custom.mnemonic=U
-properties.override=Override
+properties.override=Override document language settings
 properties.override.mnemonic=R
 properties.makeindex=Path to Makeindex:
 properties.makeindex.mnemonic=M
@@ -150,12 +155,17 @@ properties.language=Language
 properties.language.mnemonic=G
 properties.encoding=Encoding
 properties.encoding.mnemonic=E
+properties.docdefcheck=Check for document definitions
+properties.docdefcheck.mnemonic=F
+properties.langcheck=Check for missing language modules
+properties.langcheck.mnemonic=M
 
 # batch mode messages
 message.loading=Loading '$1'
 
 # Error messages
 error.title=Error
+error.io.file_doesnt_exist=File '$1' doesn't exist.
 error.no_such_file=File not found.
 error.no_xindy=Can't find Xindy application.
 error.no_makeindex=Can't find Makeindex application.

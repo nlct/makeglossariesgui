@@ -1,8 +1,8 @@
 \documentclass{article}
 
-\usepackage[automake]{glossaries}
+\usepackage{glossaries}
 
-\makeglossaries
+\makenoidxglossaries
 
 \newglossaryentry{sample}{name={sample},
  description={an example}}
@@ -10,6 +10,6 @@
 \begin{document}
 A \gls{sample} document.
 
-\printglossaries
+\printnoidxglossary
 
 \end{document}

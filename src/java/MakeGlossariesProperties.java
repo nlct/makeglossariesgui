@@ -62,6 +62,8 @@ public class MakeGlossariesProperties extends Properties
       setProperty("language", Locale.getDefault().getDisplayLanguage().toLowerCase());
       setProperty("codepage", "utf8");
       setProperty("override", "false");
+      setProperty("docdefscheck", "true");
+      setProperty("langcheck", "true");
       setProperty("german-wordorder", "false");
       setProperty("fontsize", "12");
       setProperty("fontname", "Serif");
@@ -209,6 +211,30 @@ public class MakeGlossariesProperties extends Properties
       String prop = getProperty("override");
 
       return prop == null ? false : Boolean.parseBoolean(prop);
+   }
+
+   public void setDocDefsCheck(boolean check)
+   {
+      setProperty("docdefscheck", check?"true":"false");
+   }
+
+   public boolean isDocDefsCheckOn()
+   {
+      String prop = getProperty("docdefscheck");
+
+      return prop == null ? true : Boolean.parseBoolean(prop);
+   }
+
+   public void setMissingLangCheck(boolean check)
+   {
+      setProperty("langcheck", check?"true":"false");
+   }
+
+   public boolean isMissingLangCheckOn()
+   {
+      String prop = getProperty("langcheck");
+
+      return prop == null ? true : Boolean.parseBoolean(prop);
    }
 
    public static MakeGlossariesProperties fetchProperties()

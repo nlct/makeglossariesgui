@@ -69,6 +69,8 @@
 
 \newcommand*{\dq}[1]{``#1''}
 
+\newcommand*{\sq}[1]{`#1'}
+
 \newcommand*{\meta}[1]{\ensuremath{\langle}\textit{#1}\ensuremath{\rangle}}
 
 \newcommand{\marg}[1]{\texttt{\char`\{#1\char`\}}}

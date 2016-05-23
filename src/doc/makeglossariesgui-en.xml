@@ -238,26 +238,26 @@ Test: \gls{S}, $\gls{alpha}$, $\gls{beta}$.
    in the entry's name. This document hasn't followed that advice, and
    xindy will complain. The <tt>S</tt> entry just causes a warning:
    </p>
-<pre>
+<blockquote>
 Would replace complete index key with empty string, ignoring
-</pre>
+</blockquote>
    <p noindent="true">
    and the <tt>S</tt> entry is ignored. The <tt>alpha</tt> and <tt>beta</tt>
    entries cause an error:
    </p>
-<pre>
+<blockquote>
 index 0 should be less than the length of the string
-</pre>
+</blockquote>
    <p noindent="true">
    Again the entries are ignored, but the message is fairly cryptic.
    If we load the auxiliary file (<tt>missing-sort.aux</tt>) into
    <app/>, these problems are detected, and the following error message is 
    displayed:
    </p>
-   <pre>
+<blockquote>
 Xindy has ignored one or more entries with empty sort strings.
 Xindy failed with exit code 1.
-   </pre>
+</blockquote>
    <p>
    Once this error message has been dismissed, the <dq>Diagnostics</dq> tab
    should automatically be selected (see <ref tag="missingsortdiagnostics"/>).
@@ -324,9 +324,9 @@ A \gls{sample} document.
    <p noindent="true">
    then we do finally get an error:
    </p>
-<pre>
-! Package glossaries-extra Error: Glossary type `acronym' doesn't exist.
-</pre>
+<blockquote>
+! Package glossaries-extra Error: Glossary type <sq>acronym</sq> doesn't exist.
+</blockquote>
    <p>
    The <sty>glossaries-extra</sty> package is stricter than
    the base <sty>glossaries</sty> package. The problem here
@@ -336,23 +336,158 @@ A \gls{sample} document.
    harder to pick up, but <app/> will notify you of the problem.
    This example document will trigger the error
    </p>
-<pre>
-No glossary 'acronym'.
-</pre>
+<blockquote>
+No glossary <sq>acronym</sq>.
+</blockquote>
   <p noindent="false">
   and the diagnostics panel will show the message:
   </p>
-<pre>
+<blockquote>
 It looks as though you might have done something like 
-\printglossary[type={acronym}], but there's no 'acronym' 
-glossary.
-</pre>
+<tt><cs tag="printglossary"/>[type={acronym}]</tt>, but there's no 
+<sq>acronym</sq> glossary.
+</blockquote>
    <p>
    If you switch to the <dq>General Information</dq> panel,
    the labels for the glossaries defined in the document are
    listed next to <dq><dict tag="main.list"/></dq> so you
    can check the indicated type against it. In this example,
    the list has only the single label <dq>main</dq>.
+   </p>
+   </example>
+   <p>
+   Remember that you not only have to define your entries, but you also
+   have to index them if you want them to appear in the glossary. The
+   <sty>glossaries</sty> package provides many commands that index entries,
+   the most commonly used one being <cs tag="gls"/>, which displays
+   the text associated with the entry, indexes the entry,
+   marks it as having been used and (if the <sty>hyperref</sty> package has
+   been loaded) also creates a link to the definition in the glossary.
+   Other commands provide variations, such as displaying different text
+   or not changing the <dq>first use flag</dq>. In particular, the
+   <cs tag="glsadd"/> command only indexes the entry without displaying any
+   text.
+   </p>
+   <example>
+   <p>
+   In the sample document below, I've defined an entry but it hasn't been 
+   indexed anywhere in the document.
+   </p>
+<pre>
+\documentclass{article}
+
+\usepackage{glossaries}
+
+\makeglossaries
+
+\newglossaryentry{sample}{name={sample},
+ description={an example}}
+
+\begin{document}
+A sample document.
+
+\printglossaries
+
+\end{document}
+</pre>
+   <p>
+   My first step, as usual, is to run <LaTeX/> on this document, which will
+   create the <tt>.aux</tt> file. Now if I try loading this file into <app/> 
+   I get the error message:
+   </p>
+   <blockquote>
+   No entries were found for glossary <sq>main</sq>.
+   </blockquote>
+   <p>
+   The diagnostics panel shows the following message:
+   </p>
+   <blockquote>
+   There were no entries listed for the main glossary. Remember that you must 
+   index entries for them to appear in the glossary using the commands provided 
+   by the glossaries package. Entries that have been defined but not indexed 
+   won't be listed. Check that you have used commands like <cs tag="gls"/> or 
+   <cs tag="glsadd"/>. If you don't want to use this glossary, add the 
+   <sq>nomain</sq> package option to your document.
+   </blockquote>
+   <p>
+   (The final sentence only appears if there are no entries for the 
+   <tt>main</tt> glossary.)
+   </p>
+   </example>
+   <p>
+   Remember that if you use <cs tag="makenoidxglossaries"/>, you don't
+   need <term tag="makeindex"/> or <term tag="xindy"/>.
+   </p>
+   <example>
+   <p>
+   Consider the following document:
+<pre>
+\documentclass{article}
+
+\usepackage{glossaries}
+
+\makenoidxglossaries
+
+\newglossaryentry{sample}{name={sample},
+ description={an example}}
+
+\begin{document}
+A \gls{sample} document.
+
+\printnoidxglossaries
+
+\end{document}
+</pre>
+   </p>
+   <p>
+   If I load the <tt>.aux</tt> file for this document into <app/>, I get
+   the following message in the diagnostics panel:
+   </p>
+   <blockquote>
+It seems you've used <cs tag="makenoidxglossaries"/>, which means you don't 
+need xindy or makeindex, you just need a second LaTeX run to get the glossary 
+up to date.
+   </blockquote>
+   <p>
+   Note that <app/> still provides some limited diagnostics even when
+   <cs tag="makenoidxglossaries"/> has been used. To illustrate this, if we
+   modify the above sample document slightly, introducing an error:
+   </p>
+<pre>
+\documentclass{article}
+
+\usepackage{glossaries}
+
+\makenoidxglossaries
+
+\newglossaryentry{sample}{name={sample},
+ description={an example}}
+
+\begin{document}
+A \gls{sample} document.
+
+\printnoidxglossary[type=acronym]
+
+\end{document}
+</pre>
+   <p>
+   This provides some additional information in the diagnostics panel:
+   </p>
+   <blockquote>
+<p>
+Package glossaries Warning: Empty glossary for 
+<cs tag="printnoidxglossary"/>[type=<marg>acronym</marg>] Rerun may be 
+required (or you may have forgotten to use commands like <cs tag="gls"/>) on input 
+line 13.
+</p>
+<p>
+It looks as though you might have done something like 
+<cs tag="printnoidxglossary"/>[type=<marg>acronym</marg>], but there's no
+<sq>acronym</sq> glossary.
+</p>
+   </blockquote>
+   <p>
+   So <app/> picks up the error.
    </p>
    </example>
    </node>
@@ -380,8 +515,33 @@ glossary.
    <p>
    <app/> will try to determine the language and input encoding from the
    <tt>.aux</tt> file, but you can override this if you want to. Make sure
-   that the <dq>Override</dq> check box is selected, and change the
+   that the <button tag="properties.override"/> check box is selected, and change the
    language and encoding as appropriate.
+   </p>
+   <p>
+   <app/> will also try to determine if you have defined any 
+   entries within the <env tag="document"/> environment.
+   Although the <sty>glossaries</sty> package allows 
+   document definitions, the manual encourages defining
+   entries in the preamble, see section<nbsp/>4.10 of
+   the <sty>glossaries</sty> user manual (<dq>Drawbacks
+   With Defining Entries in the Document Environment</dq>).
+   If you want to skip this check, deselect the
+   <button tag="properties.docdefcheck"/> check box.
+   </p>
+   <p>
+   There's also a check to see if the <sty>glossaries</sty>
+   package has complained about missing language modules.
+   Not all languages are supported and, for those languages
+   that are supported, the appropriate module must be installed
+   in addition to installing the <sty>glossaries</sty> package.
+   If the required language support is missing, the glossary
+   files can still be built, you'll just have to manually
+   change the fixed text for the title following the instructions
+   in section<nbsp/>1.3 (<dq>Multi-Lingual Support</dq>)
+   of the <sty>glossaries</sty> user manual. If you want to
+   skip this check, deselect the
+   <button tag="properties.langcheck"/> check box.
    </p>
    </node>
    <node type="chapter" tag="licence" title="Licence" >

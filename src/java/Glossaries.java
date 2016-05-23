@@ -67,6 +67,7 @@ public class Glossaries
       String line;
 
       boolean override = invoker.getProperties().isOverride();
+      glossaries.noidx = false;
 
       while ((line = in.readLine()) != null)
       {
@@ -76,6 +77,8 @@ public class Glossaries
          {
             glossaries.add(new Glossary(invoker, matcher.group(1), matcher.group(2),
               matcher.group(3), matcher.group(4)));
+
+            continue;
          }
 
          matcher = istFilePattern.matcher(line);
@@ -83,6 +86,7 @@ public class Glossaries
          if (matcher.matches())
          {
             glossaries.istName = matcher.group(1);
+            continue;
          }
 
          matcher = orderPattern.matcher(line);
@@ -90,6 +94,7 @@ public class Glossaries
          if (matcher.matches())
          {
             glossaries.order = matcher.group(1);
+            continue;
          }
 
          if (!override)
@@ -120,6 +125,8 @@ public class Glossaries
                }
 
                languages.put(label, language);
+
+               continue;
             }
 
             matcher = codepagePattern.matcher(line);
@@ -141,13 +148,26 @@ public class Glossaries
                }
 
                codePages.put(label, code);
+
+               continue;
             }
+         }
+
+         matcher = glsreferencePattern.matcher(line);
+
+         if (matcher.matches())
+         {
+            glossaries.noidx = true;
          }
       }
 
       in.close();
 
-      if (!override)
+      if (glossaries.noidx)
+      {
+         glossaries.addDiagnosticMessage(invoker.getLabel("diagnostics.noidx"));
+      }
+      else if (!override)
       {
          for (Enumeration<String> en = languages.keys(); en.hasMoreElements();)
          {
@@ -196,13 +216,6 @@ public class Glossaries
    public void process()
       throws GlossaryException,IOException,InterruptedException
    {
-      String mess = getIndexerError();
-
-      if (mess != null)
-      {
-         throw new GlossaryException(mess);
-      }
-
       File file = invoker.getFile();
 
       String baseName = file.getName();
@@ -216,69 +229,83 @@ public class Glossaries
 
       File dir = file.getParentFile();
 
-      String lang = null;
-      String codePage = null;
-
-      if (invoker.getProperties().isOverride())
+      if (!noidx)
       {
-         lang = invoker.getDefaultLanguage();
-         codePage = invoker.getDefaultCodePage();
+         String mess = getIndexerError();
 
-         String variant = invoker.getDefaultXindyVariant();
-
-         if (variant != null && !variant.isEmpty())
+         if (mess != null)
          {
-            lang = String.format("%s-%s", lang, variant);
+            throw new GlossaryException(mess);
+         }
+
+         String lang = null;
+         String codePage = null;
+
+         if (invoker.getProperties().isOverride())
+         {
+            lang = invoker.getDefaultLanguage();
+            codePage = invoker.getDefaultCodePage();
+
+            String variant = invoker.getDefaultXindyVariant();
+
+            if (variant != null && !variant.isEmpty())
+            {
+               lang = String.format("%s-%s", lang, variant);
+            }
+         }
+
+         for (int i = 0, n = getNumGlossaries(); i < n; i++)
+         {
+            Glossary g = getGlossary(i);
+
+            try
+            {
+               if (useXindy())
+               {
+                  if (lang != null)
+                  {
+                     g.setLanguage(lang);
+                  }
+
+                  if (codePage != null)
+                  {
+                     g.setCodePage(codePage);
+                  }
+
+                  g.xindy(dir, baseName, isWordOrder(), istName);
+               }
+               else
+               {
+                  g.makeindex(dir, baseName, isWordOrder(), istName);
+               }
+
+               String errMess = g.getErrorMessages();
+
+               if (errMess != null)
+               {
+                  addErrorMessage(errMess);
+               }
+            }
+            catch (IOException e)
+            {
+               File istFile = new File(dir, istName);
+
+               if (!istFile.exists())
+               {
+                  throw new GlossaryException(invoker.getLabelWithValue("error.no_ist", istName),
+                     invoker.getLabel("diagnostics.no_ist"), e);
+               }
+               else
+               {
+                  throw e;
+               }
+            }
          }
       }
 
-      for (int i = 0, n = getNumGlossaries(); i < n; i++)
-      {
-         Glossary g = getGlossary(i);
+      // Skip the log file check when in batch mode
 
-         try
-         {
-            if (useXindy())
-            {
-               if (lang != null)
-               {
-                  g.setLanguage(lang);
-               }
-
-               if (codePage != null)
-               {
-                  g.setCodePage(codePage);
-               }
-
-               g.xindy(dir, baseName, isWordOrder(), istName);
-            }
-            else
-            {
-               g.makeindex(dir, baseName, isWordOrder(), istName);
-            }
-
-            String errMess = g.getErrorMessages();
-
-            if (errMess != null)
-            {
-               addErrorMessage(errMess);
-            }
-         }
-         catch (IOException e)
-         {
-            File istFile = new File(dir, istName);
-
-            if (!istFile.exists())
-            {
-               throw new GlossaryException(invoker.getLabelWithValue("error.no_ist", istName),
-                  invoker.getLabel("diagnostics.no_ist"));
-            }
-            else
-            {
-               throw e;
-            }
-         }
-      }
+      if (invoker.isBatchMode()) return;
 
       // Now check the log file for any problems
 
@@ -334,32 +361,125 @@ public class Glossaries
                     String.format("%s/%s/%s", year, mon, day)
                   ));
                }
+
+               continue;
             }
-            else
+
+            m = wrongGloTypePattern.matcher(line);
+
+            if (m.matches())
             {
-               m = wrongGloTypePattern.matcher(line);
+               String type = m.group(2);
+
+               addDiagnosticMessage(invoker.getLabelWithValue(
+                 "diagnostics.wrong_type", type));
+               addErrorMessage(invoker.getLabelWithValue(
+                 "error.wrong_type", type));
+
+               continue;
+            }
+
+            if (invoker.isDocDefCheckOn())
+            {
+               m = docDefsPattern.matcher(line);
 
                if (m.matches())
                {
-                  String type = m.group(2);
+                  File f = new File(dir, baseName+".glsdefs");
 
                   addDiagnosticMessage(invoker.getLabelWithValue(
-                    "diagnostics.wrong_type", type));
-                  addErrorMessage(invoker.getLabelWithValue(
-                    "error.wrong_type", type));
+                    "diagnostics.doc_defs", f.getAbsolutePath()));
+
+                  continue;
                }
-               else
+            }
+
+            if (invoker.isMissingLangCheckOn())
+            {
+               m = missingLangPattern.matcher(line);
+
+               if (m.matches())
                {
-                  m = docDefsPattern.matcher(line);
+                  addDiagnosticMessage(invoker.getLabelWithValue(
+                    "diagnostics.missing_lang", m.group(1)));
+                  continue;
+               }
+            }
+
+            m = missingStyPattern.matcher(line);
+
+            if (m.matches())
+            {
+               addDiagnosticMessage(invoker.getLabelWithValue(
+                  "diagnostics.missing_sty", m.group(1)));
+
+               continue;
+            }
+
+            m = warningPattern.matcher(line);
+
+            if (m.matches())
+            {
+               StringBuilder builder = new StringBuilder(line);
+
+               while ((line = reader.readLine()) != null)
+               {
+                  if (line.isEmpty())
+                  {
+                     break;
+                  }
+
+                  builder.append(line);
+               }
+
+               String msg = builder.toString();
+
+               addDiagnosticMessage(msg);
+
+               if (noidx)
+               {
+                  m = emptyNoIdxGlossaryPattern.matcher(msg);
 
                   if (m.matches())
                   {
-                     File f = new File(dir, baseName+".glsdefs");
+                     String type = m.group(1);
 
-                     addDiagnosticMessage(invoker.getLabelWithValue(
-                       "diagnostics.doc_defs", file.getAbsolutePath()));
+                     if (!glossaryList.contains(type))
+                     {
+                        addDiagnosticMessage(invoker.getLabelWithValue(
+                          "diagnostics.wrong_type_noidx", type));
+                     }
                   }
                }
+
+               continue;
+            }
+
+            m = systemPattern.matcher(line);
+
+            if (m.matches())
+            {
+               StringBuilder builder = new StringBuilder(line);
+
+               while ((line = reader.readLine()) != null)
+               {
+                  if (line.isEmpty())
+                  {
+                     break;
+                  }
+
+                  builder.append(line);
+               }
+
+               m = disabledSystemPattern.matcher(builder);
+
+               if (m.matches())
+               {
+                  addDiagnosticMessage(invoker.getLabelWithValue(
+                     "diagnostics.shell_disabled", m.group(1)));
+               }
+
+               continue;
             }
          }
       }
@@ -457,6 +577,8 @@ public class Glossaries
 
    public String getIndexerError()
    {
+      if (noidx) return null;
+
       if (istName == null)
       {
          return invoker.getLabel("error.cant_determine_indexer");
@@ -487,7 +609,7 @@ public class Glossaries
 
    public String getDiagnostics()
    {
-      if (istName == null && order == null)
+      if (!noidx && istName == null && order == null)
       {
          if (glossaryList.size() == 0)
          {
@@ -623,6 +745,8 @@ public class Glossaries
    private Vector<Glossary> glossaryList;
    private String istName;
 
+   private boolean noidx = false;
+
    private String order;
 
    private StringBuilder errorMessages, diagnosticMessages;
@@ -642,6 +766,9 @@ public class Glossaries
    private static final Pattern codepagePattern
       = Pattern.compile("\\\\@gls@codepage\\{([^\\}]+)\\}\\{([^\\}]*)\\}");
 
+   private static final Pattern glsreferencePattern
+      = Pattern.compile("\\\\@gls@reference\\{.*?\\}\\{.*?\\}\\{.*\\}");
+
    private static final Pattern glossariesStyPattern
       = Pattern.compile("Package: glossaries (\\d+)\\/(\\d+)\\/(\\d+) v([\\d\\.a-z]+) \\(NLCT\\).*");
 
@@ -653,6 +780,24 @@ public class Glossaries
 
    private static final Pattern docDefsPattern
       = Pattern.compile("\\\\openout\\d+\\s*=\\s*`.*\\.glsdefs'.");
+
+   private static final Pattern missingLangPattern
+      = Pattern.compile("Package glossaries Warning: No language module detected for `(.*)'.\\s*");
+
+   private static final Pattern missingStyPattern
+      = Pattern.compile(".*`(.*?)\\.sty' not found.*");
+
+   private static final Pattern warningPattern
+      = Pattern.compile("Package glossaries(-extra)? Warning: .*");
+
+   private static final Pattern emptyNoIdxGlossaryPattern
+      = Pattern.compile(".*Empty glossary for \\\\printnoidxglossary\\[type=\\{(.*?)\\}\\]\\..*");
+
+   private static final Pattern systemPattern
+      = Pattern.compile("runsystem\\(.*");
+
+   private static final Pattern disabledSystemPattern
+      = Pattern.compile("runsystem\\((.*)\\)\\.\\.\\.disabled\\..*");
 
    private static final String[] fields =
    {

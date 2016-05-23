@@ -181,6 +181,14 @@ public class PropertiesDialog extends JDialog
       overrideBox.addActionListener(this);
       box.add(overrideBox);
 
+      docDefCheckBox = new JCheckBox(app.getLabel("properties", "docdefcheck"), properties.isDocDefsCheckOn());
+      docDefCheckBox.setMnemonic(app.getMnemonic("properties", "docdefcheck"));
+      box.add(docDefCheckBox);
+
+      missingLangModBox = new JCheckBox(app.getLabel("properties", "langcheck"), properties.isMissingLangCheckOn());
+      missingLangModBox.setMnemonic(app.getMnemonic("properties", "langcheck"));
+      box.add(missingLangModBox);
+
       dim = xindyLabel.getPreferredSize();
       maxWidth = (int)Math.max(maxWidth, dim.getWidth());
 
@@ -302,6 +310,8 @@ public class PropertiesDialog extends JDialog
          properties.setDefaultCodePage((String)encodingBox.getSelectedItem());
          properties.setDefaultXindyVariant(currentVariant.getSelected());
          properties.setOverride(overrideBox.isSelected());
+         properties.setDocDefsCheck(docDefCheckBox.isSelected());
+         properties.setMissingLangCheck(missingLangModBox.isSelected());
 
          if (homeButton.isSelected())
          {
@@ -514,7 +524,7 @@ public class PropertiesDialog extends JDialog
 
    private JFileChooser fileChooser;
 
-   private JCheckBox overrideBox;
+   private JCheckBox overrideBox, docDefCheckBox, missingLangModBox;
 
    private MakeGlossariesProperties properties;
 

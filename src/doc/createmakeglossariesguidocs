@@ -1136,6 +1136,22 @@ sub end_dq{
    print TEXFD "}";
 }
 
+sub start_sq{
+   my ($expat, %attrs) = @_;
+
+   &handle_html("'");
+
+   print TEXFD "\\sq{";
+}
+
+sub end_sq{
+   my ($expat) = @_;
+
+   &handle_html("'");
+
+   print TEXFD "}";
+}
+
 sub start_url{
    my ($expat, %attrs) = @_;
 
@@ -1222,6 +1238,22 @@ sub end_footnote{
    $docinfo{Footnote} = '';
 
    print TEXFD "}";
+}
+
+sub start_blockquote{
+   my ($expat, %attrs) = @_;
+
+   print TEXFD "\\begin{quote}";
+
+   &handle_html('<blockquote>');
+}
+
+sub end_blockquote{
+   my ($expat) = @_;
+
+   print TEXFD "\\end{quote}";
+
+   &handle_html('</blockquote>');
 }
 
 sub start_example{
