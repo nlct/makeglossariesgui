@@ -268,7 +268,7 @@ public class Glossary
       }
    }
 
-   public void makeindex(File dir, String baseName, boolean isWordOrder, String istName)
+   public void makeindex(File dir, String baseName, boolean isWordOrder, String istName, String[] extra)
       throws IOException,InterruptedException,GlossaryException
    {
       File makeindexApp = new File(invoker.getMakeIndexApp());
@@ -286,55 +286,90 @@ public class Glossary
 
       String[] cmdArray;
 
+      int n = (extra == null ? 0 : extra.length);
+
       if (invoker.useGermanWordOrdering())
       {
          if (isWordOrder)
          {
-            cmdArray = new String[]
+            cmdArray = new String[9+n];
+            int idx = 0;
+            cmdArray[idx++] = makeindexApp.getAbsolutePath();
+            cmdArray[idx++] = "-g";
+            cmdArray[idx++] = "-s";
+            cmdArray[idx++] = istName;
+            cmdArray[idx++] = "-t";
+            cmdArray[idx++] = transFileName;
+            cmdArray[idx++] = "-o";
+            cmdArray[idx++] = baseName+"."+glsExt;
+
+            for (int i = 0; i < n; i++)
             {
-               makeindexApp.getAbsolutePath(),
-               "-g",
-               "-s", istName,  
-               "-t", transFileName,
-               "-o", baseName+"."+glsExt,
-                gloFile.getName()
-            };
+               cmdArray[idx++] = extra[i];
+            }
+
+            cmdArray[idx++] = gloFile.getName();
          }
          else
          {
-            cmdArray = new String[]
+            cmdArray = new String[10+n];
+            int idx = 0;
+            cmdArray[idx++] = makeindexApp.getAbsolutePath();
+            cmdArray[idx++] = "-l";
+            cmdArray[idx++] = "-g";
+            cmdArray[idx++] = "-s";
+            cmdArray[idx++] = istName;
+            cmdArray[idx++] = "-t";
+            cmdArray[idx++] = transFileName;
+            cmdArray[idx++] = "-o";
+            cmdArray[idx++] = baseName+"."+glsExt;
+
+            for (int i = 0; i < n; i++)
             {
-               makeindexApp.getAbsolutePath(),
-               "-l", "-g",
-               "-s", istName,  
-               "-t", transFileName,
-               "-o", baseName+"."+glsExt,
-                gloFile.getName()
-            };
+               cmdArray[idx++] = extra[i];
+            }
+
+            cmdArray[idx++] = gloFile.getName();
          }
       }
       else if (isWordOrder)
       {
-         cmdArray = new String[]
+         cmdArray = new String[8+n];
+         int idx = 0;
+         cmdArray[idx++] = makeindexApp.getAbsolutePath();
+         cmdArray[idx++] = "-s";
+         cmdArray[idx++] = istName;
+         cmdArray[idx++] = "-t";
+         cmdArray[idx++] = transFileName;
+         cmdArray[idx++] = "-o";
+         cmdArray[idx++] = baseName+"."+glsExt;
+
+         for (int i = 0; i < n; i++)
          {
-            makeindexApp.getAbsolutePath(),
-            "-s", istName,  
-            "-t", transFileName,
-            "-o", baseName+"."+glsExt,
-             gloFile.getName()
-         };
+            cmdArray[idx++] = extra[i];
+         }
+
+         cmdArray[idx++] = gloFile.getName();
       }
       else
       {
-         cmdArray = new String[]
+         cmdArray = new String[9+n];
+         int idx = 0;
+         cmdArray[idx++] = makeindexApp.getAbsolutePath();
+         cmdArray[idx++] = "-l";
+         cmdArray[idx++] = "-s";
+         cmdArray[idx++] = istName;
+         cmdArray[idx++] = "-t";
+         cmdArray[idx++] = transFileName;
+         cmdArray[idx++] = "-o";
+         cmdArray[idx++] = baseName+"."+glsExt;
+
+         for (int i = 0; i < n; i++)
          {
-            makeindexApp.getAbsolutePath(),
-            "-l",
-            "-s", istName,  
-            "-t", transFileName,
-            "-o", baseName+"."+glsExt,
-             gloFile.getName()
-         };
+            cmdArray[idx++] = extra[i];
+         }
+
+         cmdArray[idx++] = gloFile.getName();
       }
 
       invoker.getMessageSystem().aboutToExec(cmdArray, dir);

@@ -158,6 +158,17 @@ public class Glossaries
          if (matcher.matches())
          {
             glossaries.noidx = true;
+            continue;
+         }
+
+         matcher = extraMakeIndexOptsPattern.matcher(line);
+
+         if (matcher.matches())
+         {
+            String opts = matcher.group(1);
+
+            // TODO check for quoted args
+            glossaries.extraMakeIndexOpts = opts.split(" ");
          }
       }
 
@@ -254,6 +265,12 @@ public class Glossaries
             }
          }
 
+         if (glossaryList.isEmpty())
+         {
+            addDiagnosticMessage(invoker.getLabel("diagnostics.no_glossaries"));
+            addErrorMessage(invoker.getLabel("error.no_glossaries"));
+         }
+
          for (int i = 0, n = getNumGlossaries(); i < n; i++)
          {
             Glossary g = getGlossary(i);
@@ -276,7 +293,8 @@ public class Glossaries
                }
                else
                {
-                  g.makeindex(dir, baseName, isWordOrder(), istName);
+                  g.makeindex(dir, baseName, isWordOrder(), istName,
+                    extraMakeIndexOpts);
                }
 
                String errMess = g.getErrorMessages();
@@ -745,6 +763,8 @@ public class Glossaries
    private Vector<Glossary> glossaryList;
    private String istName;
 
+   private String[] extraMakeIndexOpts;
+
    private boolean noidx = false;
 
    private String order;
@@ -768,6 +788,9 @@ public class Glossaries
 
    private static final Pattern glsreferencePattern
       = Pattern.compile("\\\\@gls@reference\\{.*?\\}\\{.*?\\}\\{.*\\}");
+
+   private static final Pattern extraMakeIndexOptsPattern
+      = Pattern.compile("\\\\@gls@extramakeindexopts\\{(.*)\\}");
 
    private static final Pattern glossariesStyPattern
       = Pattern.compile("Package: glossaries (\\d+)\\/(\\d+)\\/(\\d+) v([\\d\\.a-z]+) \\(NLCT\\).*");

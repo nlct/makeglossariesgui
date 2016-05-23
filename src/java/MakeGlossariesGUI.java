@@ -626,6 +626,20 @@ public class MakeGlossariesGUI extends JFrame
 
    public void aboutToExec(String[] cmdArray, File dir)
    {
+      if (invoker.isDebugMode())
+      {
+         for (int i = 0, n = cmdArray.length-1; i < cmdArray.length; i++)
+         {
+            if (i == n)
+            {
+               System.out.println(String.format("\"%s\"", cmdArray[i]));
+            }
+            else
+            {
+               System.out.print(String.format("\"%s\" ", cmdArray[i]));
+            }
+         }
+      }
    }
 
    public void message(String msg)

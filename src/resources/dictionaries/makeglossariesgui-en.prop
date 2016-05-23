@@ -133,6 +133,7 @@ diagnostics.missing_lang=You don't have any glossaries support for language '$1'
 diagnostics.missing_sty=The package '$1' is required but doesn't seem to be installed. Use your TeX package manager to install it. If your package manager can't find it, try searching for it on CTAN http://ctan.org/search/?phrase=$1
 diagnostics.noidx=It seems you've used \\makenoidxglossaries, which means you don't need xindy or makeindex, you just need a second LaTeX run to get the glossary up to date.
 diagnostics.shell_disabled=It seems that TeX refused to run the system command '$1'. This could be because the shell escape has been disabled or it could be that TeX is running in restricted mode and the given system command isn't a trusted application.
+diagnostics.no_glossaries=The document doesn't define any glossaries. Have you used the 'nomain' option by mistake?
 
 # Properties dialog
 properties.title=MakeGlossariesGUI Properties

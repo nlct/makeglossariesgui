@@ -64,12 +64,11 @@ public class GlossaryBatchMessage implements GlossaryMessage
          {
             if (i == n)
             {
-               System.out.println(cmdArray[i]);
+               System.out.println(String.format("\"%s\"", cmdArray[i]));
             }
             else
             {
-               System.out.print(cmdArray[i]);
-               System.out.print(" ");
+               System.out.print(String.format("\"%s\" ", cmdArray[i]));
             }
          }
       }
