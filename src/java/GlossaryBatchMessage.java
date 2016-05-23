@@ -4,27 +4,38 @@ import java.io.File;
 
 public class GlossaryBatchMessage implements GlossaryMessage
 {
-   public void setQuiet(boolean isQuiet)
+   public GlossaryBatchMessage(MakeGlossariesInvoker invoker)
    {
-      this.quiet = isQuiet;
-   }
-
-   public boolean isQuiet()
-   {
-      return quiet;
+      this.invoker = invoker;
    }
 
    public void message(String msg)
    {
-      if (!isQuiet())
+      if (!invoker.isQuiet())
       {
          System.out.println(msg);
       }
    }
 
+   public void debug(String msg)
+   {
+      if (invoker.isDebugMode())
+      {
+         System.out.println(msg);
+      }
+   }
+
+   public void debug(Throwable e)
+   {
+      if (invoker.isDebugMode())
+      {
+         e.printStackTrace();
+      }
+   }
+
    public void message(GlossaryException e)
    {
-      if (!quiet)
+      if (!invoker.isQuiet())
       {
          System.out.println(e.getMessage());
          System.out.println(e.getDiagnosticMessage());
@@ -47,7 +58,7 @@ public class GlossaryBatchMessage implements GlossaryMessage
 
    public void aboutToExec(String[] cmdArray, File dir)
    {
-      if (!quiet)
+      if (!invoker.isQuiet())
       {
          for (int i = 0, n = cmdArray.length-1; i < cmdArray.length; i++)
          {
@@ -64,5 +75,5 @@ public class GlossaryBatchMessage implements GlossaryMessage
       }
    }
 
-   private boolean quiet=false;
+   private MakeGlossariesInvoker invoker;
 }

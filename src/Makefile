@@ -2,7 +2,7 @@ APP_VERSION:=$(shell grep "public static final String appVersion" java/MakeGloss
 IZPACKDIR=/usr/local/IzPack
 
 test	: app
-	bin/makeglossariesgui
+	bin/makeglossariesgui --debug
 
 app	: lib lib/icons lib/makeglossariesgui.jar lib/resources lib/makeglossariesgui-splash.png
 

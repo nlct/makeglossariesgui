@@ -44,6 +44,8 @@ public class MakeGlossariesGUI extends JFrame
          error(this, e.getMessage());
       }
 
+      setTransferHandler(new GlsTransferHandler(this));
+
       toolBar = new JToolBar(invoker.getProperties().getToolBarOrientation());
       getContentPane().add(toolBar, 
         invoker.getProperties().getToolBarPosition());
@@ -103,6 +105,8 @@ public class MakeGlossariesGUI extends JFrame
          fatalError(e);
       }
 
+      mainPanel.setTransferHandler(getTransferHandler());
+
       scrollPane = new JScrollPane(mainPanel);
       scrollPane.setPreferredSize(new Dimension(800,600));
 
@@ -119,6 +123,7 @@ public class MakeGlossariesGUI extends JFrame
       diagnosticArea.setLineWrap(true);
       diagnosticArea.setWrapStyleWord(true);
       diagnosticArea.setFont(getFont());
+      diagnosticArea.setTransferHandler(getTransferHandler());
 
       diagnosticSP = new JScrollPane(diagnosticArea);
 
@@ -163,6 +168,11 @@ public class MakeGlossariesGUI extends JFrame
          }
 
          propertiesDialog.display();
+      }
+
+      if (invoker.getFileName() != null)
+      {
+         load(invoker.getFile());
       }
    }
 
@@ -333,6 +343,14 @@ public class MakeGlossariesGUI extends JFrame
 
    public void load(File file)
    {
+      if (file.getName().toLowerCase().endsWith(".tex"))
+      {
+         int idx = file.getName().length()-4;
+
+         file = new File(file.getParentFile(),
+           file.getName().substring(0,idx)+".aux");
+      }
+
       setTitle(getLabelWithValues("app.title", invoker.appName, file.getName()));
 
       invoker.setFile(file);
@@ -618,6 +636,22 @@ public class MakeGlossariesGUI extends JFrame
    {
       error(e);
       selectDiagnosticComponent();
+   }
+
+   public void debug(String msg)
+   {
+      if (invoker.isDebugMode())
+      {
+         System.out.println(msg);
+      }
+   }
+
+   public void debug(Throwable e)
+   {
+      if (invoker.isDebugMode())
+      {
+         e.printStackTrace();
+      }
    }
 
    public void error(Exception e)

@@ -6,9 +6,9 @@ import java.util.*;
 
 public class MakeGlossariesInvoker
 {
-   public MakeGlossariesInvoker(GlossaryMessage msgSys)
+   public MakeGlossariesInvoker()
    {
-      setMessageSystem(msgSys);
+      setMessageSystem(new GlossaryBatchMessage(this));
 
       try
       {
@@ -16,7 +16,8 @@ public class MakeGlossariesInvoker
       }
       catch (IOException e)
       {
-         msgSys.error(String.format("Unable to load dictionary file:%n%s",
+         getMessageSystem().error(
+           String.format("Unable to load dictionary file:%n%s",
             e.getMessage()));
       }
 
@@ -28,7 +29,7 @@ public class MakeGlossariesInvoker
       }
       catch (IOException e)
       {
-         msgSys.error(
+         getMessageSystem().error(
            getLabelWithValue("error.prop_io", e.getMessage()));
          properties = new MakeGlossariesProperties();
       }
@@ -36,11 +37,35 @@ public class MakeGlossariesInvoker
 
    public void setFile(File file)
    {
-      currentFileName = file.getAbsolutePath();
+      setFile(file.getAbsolutePath());
+   }
+
+   public void setFile(String filename)
+   {
+      if (filename.toLowerCase().endsWith(".tex"))
+      {
+         int idx = filename.length()-4;
+
+         filename = filename.substring(0, idx)+".aux";
+      }
+      else if (!filename.endsWith(".aux"))
+      {
+         filename = filename+".aux";
+      }
+
+      currentFileName = filename;
    }
 
    public void load(File file)
    {
+      if (file.getName().toLowerCase().endsWith(".tex"))
+      {
+         int idx = file.getName().length()-4;
+
+         file = new File(file.getParentFile(),
+                file.getName().substring(0, idx)+".aux");
+      }
+
       setFile(file);
       reload(file);
    }
@@ -341,6 +366,20 @@ public class MakeGlossariesInvoker
 
    public void help()
    {
+      System.out.println(getLabel("syntax.cmdline"));
+      System.out.println();
+      System.out.println(getLabelWithValue("syntax.filename", "--batch"));
+      System.out.println();
+      System.out.println(getLabel("syntax.options"));
+      System.out.println();
+      System.out.println(getLabelWithValues("syntax.help", "--help", "-h"));
+      System.out.println(getLabelWithValues("syntax.version", 
+         "--version", "-v"));
+      System.out.println(getLabelWithValue("syntax.debug", "--debug"));
+      System.out.println(getLabelWithValue("syntax.batch", "--batch"));
+      System.out.println(getLabelWithValue("syntax.gui", "--gui"));
+      System.out.println(getLabelWithValue("syntax.quiet", "--quiet"));
+      
    }
 
    public void version()
@@ -361,10 +400,29 @@ public class MakeGlossariesInvoker
 
    }
 
+   public boolean isQuiet()
+   {
+      return quiet;
+   }
+
+   public void setQuietMode(boolean isSet)
+   {
+      quiet = isSet;
+   }
+
+   public boolean isDebugMode()
+   {
+      return debug;
+   }
+
+   public void setDebugMode(boolean isSet)
+   {
+      debug = isSet;
+   }
+
    public static void main(String[] args)
    {
-      GlossaryBatchMessage msgSys = new GlossaryBatchMessage();
-      MakeGlossariesInvoker invoker = new MakeGlossariesInvoker(msgSys);
+      MakeGlossariesInvoker invoker = new MakeGlossariesInvoker();
 
       boolean doBatch = false;
 
@@ -392,7 +450,11 @@ public class MakeGlossariesInvoker
          }
          else if (args[i].equals("--quiet"))
          {
-            msgSys.setQuiet(false);
+            invoker.setQuietMode(true);
+         }
+         else if (args[i].equals("--debug"))
+         {
+            invoker.setDebugMode(true);
          }
          else if (args[i].startsWith("-"))
          {
@@ -401,7 +463,8 @@ public class MakeGlossariesInvoker
          }
          else if (invoker.getFileName() == null)
          {
-            invoker.currentFileName = args[i];
+            invoker.setFile(args[i]);
+
          }
          else
          {
@@ -434,9 +497,11 @@ public class MakeGlossariesInvoker
 
    public static final String appName = "MakeGlossariesGUI";
 
-   public static final String appVersion = "1.0";
+   public static final String appVersion = "2.0";
 
-   public static final String appDate = "2016-05-17";
+   public static final String appDate = "2016-05-23";
+
+   private boolean quiet=false, debug=false; 
 
    protected Glossaries glossaries;
 
