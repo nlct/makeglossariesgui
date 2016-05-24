@@ -102,11 +102,13 @@ public class PropertiesDialog extends JDialog
 
       box.add(new JLabel(app.getLabel("properties", "diagnostics")));
 
-      docDefCheckBox = new JCheckBox(app.getLabel("properties", "docdefcheck"), properties.isDocDefsCheckOn());
+      docDefCheckBox = new JCheckBox(app.getLabel("properties", "docdefcheck"), 
+         properties.isDocDefsCheckOn());
       docDefCheckBox.setMnemonic(app.getMnemonic("properties", "docdefcheck"));
       box.add(docDefCheckBox);
 
-      missingLangModBox = new JCheckBox(app.getLabel("properties", "langcheck"), properties.isMissingLangCheckOn());
+      missingLangModBox = new JCheckBox(app.getLabel("properties", "langcheck"),
+         properties.isMissingLangCheckOn());
       missingLangModBox.setMnemonic(app.getMnemonic("properties", "langcheck"));
       box.add(missingLangModBox);
 

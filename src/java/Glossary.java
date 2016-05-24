@@ -365,6 +365,7 @@ public class Glossary
 
       int numAttributes = 0;
       int numIgnored = 0;
+      int numTooLong = 0;
 
       while ((line = in.readLine()) != null)
       {
@@ -381,6 +382,8 @@ public class Glossary
             catch (NumberFormatException e)
             {
             }
+
+            continue;
          }
 
          matcher = makeindexIstAttributePattern.matcher(line);
@@ -395,6 +398,15 @@ public class Glossary
             catch (NumberFormatException e)
             {
             }
+
+            continue;
+         }
+
+         matcher = makeindexTooLongPattern.matcher(line);
+
+         if (matcher.matches())
+         {
+            numTooLong++;
          }
       }
 
@@ -493,6 +505,33 @@ public class Glossary
          {
             addDiagnosticMessage(invoker.getLabelWithValues
                ("diagnostics.bad_attributes", istName, "makeindex"));
+         }
+
+         if (numTooLong == 1)
+         {
+            if (deprecated)
+            {
+               addDiagnosticMessage(
+                 invoker.getLabel("diagnostics.old_one_too_long"));
+            }
+            else
+            {
+               addDiagnosticMessage(
+                 invoker.getLabel("diagnostics.one_too_long"));
+            }
+         }
+         else if (numTooLong > 1)
+         {
+            if (deprecated)
+            {
+               addDiagnosticMessage(invoker.getLabelWithValue(
+                "diagnostics.old_too_long", ""+numTooLong));
+            }
+            else
+            {
+               addDiagnosticMessage(invoker.getLabelWithValue(
+                "diagnostics.too_long", ""+numTooLong));
+            }
          }
       }
       else if (numAccepted == 0)
@@ -696,6 +735,9 @@ public class Glossary
 
    private static final Pattern makeindexIstAttributePattern
       = Pattern.compile(".*(\\d+)\\s+attributes\\s+redefined.*(\\d+).*ignored.*");
+
+   private static final Pattern makeindexTooLongPattern
+      = Pattern.compile("\\s+-- First argument too long \\(max \\d+\\)\\.");
 
    private static final Pattern xindyIstPattern
       = Pattern.compile(".*variable (.*) has no value.*");
