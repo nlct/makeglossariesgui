@@ -93,6 +93,10 @@
        <dt><opt tag="quiet"/></dt>
        <dd>Suppress (non-error) messages that would otherwise have been written
        to STDOUT.</dd>
+       <dt><opt tag="dry-run"/> (or <tt>-n</tt>)</dt>
+       <dd>Dry run mode (don't run the indexing application).</dd>
+       <dt><opt tag="nodry-run"/></dt>
+       <dd>Not dry run mode (default).</dd>
        <dt><opt tag="debug"/></dt>
        <dd>Print debug messages to STDOUT.</dd>
        <dt><opt tag="version"/> (or <tt>-v</tt>)</dt>

@@ -427,6 +427,9 @@ public class MakeGlossariesInvoker
       System.out.println(getLabelWithValues("syntax.version", 
          "--version", "-v"));
       System.out.println(getLabelWithValue("syntax.debug", "--debug"));
+      System.out.println(getLabelWithValues("syntax.dryrun", "--dry-run", 
+        "-n"));
+      System.out.println(getLabelWithValue("syntax.nodryrun", "--nodry-run"));
       System.out.println(getLabelWithValues("syntax.batch", "--batch", "-b"));
       System.out.println(getLabelWithValue("syntax.gui", "--gui"));
       System.out.println(getLabelWithValue("syntax.quiet", "--quiet"));
@@ -476,6 +479,16 @@ public class MakeGlossariesInvoker
       return batchMode;
    }
 
+   public void setDryRunMode(boolean isDryRun)
+   {
+      dryRun = isDryRun;
+   }
+
+   public boolean isDryRunMode()
+   {
+      return dryRun;
+   }
+
    public static void main(String[] args)
    {
       MakeGlossariesInvoker invoker = new MakeGlossariesInvoker();
@@ -509,6 +522,14 @@ public class MakeGlossariesInvoker
          else if (args[i].equals("--debug"))
          {
             invoker.setDebugMode(true);
+         }
+         else if (args[i].equals("--dry-run") || args[i].equals("-n"))
+         {
+            invoker.setDryRunMode(true);
+         }
+         else if (args[i].equals("--nodry-run"))
+         {
+            invoker.setDryRunMode(false);
          }
          else if (args[i].startsWith("-"))
          {
@@ -555,7 +576,7 @@ public class MakeGlossariesInvoker
 
    public static final String appDate = "2016-05-23";
 
-   private boolean quiet=false, debug=false, batchMode=false; 
+   private boolean quiet=false, debug=false, batchMode=false, dryRun=false; 
 
    protected Glossaries glossaries;
 

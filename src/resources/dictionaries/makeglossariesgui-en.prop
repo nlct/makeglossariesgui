@@ -27,6 +27,8 @@ settings.decsize=Decrease Font Size
 settings.decsize.mnemonic=D
 settings.decsize.tooltip=Decrease font size
 settings.decsize.alttext=Decrease Font Size
+settings.dryrun=Dry Run Mode
+settings.dryrun.mnemonic=N
 settings.editproperties=Edit Properties...
 settings.editproperties.mnemonic=E
 
@@ -58,6 +60,8 @@ syntax.quiet=$1\t\tsuppress messages (except errors) to stdout
 syntax.help=$1 (or $2)\t\tprint the help message
 syntax.version=$1 (or $2)\tprint the application version
 syntax.debug=$1\t\tprint debug messages to stdout
+syntax.dryrun=$1 (or $2)\tdry run mode
+syntax.nodryrun=$1\t\tnot dry run mode (default)
 
 # file filter
 filter.aux=Auxiliary (AUX) Files
@@ -141,6 +145,7 @@ diagnostics.too_long=$1 entries were too long for makeindex. Do you have an exce
 diagnostics.old_one_too_long=One entry was too long for makeindex. If you upgrade to at least v4.0 of the glossaries package, this shouldn't be a problem.
 diagnostics.old_too_long=$1 entries were too long for makeindex. If you upgrade to at least v4.0 of the glossaries package, this shouldn't be a problem.
 diagnostics.undef_opt=Your version of glossaries doesn't provide the package option '$1'. This may be because that option was introduced to a later version, in which case you will need to use your TeX package manager to update the glossaries package, or it may be that you have misspelt the option.
+diagnostics.dry_run=Dry run mode on. System command would've been:\n$1
 
 # Properties dialog
 properties.title=MakeGlossariesGUI Properties

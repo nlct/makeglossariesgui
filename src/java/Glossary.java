@@ -90,20 +90,54 @@ public class Glossary
          };
       }
 
-      Process p = Runtime.getRuntime().exec(cmdArray, null, dir);
+      int exitCode = 0;
+      BufferedReader in=null;
 
-      int exitCode = p.waitFor();
+      File transFile = new File(dir, transFileName);
+
+      if (invoker.isDryRunMode())
+      {
+         StringBuilder builder = new StringBuilder();
+
+         for (int i = 0, n = cmdArray.length-1; i < cmdArray.length; i++)
+         {
+            if (i == n)
+            {
+               builder.append(String.format("\"%s\"", cmdArray[i]));         
+            }
+            else
+            {
+               builder.append(String.format("\"%s\" ", cmdArray[i]));
+            }
+         }
+
+         addDiagnosticMessage(invoker.getLabelWithValue(
+            "diagnostics.dry_run", builder.toString()));
+
+         if (transFile.exists())
+         {
+            in = new BufferedReader(new FileReader(transFile));
+         }
+      }
+      else
+      {
+         invoker.getMessageSystem().aboutToExec(cmdArray, dir);
+
+         Process p = Runtime.getRuntime().exec(cmdArray, null, dir);
+
+         exitCode = p.waitFor();
+
+         in = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+      }
 
       String line;
-
-      BufferedReader in = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 
       StringBuilder processErrors = null;
 
       String unknownMod = null;
       boolean emptySortFound = false;
 
-      while ((line = in.readLine()) != null)
+      while (in != null && (line = in.readLine()) != null)
       {
          if (processErrors == null)
          {
@@ -116,7 +150,8 @@ public class Glossary
 
          if (matcher.matches())
          {
-            unknownMod = invoker.getLabelWithValues("diagnostics.unknown_language_or_codepage",
+            unknownMod = invoker.getLabelWithValues(
+              "diagnostics.unknown_language_or_codepage",
                matcher.group(1), matcher.group(2));
          }
          else
@@ -139,11 +174,12 @@ public class Glossary
          }
       }
 
-      in.close();
+      if (in != null)
+      {
+         in.close();
+      }
 
       String unknownVar = null;
-
-      File transFile = new File(dir, transFileName);
 
       if (transFile.exists())
       {
@@ -333,19 +369,53 @@ public class Glossary
          cmdArray[idx++] = gloFile.getName();
       }
 
-      invoker.getMessageSystem().aboutToExec(cmdArray, dir);
+      int exitCode = 0;
+      BufferedReader in = null;
 
-      Process p = Runtime.getRuntime().exec(cmdArray, null, dir);
+      if (invoker.isDryRunMode())
+      {
+         StringBuilder builder = new StringBuilder();
 
-      int exitCode = p.waitFor();
+         n = cmdArray.length-1;
+
+         for (int i = 0; i < cmdArray.length; i++)
+         {
+            if (i == n)
+            {
+               builder.append(String.format("\"%s\"", cmdArray[i]));         
+            }
+            else
+            {
+               builder.append(String.format("\"%s\" ", cmdArray[i]));
+            }
+         }
+
+         addDiagnosticMessage(invoker.getLabelWithValue(
+            "diagnostics.dry_run", builder.toString()));
+
+         File transFile = new File(dir, transFileName);
+
+         if (transFile.exists())
+         {
+            in = new BufferedReader(new FileReader(transFile));
+         }
+      }
+      else
+      {
+         invoker.getMessageSystem().aboutToExec(cmdArray, dir);
+
+         Process p = Runtime.getRuntime().exec(cmdArray, null, dir);
+
+         exitCode = p.waitFor();
+
+         in = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+      }
 
       String line;
 
-      BufferedReader in = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-
       StringBuilder processErrors = null;
 
-      while ((line = in.readLine()) != null)
+      while (in != null && (line = in.readLine()) != null)
       {
          if (processErrors == null)
          {

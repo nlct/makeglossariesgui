@@ -80,6 +80,11 @@ public class MakeGlossariesGUI extends JFrame
          KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_MASK),
          "general/ZoomOut24"));
 
+      dryRunItem = createCheckBoxMenuItem("settings", "dryrun", 
+         invoker.isDryRunMode());
+
+      settingsM.add(dryRunItem);
+
       settingsM.add(createMenuItem("settings", "editproperties"));
 
       initHelp();
@@ -191,6 +196,8 @@ public class MakeGlossariesGUI extends JFrame
          fileChooser.setCurrentDirectory(file.getParentFile());
 
          load(file);
+
+         return;
       }
       catch (NumberFormatException e)
       {
@@ -241,6 +248,10 @@ public class MakeGlossariesGUI extends JFrame
          invoker.getProperties().setFontSize(size);
 
          updateAll();
+      }
+      else if (action.equals("dryrun"))
+      {
+         invoker.setDryRunMode(dryRunItem.isSelected());
       }
       else if (action.equals("editproperties"))
       {
@@ -512,6 +523,40 @@ public class MakeGlossariesGUI extends JFrame
       }
 
       toolBar.add(button);
+
+      return item;
+   }
+
+   private JCheckBoxMenuItem createCheckBoxMenuItem(String parentLabel,
+      String label, boolean isSelected)
+   {
+      return createCheckBoxMenuItem(parentLabel, label, null, null, this,
+        isSelected);
+   }
+
+   private JCheckBoxMenuItem createCheckBoxMenuItem(String parentLabel,
+      String label, KeyStroke keyStroke, String tooltip,
+      ActionListener listener, boolean isSelected)
+   {
+      JCheckBoxMenuItem item = new JCheckBoxMenuItem(
+         getLabel(parentLabel, label), isSelected);
+      item.setMnemonic(getMnemonic(parentLabel, label));
+      item.setActionCommand(label);
+
+      if (listener != null)
+      {
+         item.addActionListener(listener);
+      }
+
+      if (keyStroke != null)
+      {
+         item.setAccelerator(keyStroke);
+      }
+
+      if (tooltip != null)
+      {
+         item.setToolTipText(tooltip);
+      }
 
       return item;
    }
@@ -892,6 +937,8 @@ public class MakeGlossariesGUI extends JFrame
    private JTextArea diagnosticArea;
 
    private JMenu recentM;
+
+   private JCheckBoxMenuItem dryRunItem;
 
    private PropertiesDialog propertiesDialog;
 
