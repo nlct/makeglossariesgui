@@ -568,6 +568,18 @@ public class Glossaries
 
                continue;
             }
+
+            m = undefControlSequencePattern.matcher(line);
+
+            if (m.matches())
+            {
+               line = reader.readLine();
+
+               addDiagnosticMessage(invoker.getLabelWithValue(
+                 "diagnostics.undef_cs", line));
+
+               continue;
+            }
          }
       }
       finally
@@ -890,6 +902,9 @@ public class Glossaries
 
    private static final Pattern disabledSystemPattern
       = Pattern.compile("runsystem\\((.*)\\)\\.\\.\\.disabled\\..*");
+
+   private static final Pattern undefControlSequencePattern
+      = Pattern.compile(".* Undefined control sequence.");
 
    private static final String[] fields =
    {

@@ -201,7 +201,42 @@ public class MakeGlossariesInvoker
    {
       String prop = getLabel(label);
 
-      return prop.replaceAll("\\$1", value);
+      StringBuilder builder = new StringBuilder(prop.length());
+
+      for (int i = 0; i < prop.length(); i++)
+      {
+         char c = prop.charAt(i);
+
+         if (c == '$')
+         {
+            i++;
+
+            if (i == prop.length())
+            {
+               builder.append(c);
+            }
+            else
+            {
+              char c2 = prop.charAt(i);
+
+              if (c2 == '1')
+              {
+                 builder.append(value);
+              }
+              else
+              {
+                 builder.append(c);
+                 builder.append(c2);
+              }
+            }
+         }
+         else
+         {
+            builder.append(c);
+         }
+      }
+
+      return builder.toString();
    }
 
    public String getLabelWithValues(String label, String value1,
