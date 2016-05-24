@@ -388,12 +388,6 @@ public class MakeGlossariesInvoker
       return properties.getMakeIndexApp();
    }
 
-   public boolean useGermanWordOrdering()
-   {
-      return properties.useGermanWordOrdering();
-   }
-
-
    private void initLanguageMappings()
    {
       languageMap = new Hashtable<String,String>();

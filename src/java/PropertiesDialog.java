@@ -4,6 +4,8 @@ import java.io.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Arrays;
 
 import javax.swing.*;
 
@@ -89,7 +91,7 @@ public class PropertiesDialog extends JDialog
       }
       else if (setting.equals("last"))
       {
-         homeButton.setSelected(true);
+         lastButton.setSelected(true);
          customField.setEnabled(false);
       }
       else if (setting.equals("custom"))
@@ -97,6 +99,16 @@ public class PropertiesDialog extends JDialog
          customButton.setSelected(true);
          customField.setFileName(file.getAbsolutePath());
       }
+
+      box.add(new JLabel(app.getLabel("properties", "diagnostics")));
+
+      docDefCheckBox = new JCheckBox(app.getLabel("properties", "docdefcheck"), properties.isDocDefsCheckOn());
+      docDefCheckBox.setMnemonic(app.getMnemonic("properties", "docdefcheck"));
+      box.add(docDefCheckBox);
+
+      missingLangModBox = new JCheckBox(app.getLabel("properties", "langcheck"), properties.isMissingLangCheckOn());
+      missingLangModBox.setMnemonic(app.getMnemonic("properties", "langcheck"));
+      box.add(missingLangModBox);
 
       Box makeindexBox = Box.createVerticalBox();
       makeindexBox.setBorder(BorderFactory.createEtchedBorder());
@@ -119,14 +131,6 @@ public class PropertiesDialog extends JDialog
       makeindexLabel.setLabelFor(makeindexField.getTextField());
       panel.add(makeindexField);
 
-      germanWordOrderButton = new JCheckBox(app.getLabel("properties.german_word_order"),false);
-      germanWordOrderButton.setMnemonic(app.getMnemonic("properties.german_word_order"));
-      germanWordOrderButton.setSelected(properties.useGermanWordOrdering());
-
-      // Need to change style to use something other than " as quote
-      // character in order to implement this
-      //makeindexBox.add(germanWordOrderButton);
-
       Box xindyBox = Box.createVerticalBox();
       xindyBox.setBorder(BorderFactory.createEtchedBorder());
       box.add(xindyBox);
@@ -147,8 +151,10 @@ public class PropertiesDialog extends JDialog
       langLabel.setDisplayedMnemonic(app.getMnemonic("properties.language"));
       xindyDefaultsPanel.add(langLabel);
 
-      languageBox = new JComboBox<String>(knownXindyLanguages);
-      languageBox.setEditable(true);
+      String[] languages = XindyModule.getKnownLanguages();
+      Arrays.sort(languages);
+
+      languageBox = new JComboBox<String>(languages);
       langLabel.setLabelFor(languageBox);
 
       languageBox.setSelectedItem(properties.getDefaultLanguage());
@@ -157,37 +163,19 @@ public class PropertiesDialog extends JDialog
       xindyDefaultsPanel.add(languageBox);
 
       xindyModuleLayout = new CardLayout();
-      variantPanel = new JPanel(xindyModuleLayout);
-      xindyDefaultsPanel.add(variantPanel);
+      modulesPanel = new JPanel(xindyModuleLayout);
 
       initVariants((String)languageBox.getSelectedItem(),
-        properties.getDefaultXindyVariant());
-      updateXindyModule();
+        properties.getDefaultXindyVariant(),
+        properties.getDefaultCodePage());
 
-      encodingLabel = new JLabel(app.getLabel("properties.encoding"));
-      encodingLabel.setDisplayedMnemonic(app.getMnemonic("properties.encoding"));
-      xindyDefaultsPanel.add(encodingLabel);
-
-      encodingBox = new JComboBox<String>(knownEncodings);
-      encodingBox.setEditable(true);
-      encodingLabel.setLabelFor(encodingBox);
-      encodingBox.setSelectedItem(properties.getDefaultCodePage());
-
-      xindyDefaultsPanel.add(encodingBox);
+      xindyDefaultsPanel.add(modulesPanel);
 
       overrideBox = new JCheckBox(app.getLabel("properties", "override"), properties.isOverride());
       overrideBox.setMnemonic(app.getMnemonic("properties", "override"));
       overrideBox.setActionCommand("override");
       overrideBox.addActionListener(this);
-      box.add(overrideBox);
-
-      docDefCheckBox = new JCheckBox(app.getLabel("properties", "docdefcheck"), properties.isDocDefsCheckOn());
-      docDefCheckBox.setMnemonic(app.getMnemonic("properties", "docdefcheck"));
-      box.add(docDefCheckBox);
-
-      missingLangModBox = new JCheckBox(app.getLabel("properties", "langcheck"), properties.isMissingLangCheckOn());
-      missingLangModBox.setMnemonic(app.getMnemonic("properties", "langcheck"));
-      box.add(missingLangModBox);
+      xindyBox.add(overrideBox);
 
       dim = xindyLabel.getPreferredSize();
       maxWidth = (int)Math.max(maxWidth, dim.getWidth());
@@ -305,10 +293,16 @@ public class PropertiesDialog extends JDialog
       {
          properties.setMakeIndexApp(makeindexField.getFileName());
          properties.setXindyApp(xindyField.getFileName());
-         properties.setGermanWordOrdering(germanWordOrderButton.isSelected());
          properties.setDefaultLanguage((String)languageBox.getSelectedItem());
-         properties.setDefaultCodePage((String)encodingBox.getSelectedItem());
-         properties.setDefaultXindyVariant(currentVariant.getSelected());
+         properties.setDefaultCodePage(currentModule.getSelectedCodePage());
+
+         String variant = currentModule.getSelectedVariant();
+
+         if (variant != null)
+         {
+            properties.setDefaultXindyVariant(variant);
+         }
+
          properties.setOverride(overrideBox.isSelected());
          properties.setDocDefsCheck(docDefCheckBox.isSelected());
          properties.setMissingLangCheck(missingLangModBox.isSelected());
@@ -354,20 +348,9 @@ public class PropertiesDialog extends JDialog
    {
       boolean enable = overrideBox.isSelected();
 
-      germanWordOrderButton.setEnabled(enable);
       langLabel.setEnabled(enable);
       languageBox.setEnabled(enable);
-      encodingLabel.setEnabled(enable);
-      encodingBox.setEnabled(enable);
-
-      if (enable)
-      {
-         updateXindyModule();
-      }
-      else
-      {
-         xindyModuleLayout.first(variantPanel);
-      }
+      currentModule.setEnabled(enable);
    }
 
    public void setXindy(File path)
@@ -380,100 +363,31 @@ public class PropertiesDialog extends JDialog
       makeindexField.setFile(path);
    }
 
-   private void initVariants(String lang, String defVariant)
+   private void initVariants(String lang, String defVariant, String defCode)
    {
-      addXindyModule("default", null, null);
+      HashMap<String,XindyModule> modules = XindyModule.getKnownModules();
 
-      addXindyModule("german", new String[]
-        {
-          "braille",
-          "duden",
-          "din5007"
-        },
-        lang.equals("german") ? defVariant : "din5007"
-      );
+      for (Iterator<String> it = modules.keySet().iterator(); it.hasNext();)
+      {
+         String key = it.next();
+         XindyModule mod = modules.get(key);
+         XindyModulePanel panel;
 
-      addXindyModule("dutch", new String[]
-        {
-          "ij-as-ij",
-          "ij-as-y"
-        },
-        lang.equals("dutch") ? defVariant : null
-      );
+         if (lang.equals(key))
+         {
+            panel = new XindyModulePanel(app, mod, defVariant, defCode);
+            currentModule = panel;
+         }
+         else
+         {
+            panel = new XindyModulePanel(app, mod);
+         }
 
-      addXindyModule("greek", new String[]
-        {
-          "polytonic",
-          "translit"
-        },
-        lang.equals("greek") ? defVariant : null
-      );
+         modulesPanel.add(panel);
+         xindyModuleLayout.addLayoutComponent(panel, key);
+      }
 
-      addXindyModule("gypsy", new String[]
-        {
-          "northrussian"
-        },
-        lang.equals("gypsy") ? defVariant : null
-      );
-
-      addXindyModule("kurdish", new String[]
-        {
-          "bedirxan"
-        },
-        lang.equals("kurdish") ? defVariant : null
-      );
-
-      addXindyModule("mongolian", new String[]
-        {
-          "cyrillic"
-        },
-        lang.equals("mongolian") ? defVariant : null
-      );
-
-      addXindyModule("persian", new String[]
-        {
-          "variant1",
-          "variant2",
-          "variant3"
-        },
-        lang.equals("persian") ? defVariant : null
-      );
-
-      addXindyModule("russian", new String[]
-        {
-          "translit-iso"
-        },
-        lang.equals("russian") ? defVariant : null
-      );
-
-      addXindyModule("slovak", new String[]
-        {
-          "large",
-          "small"
-        },
-        lang.equals("slovak") ? defVariant : null
-      );
-
-      addXindyModule("spanish", new String[]
-        {
-          "modern",
-          "traditional"
-        },
-        lang.equals("spanish") ? defVariant : "modern"
-      );
-
-   }
-
-   private void addXindyModule(String langName, String[] choices)
-   {
-      addXindyModule(langName, choices, null);
-   }
-
-   private void addXindyModule(String langName, String[] choices,
-     String def)
-   {
-      variantPanel.add(
-        new XindyModule(langName, choices, def), langName);
+      xindyModuleLayout.show(modulesPanel, lang);
    }
 
    public void itemStateChanged(ItemEvent e)
@@ -488,37 +402,36 @@ public class PropertiesDialog extends JDialog
    {
       String language = (String)languageBox.getSelectedItem();
 
-      for (int i = 0, n = variantPanel.getComponentCount(); i < n; i++)
+      for (int i = 0, n = modulesPanel.getComponentCount(); i < n; i++)
       {
-         Component comp = variantPanel.getComponent(i);
+         Component comp = modulesPanel.getComponent(i);
 
          if (comp.getName().equals(language))
          {
-            currentVariant = (XindyModule)comp;
-            xindyModuleLayout.show(variantPanel, language);
+            currentModule = (XindyModulePanel)comp;
+            xindyModuleLayout.show(modulesPanel, language);
             return;
          }
       }
 
-      currentVariant = (XindyModule)variantPanel.getComponent(0);
-      xindyModuleLayout.first(variantPanel);
+      app.debug("Can't find module panel for language "+language);
+      currentModule = (XindyModulePanel)modulesPanel.getComponent(0);
+      xindyModuleLayout.first(modulesPanel);
    }
 
    private MakeGlossariesGUI app;
 
    private CardLayout xindyModuleLayout;
 
-   private JPanel variantPanel;
+   private JPanel modulesPanel;
 
-   JLabel langLabel, encodingLabel;
+   private JLabel langLabel;
 
-   private XindyModule currentVariant;
+   private XindyModulePanel currentModule;
 
    private JRadioButton homeButton, lastButton, customButton;
 
-   private JCheckBox germanWordOrderButton;
-
-   private JComboBox<String> languageBox, encodingBox;
+   private JComboBox<String> languageBox;
 
    private FileField customField, makeindexField, xindyField;
 
@@ -528,115 +441,74 @@ public class PropertiesDialog extends JDialog
 
    private MakeGlossariesProperties properties;
 
-   // TODO find some way to do this programmatically
-
-   private static final String[] knownXindyLanguages = new String[]
-   {
-      "albanian",
-      "belarusian",
-      "bulgarian",
-      "croatian",
-      "czech",
-      "danish",
-      "dutch",
-      "english",
-      "esperanto",
-      "estonian",
-      "finnish",
-      "french",
-      "general",
-      "georgian",
-      "german",
-      "greek",
-      "gypsy",
-      "hausa",
-      "hebrew",
-      "hungarian",
-      "icelandic",
-      "italian",
-      "klingon",
-      "korean",
-      "kurdish",
-      "latin",
-      "latvian",
-      "lithuanian",
-      "lower-sorbian",
-      "macedonian",
-      "mongolian",
-      "norwegian",
-      "persian",
-      "polish",
-      "portuguese",
-      "romanian",
-      "russian",
-      "serbian",
-      "slovak",
-      "slovenian",
-      "spanish",
-      "swedish",
-      "turkish",
-      "ukrainian",
-      "upper-sorbian",
-      "vietnamese"
-   };
-
-   private static final String[] knownEncodings = new String[]
-   {
-     "cp1250",
-     "cp1251",
-     "cp1252",
-     "iso88595",
-     "iso88597",
-     "isoir111",
-     "koi8-r",
-     "koi8-u",
-     "latin1",
-     "latin2",
-     "latin3",
-     "latin4",
-     "latin5",
-     "latin9",
-     "utf8"
-   };
 }
 
-class XindyModule extends JPanel
+class XindyModulePanel extends JPanel
 {
-   public XindyModule(String name)
+   public XindyModulePanel(MakeGlossariesGUI app, XindyModule module)
    {
-      this(name, null, null);
+      this(app, module, null, null);
    }
 
-   public XindyModule(String name, String[] choices)
-   {
-      this(name, choices, null);
-   }
-
-   public XindyModule(String name, String[] choices, String def)
+   public XindyModulePanel(MakeGlossariesGUI app,
+      XindyModule module, String defVar, String defCode)
    {
       super();
-      setName(name);
+      setName(module.getLanguage());
+      this.module = module;
 
-      if (choices != null)
+      encodingLabel = new JLabel(app.getLabel("properties.encoding"));
+      encodingLabel.setDisplayedMnemonic(app.getMnemonic("properties.encoding"));
+      add(encodingLabel);
+
+      codePageBox = new JComboBox<String>(module.getCodePages());
+      add(codePageBox);
+
+      if (defCode != null)
       {
-         choicesBox = new JComboBox<String>(choices);
-         choicesBox.setEditable(true);
+         codePageBox.setSelectedItem(defCode);
+      }
+      else
+      {
+         codePageBox.setSelectedIndex(codePageBox.getItemCount()-1);
+      }
 
-         if (def != null)
-         {
-            choicesBox.setSelectedItem(def);
-         }
+      encodingLabel.setLabelFor(codePageBox);
 
-         add(choicesBox);
+      if (module.hasVariants())
+      {
+         variantBox = new JComboBox<String>(module.getVariants());
+         variantBox.setSelectedItem(
+           defVar == null ? module.getDefaultVariant() : defVar);
+         add(variantBox);
       }
    }
 
-   public String getSelected()
+   public String getSelectedVariant()
    {
-      return choicesBox == null ? null : 
-       (String)choicesBox.getSelectedItem();
+      return variantBox == null ? null : 
+       (String)variantBox.getSelectedItem();
    }
 
-   private JComboBox<String> choicesBox = null;
+   public String getSelectedCodePage()
+   {
+      return (String)codePageBox.getSelectedItem();
+   }
+
+   public void setEnabled(boolean enabled)
+   {
+      if (variantBox != null)
+      {
+         variantBox.setEnabled(enabled);
+      }
+
+      encodingLabel.setEnabled(enabled);
+      codePageBox.setEnabled(enabled);
+   }
+
+   private XindyModule module;
+   private JComboBox<String> variantBox = null;
+   private JComboBox<String> codePageBox = null;
+   private JLabel encodingLabel;
 }
 

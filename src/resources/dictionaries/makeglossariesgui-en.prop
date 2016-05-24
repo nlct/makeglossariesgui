@@ -158,6 +158,7 @@ properties.language=Language
 properties.language.mnemonic=G
 properties.encoding=Encoding
 properties.encoding.mnemonic=E
+properties.diagnostics=Diagnostics
 properties.docdefcheck=Check for document definitions
 properties.docdefcheck.mnemonic=F
 properties.langcheck=Check for missing language modules

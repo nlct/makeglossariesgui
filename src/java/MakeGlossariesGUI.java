@@ -786,11 +786,6 @@ public class MakeGlossariesGUI extends JFrame
       return invoker.getMakeIndexApp();
    }
 
-   public boolean useGermanWordOrdering()
-   {
-      return invoker.useGermanWordOrdering();
-   }
-
    public void selectDiagnosticComponent()
    {
       tabbedPane.setSelectedComponent(diagnosticSP);

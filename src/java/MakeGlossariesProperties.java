@@ -64,7 +64,6 @@ public class MakeGlossariesProperties extends Properties
       setProperty("override", "false");
       setProperty("docdefscheck", "true");
       setProperty("langcheck", "true");
-      setProperty("german-wordorder", "false");
       setProperty("fontsize", "12");
       setProperty("fontname", "Serif");
       setProperty("fontstyle", ""+Font.PLAIN);
@@ -333,20 +332,6 @@ public class MakeGlossariesProperties extends Properties
       if (prop == null || prop.equals("")) return null;
 
       return prop;
-   }
-
-   public boolean useGermanWordOrdering()
-   {
-      String prop = getProperty("german-wordorder");
-
-      if (prop == null) return false;
-
-      return prop.equals("true");
-   }
-
-   public void setGermanWordOrdering(boolean useGermanWordOrder)
-   {
-      setProperty("german-wordorder", useGermanWordOrder ? "true" : "false");
    }
 
    public void setDefaultCustomDir(String dir)

@@ -43,6 +43,10 @@ public class Glossary
          codepage = invoker.getDefaultCodePage();
       }
 
+      if (!invoker.getProperties().isOverride())
+      {
+      }
+
       String style = istName;
 
       int idx = istName.lastIndexOf(".");
@@ -289,51 +293,7 @@ public class Glossary
 
       int n = (extra == null ? 0 : extra.size());
 
-      if (invoker.useGermanWordOrdering())
-      {
-         if (isWordOrder)
-         {
-            cmdArray = new String[9+n];
-            int idx = 0;
-            cmdArray[idx++] = makeindexApp.getAbsolutePath();
-            cmdArray[idx++] = "-g";
-            cmdArray[idx++] = "-s";
-            cmdArray[idx++] = istName;
-            cmdArray[idx++] = "-t";
-            cmdArray[idx++] = transFileName;
-            cmdArray[idx++] = "-o";
-            cmdArray[idx++] = baseName+"."+glsExt;
-
-            for (int i = 0; i < n; i++)
-            {
-               cmdArray[idx++] = extra.get(i);
-            }
-
-            cmdArray[idx++] = gloFile.getName();
-         }
-         else
-         {
-            cmdArray = new String[10+n];
-            int idx = 0;
-            cmdArray[idx++] = makeindexApp.getAbsolutePath();
-            cmdArray[idx++] = "-l";
-            cmdArray[idx++] = "-g";
-            cmdArray[idx++] = "-s";
-            cmdArray[idx++] = istName;
-            cmdArray[idx++] = "-t";
-            cmdArray[idx++] = transFileName;
-            cmdArray[idx++] = "-o";
-            cmdArray[idx++] = baseName+"."+glsExt;
-
-            for (int i = 0; i < n; i++)
-            {
-               cmdArray[idx++] = extra.get(i);
-            }
-
-            cmdArray[idx++] = gloFile.getName();
-         }
-      }
-      else if (isWordOrder)
+      if (isWordOrder)
       {
          cmdArray = new String[8+n];
          int idx = 0;
