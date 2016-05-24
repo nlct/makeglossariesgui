@@ -268,7 +268,8 @@ public class Glossary
       }
    }
 
-   public void makeindex(File dir, String baseName, boolean isWordOrder, String istName, String[] extra)
+   public void makeindex(File dir, String baseName,
+       boolean isWordOrder, String istName, Vector<String> extra)
       throws IOException,InterruptedException,GlossaryException
    {
       File makeindexApp = new File(invoker.getMakeIndexApp());
@@ -286,7 +287,7 @@ public class Glossary
 
       String[] cmdArray;
 
-      int n = (extra == null ? 0 : extra.length);
+      int n = (extra == null ? 0 : extra.size());
 
       if (invoker.useGermanWordOrdering())
       {
@@ -305,7 +306,7 @@ public class Glossary
 
             for (int i = 0; i < n; i++)
             {
-               cmdArray[idx++] = extra[i];
+               cmdArray[idx++] = extra.get(i);
             }
 
             cmdArray[idx++] = gloFile.getName();
@@ -326,7 +327,7 @@ public class Glossary
 
             for (int i = 0; i < n; i++)
             {
-               cmdArray[idx++] = extra[i];
+               cmdArray[idx++] = extra.get(i);
             }
 
             cmdArray[idx++] = gloFile.getName();
@@ -346,7 +347,7 @@ public class Glossary
 
          for (int i = 0; i < n; i++)
          {
-            cmdArray[idx++] = extra[i];
+            cmdArray[idx++] = extra.get(i);
          }
 
          cmdArray[idx++] = gloFile.getName();
@@ -366,7 +367,7 @@ public class Glossary
 
          for (int i = 0; i < n; i++)
          {
-            cmdArray[idx++] = extra[i];
+            cmdArray[idx++] = extra.get(i);
          }
 
          cmdArray[idx++] = gloFile.getName();

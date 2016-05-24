@@ -1,0 +1,19 @@
+\documentclass{article}
+
+\usepackage[ngerman]{babel}
+\usepackage{glossaries}
+
+\GlsSetQuote{+}% requires glossaries v4.24
+
+\makeglossaries
+
+\newglossaryentry{sample}{name={s\"ample},
+  sort={s"ample},
+  description={an example}}
+
+\begin{document}
+
+A \gls{sample} document.
+
+\printglossaries
+\end{document}

@@ -167,8 +167,7 @@ public class Glossaries
          {
             String opts = matcher.group(1);
 
-            // TODO check for quoted args
-            glossaries.extraMakeIndexOpts = opts.split(" ");
+            glossaries.extraMakeIndexOpts = splitArgs(opts);
          }
       }
 
@@ -222,6 +221,66 @@ public class Glossaries
       }
 
       return glossaries;
+   }
+
+   public static Vector<String> splitArgs(String str)
+   {
+      Vector<String> args = new Vector<String>();
+      StringBuilder builder = null;
+      int delim = -1;
+
+      for (int i = 0, n = str.length(); i < n; i++)
+      {
+         char c = str.charAt(i);
+
+         if (builder == null)
+         {
+            if (Character.isWhitespace(c))
+            {
+               continue;
+            }
+
+            builder = new StringBuilder();
+
+            if (c == '\'' || c == '"')
+            {
+               delim = c;
+            }
+            else
+            {
+               delim = -1;
+               builder.append(c);
+            }
+         }
+         else if (c == '\\')
+         {
+            i++;
+
+            if (i < n)
+            {
+               c = str.charAt(i);
+            }
+
+            builder.append(c);
+         }
+         else if (delim == c
+              || (delim == -1 && Character.isWhitespace(c)))
+         {
+            args.add(builder.toString());
+            builder = null;
+         }
+         else 
+         {
+            builder.append(c);
+         }
+      }
+
+      if (builder != null)
+      {
+         args.add(builder.toString());
+      }
+
+      return args;
    }
 
    public void process()
@@ -428,8 +487,18 @@ public class Glossaries
 
             if (m.matches())
             {
-               addDiagnosticMessage(invoker.getLabelWithValue(
-                  "diagnostics.missing_sty", m.group(1)));
+               String sty = m.group(1);
+
+               if (sty.equals("datatool-base"))
+               {
+                  addDiagnosticMessage(invoker.getLabel(
+                     "diagnostics.missing_datatool_base"));
+               }
+               else
+               {
+                  addDiagnosticMessage(invoker.getLabelWithValue(
+                     "diagnostics.missing_sty", sty));
+               }
 
                continue;
             }
@@ -763,7 +832,7 @@ public class Glossaries
    private Vector<Glossary> glossaryList;
    private String istName;
 
-   private String[] extraMakeIndexOpts;
+   private Vector<String> extraMakeIndexOpts;
 
    private boolean noidx = false;
 
