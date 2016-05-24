@@ -140,6 +140,7 @@ diagnostics.one_too_long=One entry was too long for makeindex. Do you have an ex
 diagnostics.too_long=$1 entries were too long for makeindex. Do you have an excessively long sort field or label for that entry?
 diagnostics.old_one_too_long=One entry was too long for makeindex. If you upgrade to at least v4.0 of the glossaries package, this shouldn't be a problem.
 diagnostics.old_too_long=$1 entries were too long for makeindex. If you upgrade to at least v4.0 of the glossaries package, this shouldn't be a problem.
+diagnostics.undef_opt=Your version of glossaries doesn't provide the package option '$1'. This may be because that option was introduced to a later version, in which case you will need to use your TeX package manager to update the glossaries package, or it may be that you have misspelt the option.
 
 # Properties dialog
 properties.title=MakeGlossariesGUI Properties

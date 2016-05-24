@@ -580,6 +580,16 @@ public class Glossaries
 
                continue;
             }
+
+            m = unknownOptPattern.matcher(line);
+
+            if (m.matches())
+            {
+               addDiagnosticMessage(invoker.getLabelWithValue(
+                 "diagnostics.undef_opt", m.group(1)));
+
+               continue;
+            }
          }
       }
       finally
@@ -905,6 +915,9 @@ public class Glossaries
 
    private static final Pattern undefControlSequencePattern
       = Pattern.compile(".* Undefined control sequence.");
+
+   private static final Pattern unknownOptPattern
+      = Pattern.compile(".*Unknown option `(.*)' for package `glossaries'.*");
 
    private static final String[] fields =
    {
