@@ -58,8 +58,14 @@ public class GlossaryBatchMessage implements GlossaryMessage
 
    public void aboutToExec(String[] cmdArray, File dir)
    {
-      if (!invoker.isQuiet())
+      if (invoker.isDryRunMode() || !invoker.isQuiet())
       {
+         if (invoker.isDryRunMode())
+         {
+            System.out.println(invoker.getLabel("diagnostics.dry_run"));
+
+         }
+
          for (int i = 0, n = cmdArray.length-1; i < cmdArray.length; i++)
          {
             if (i == n)

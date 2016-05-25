@@ -131,6 +131,39 @@ public class MakeGlossariesInvoker
       return messageSystem;
    }
 
+   public static String escapeHTML(String text)
+   {
+      if (text == null || text.isEmpty()) return "";
+
+      int n = text.length();
+
+      StringBuilder builder = new StringBuilder(n);
+
+      for (int i = 0; i < n; i++)
+      {
+         char c = text.charAt(i);
+
+         if (c == '&')
+         {
+            builder.append("&amp;");
+         }
+         else if (c == '<')
+         {
+            builder.append("&lt;");
+         }
+         else if (c == '>')
+         {
+            builder.append("&gt;");
+         }
+         else
+         {
+            builder.append(c);
+         }
+      }
+
+      return builder.toString();
+   }
+
    public String getLabelOrDef(String label, String alt)
    {
       String val = dictionary.getProperty(label);
@@ -201,6 +234,11 @@ public class MakeGlossariesInvoker
    {
       String prop = getLabel(label);
 
+      if (!isBatchMode())
+      {
+         value = escapeHTML(value);
+      }
+
       StringBuilder builder = new StringBuilder(prop.length());
 
       for (int i = 0; i < prop.length(); i++)
@@ -243,6 +281,12 @@ public class MakeGlossariesInvoker
       String value2)
    {
       String prop = getLabel(label);
+
+      if (!isBatchMode())
+      {
+         value1 = escapeHTML(value1);
+         value2 = escapeHTML(value2);
+      }
 
       StringBuilder builder = new StringBuilder(prop.length());
 

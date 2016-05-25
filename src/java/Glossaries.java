@@ -590,6 +590,36 @@ public class Glossaries
 
                continue;
             }
+
+            m = infoPattern.matcher(line);
+
+            if (m.matches())
+            {
+               StringBuilder builder = new StringBuilder(m.group(1));
+
+               while (!line.endsWith(".")
+                      && (line = reader.readLine()) != null
+                      && !line.isEmpty())
+               {
+                  builder.append(line);
+               }
+
+               m = wrglossaryPattern.matcher(builder);
+
+               if (m.matches())
+               {
+                  String type = m.group(1);
+                  String info = m.group(2);
+                  String lineNum = m.group(3);
+
+                  addDiagnosticMessage(String.format("%s%n<pre>%s</pre>%n",
+                     invoker.getLabelWithValues(
+                      "diagnostics.wrglossary", type, lineNum),
+                      info));
+               }
+
+               continue;
+            }
          }
       }
       finally
@@ -775,7 +805,8 @@ public class Glossaries
       }
       else
       {
-         diagnosticMessages.append(String.format("%n%s", mess));
+         //diagnosticMessages.append(String.format("%n%s", mess));
+         diagnosticMessages.append(String.format("<p>%s", mess));
       }
    }
 
@@ -918,6 +949,12 @@ public class Glossaries
 
    private static final Pattern unknownOptPattern
       = Pattern.compile(".*Unknown option `(.*)' for package `glossaries'.*");
+
+   private static final Pattern infoPattern
+      = Pattern.compile("Package glossaries Info:\\s*(.*)");
+
+   private static final Pattern wrglossaryPattern
+      = Pattern.compile("wrglossary\\((.*?)\\)\\((.*)\\) on input line (\\d+).*");
 
    private static final String[] fields =
    {

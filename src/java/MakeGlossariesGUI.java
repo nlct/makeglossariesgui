@@ -123,10 +123,13 @@ public class MakeGlossariesGUI extends JFrame
       tabbedPane.add(scrollPane, 0);
       tabbedPane.setMnemonicAt(0, getMnemonicInt("main.title"));
 
-      diagnosticArea = new JTextArea();
+//      diagnosticArea = new JTextArea();
+      diagnosticArea = new JEditorPane("text/html", "");
       diagnosticArea.setEditable(false);
+/*
       diagnosticArea.setLineWrap(true);
       diagnosticArea.setWrapStyleWord(true);
+*/
       diagnosticArea.setFont(getFont());
       diagnosticArea.setTransferHandler(getTransferHandler());
 
@@ -685,6 +688,27 @@ public class MakeGlossariesGUI extends JFrame
             }
          }
       }
+
+      if (invoker.isDryRunMode())
+      {
+        StringBuilder builder = new StringBuilder();
+
+         for (int i = 0, n = cmdArray.length-1; i < cmdArray.length; i++)
+         {
+            if (i == n)
+            {
+               builder.append(String.format("\"%s\"", cmdArray[i]));
+            }
+            else
+            {
+               builder.append(String.format("\"%s\" ", cmdArray[i]));
+            }
+         }
+
+         invoker.getGlossaries().addDiagnosticMessage(
+            String.format("%s<pre>%s</pre>", invoker.getLabel(
+            "diagnostics.dry_run"), builder.toString()));
+      }
    }
 
    public void message(String msg)
@@ -934,7 +958,8 @@ public class MakeGlossariesGUI extends JFrame
 
    private JScrollPane scrollPane, diagnosticSP;
 
-   private JTextArea diagnosticArea;
+   //private JTextArea diagnosticArea;
+   private JEditorPane diagnosticArea;
 
    private JMenu recentM;
 

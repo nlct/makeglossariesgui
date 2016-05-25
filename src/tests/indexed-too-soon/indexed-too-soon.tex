@@ -1,0 +1,16 @@
+\documentclass{article}
+
+\usepackage[debug]{glossaries}
+
+\newglossaryentry{sample}{name={sample},
+ description={an example}}
+\glsaddall
+
+\makeglossaries
+
+\begin{document}
+A sample document with a mistake in it.
+
+\printglossaries
+
+\end{document}

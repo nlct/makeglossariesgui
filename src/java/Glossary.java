@@ -95,25 +95,10 @@ public class Glossary
 
       File transFile = new File(dir, transFileName);
 
+      invoker.getMessageSystem().aboutToExec(cmdArray, dir);
+
       if (invoker.isDryRunMode())
       {
-         StringBuilder builder = new StringBuilder();
-
-         for (int i = 0, n = cmdArray.length-1; i < cmdArray.length; i++)
-         {
-            if (i == n)
-            {
-               builder.append(String.format("\"%s\"", cmdArray[i]));         
-            }
-            else
-            {
-               builder.append(String.format("\"%s\" ", cmdArray[i]));
-            }
-         }
-
-         addDiagnosticMessage(invoker.getLabelWithValue(
-            "diagnostics.dry_run", builder.toString()));
-
          if (transFile.exists())
          {
             in = new BufferedReader(new FileReader(transFile));
@@ -121,8 +106,6 @@ public class Glossary
       }
       else
       {
-         invoker.getMessageSystem().aboutToExec(cmdArray, dir);
-
          Process p = Runtime.getRuntime().exec(cmdArray, null, dir);
 
          exitCode = p.waitFor();
@@ -372,27 +355,10 @@ public class Glossary
       int exitCode = 0;
       BufferedReader in = null;
 
+      invoker.getMessageSystem().aboutToExec(cmdArray, dir);
+
       if (invoker.isDryRunMode())
       {
-         StringBuilder builder = new StringBuilder();
-
-         n = cmdArray.length-1;
-
-         for (int i = 0; i < cmdArray.length; i++)
-         {
-            if (i == n)
-            {
-               builder.append(String.format("\"%s\"", cmdArray[i]));         
-            }
-            else
-            {
-               builder.append(String.format("\"%s\" ", cmdArray[i]));
-            }
-         }
-
-         addDiagnosticMessage(invoker.getLabelWithValue(
-            "diagnostics.dry_run", builder.toString()));
-
          File transFile = new File(dir, transFileName);
 
          if (transFile.exists())
@@ -402,8 +368,6 @@ public class Glossary
       }
       else
       {
-         invoker.getMessageSystem().aboutToExec(cmdArray, dir);
-
          Process p = Runtime.getRuntime().exec(cmdArray, null, dir);
 
          exitCode = p.waitFor();
@@ -786,7 +750,8 @@ public class Glossary
       }
       else
       {
-         diagnosticMessage.append(String.format("%n%s", mess));
+         //diagnosticMessage.append(String.format("%n%s", mess));
+         diagnosticMessage.append(String.format("<p>%s", mess));
       }
    }
 
