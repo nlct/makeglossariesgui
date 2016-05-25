@@ -15,8 +15,6 @@
     <newacro short="GUI" long="graphical user interface" tag="gui" />
     <!-- Define Terms. If a description is included it's a glossary
          term otherwise it goes in the index -->
-    <newterm tag="cwd" text="current working directory" 
-      description="The directory in which the application was started"/>
     <newterm tag="makeglossaries" text="makeglossaries" 
       description="a Perl script provided with the glossaries package
       which runs either makeindex or xindy, depending on the
@@ -188,8 +186,8 @@ A \gls{sample} document.
    column lists the entry's label, the second column lists the entry's sort
    field and the third column shows the number of times that entry was indexed
    in the document. If you have a long list of entries, you can use the search
-   box to find an entry according to it's label. (An exact match on the label
-   is required.)
+   box to find an entry according to its <em>label</em>. Regular
+   expressions are permitted.
    </p>
    </example>
    <p>
@@ -286,6 +284,19 @@ Xindy failed with exit code 1.
    (You can adjust the font size using the increase or decrease buttons, or 
    the <menu tag="settings.incsize"/> or <menu tag="settings.decsize"/> menu
    items.)
+   </p>
+   <p>
+   In the <button tag="main.title"/> panel, the <dq>Details</dq>
+   link can again be used to view the list of indexed entries,
+   but now the problematic entries are shown in red (see 
+   <ref tag="missingsortdetails"/>).
+   </p>
+   <p>
+   <float type="figure" tag="missingsortdetails"
+     caption="Entry Details (Problematic Entries)" pos="htbp">
+   <image src="images/missing-sort-details.png" 
+          alt="image of details window with rows displayed in red"/>
+   </float>
    </p>
    </example>
    <p>

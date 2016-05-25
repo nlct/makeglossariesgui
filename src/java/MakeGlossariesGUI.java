@@ -280,6 +280,7 @@ public class MakeGlossariesGUI extends JFrame
          int size = font.getSize()+1;
 
          invoker.getProperties().setFontSize(size);
+         propertiesDialog.updateFontSize(size);
 
          updateFont();
       }
@@ -294,6 +295,7 @@ public class MakeGlossariesGUI extends JFrame
          }
 
          invoker.getProperties().setFontSize(size);
+         propertiesDialog.updateFontSize(size);
 
          updateFont();
       }

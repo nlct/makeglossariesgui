@@ -244,6 +244,7 @@ public class Glossary
                         addDiagnosticMessage(invoker.getLabelWithValues(
                           "diagnostics.empty_sort", 
                            sort, key));
+                        entry.setHasProblem(true);
                      }
                   }
                }
@@ -620,6 +621,13 @@ public class Glossary
       return entry == null ? null : entry.getSort();
    }
 
+   public boolean hasProblem(String key)
+   {
+      GlossaryEntry entry = entryTable.get(key);
+
+      return entry == null ? false : entry.hasProblem();
+   }
+
    public Integer getEntryCount(int entryIdx)
    {
       int i = 0;
@@ -810,6 +818,7 @@ class GlossaryEntry
       this.label = label;
       this.sort = sort;
       this.count = 0;
+      this.hasProblem = false;
    }
 
    public void increment()
@@ -832,7 +841,18 @@ class GlossaryEntry
       return label;
    }
 
-   int count = 0;
-   String label, sort;
+   public boolean hasProblem()
+   {
+      return hasProblem;
+   }
+
+   public void setHasProblem(boolean hasProblem)
+   {
+      this.hasProblem = hasProblem;
+   }
+
+   private int count = 0;
+   private String label, sort;
+   private boolean hasProblem;
 }
 

@@ -238,6 +238,7 @@ public class PropertiesDialog extends JDialog
       fontSample = new JLabel(app.getLabel("properties.font.sample"));
       p.setBackground(Color.white);
       p.setOpaque(true);
+      p.setBorder(BorderFactory.createEtchedBorder());
       p.add(fontSample);
 
       updateFontSample();
@@ -551,6 +552,11 @@ public class PropertiesDialog extends JDialog
         style, ((Number)fontSizeBox.getValue()).intValue()));
 
       fontSample.repaint();
+   }
+
+   public void updateFontSize(int size)
+   {
+      fontSizeBox.setValue(size);
    }
 
    private void updateXindyModule()

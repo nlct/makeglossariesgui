@@ -3,16 +3,18 @@ package com.dickimawbooks.makeglossariesgui;
 import java.net.URL;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.regex.*;
 
 import javax.swing.*;
 import javax.swing.table.*;
 
-public class ViewEntries extends JFrame
+public class ViewEntries extends JDialog
    implements ActionListener
 {
    public ViewEntries(MakeGlossariesGUI application, Glossary g, Font font)
    {
-      super(application.getLabelWithValue("entry.title", g.label));
+      super(application, application.getLabelWithValue("entry.title", g.label),
+         true);
 
       app = application;
       glossary = g;
@@ -25,6 +27,11 @@ public class ViewEntries extends JFrame
          public int getRowCount() {return entryLabels.length;}
          public int getColumnCount() {return 3;}
          public boolean isCellEditable(int row, int column) {return false;}
+
+         public Class<?> getColumnClass(int column)
+         {
+            return String.class;
+         }
 
          public Object getValueAt(int row, int column)
          {
@@ -60,6 +67,9 @@ public class ViewEntries extends JFrame
       };
 
       table = new JTable(model);
+      table.setDefaultRenderer(String.class, 
+        new EntryTableCellRenderer(this));
+      table.setFont(app.getFont());
 
       getContentPane().add(new JScrollPane(table), "Center");
 
@@ -70,7 +80,7 @@ public class ViewEntries extends JFrame
       label.setDisplayedMnemonic(app.getMnemonic("entry", "find_label"));
       toolbar.add(label);
 
-      searchField = new JTextField();
+      searchField = new JTextField(32);
       searchField.registerKeyboardAction(this, "find", 
          KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
          JComponent.WHEN_FOCUSED);
@@ -131,7 +141,33 @@ public class ViewEntries extends JFrame
       {
          String label = searchField.getText();
 
-         int idx = glossary.getEntryIdx(label);
+         int start = table.getSelectedRow();
+
+         int idx = -1;
+
+         Pattern p = Pattern.compile(label);
+
+         for (int i = start+1; i < entryLabels.length; i++)
+         {
+            Matcher m = p.matcher(entryLabels[i]);
+
+            if (m.find())
+            {
+               idx = i;
+               break;
+            }
+         }
+
+         for (int i = 0; idx == -1 && i <= start; i++)
+         {
+            Matcher m = p.matcher(entryLabels[i]);
+
+            if (m.find())
+            {
+               idx = i;
+               break;
+            }
+         }
 
          if (idx == -1)
          {
@@ -148,6 +184,13 @@ public class ViewEntries extends JFrame
       }
    }
 
+   public boolean hasProblem(int row)
+   {
+      String label = entryLabels[row];
+
+      return glossary.hasProblem(label);
+   }
+
    private Glossary glossary;
 
    private String[] entryLabels;
@@ -159,4 +202,33 @@ public class ViewEntries extends JFrame
    private MakeGlossariesGUI app;
 
    private JToolBar toolbar;
+}
+
+class EntryTableCellRenderer extends DefaultTableCellRenderer
+{
+   public EntryTableCellRenderer(ViewEntries view)
+   {
+      super();
+      this.view = view;
+   }
+
+   public Component getTableCellRendererComponent(JTable table, Object value, 
+     boolean isSelected, boolean hasFocus, int row, int column)
+   {
+      Component comp = super.getTableCellRendererComponent(table,
+        value, isSelected, hasFocus, row, column);
+
+      if (column == 1 && view.hasProblem(row))
+      {
+         setForeground(Color.red);
+      }
+      else
+      {
+         setForeground(Color.black);
+      }
+
+      return comp;
+   }
+
+   private ViewEntries view;
 }
