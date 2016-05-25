@@ -30,7 +30,9 @@ settings.decsize.alttext=Decrease Font Size
 settings.dryrun=Dry Run Mode
 settings.dryrun.mnemonic=N
 settings.editproperties=Edit Properties...
-settings.editproperties.mnemonic=E
+settings.editproperties.mnemonic=P
+settings.editproperties.tooltip=Edit application settings
+settings.editproperties.alttext=Settings
 
 # Help menu
 help=Help
@@ -149,8 +151,9 @@ diagnostics.dry_run=Dry run mode on. System command would've been:
 diagnostics.wrglossary=It seems you have tried to index an entry in the <tt>$1</tt> glossary on <b>line $2</b>, but the associated file hasn't been opened. Remember to use <code>\\makeglossaries</code> before commands like <code>\\glsadd</code> and <code>\\glsaddall</code>. Details of lost indexing code:
 
 # Properties dialog
-properties.title=MakeGlossariesGUI Properties
-properties.start_dir=Start Up Directory:
+properties.title=Preferences
+properties.start_dir=Start Up Directory
+properties.start_dir.mnemonic=S
 properties.dir.home=Home
 properties.dir.home.mnemonic=H
 properties.dir.last=Last Used Directory 
@@ -159,6 +162,8 @@ properties.dir.custom=Custom:
 properties.dir.custom.mnemonic=U
 properties.override=Override document language settings
 properties.override.mnemonic=R
+properties.applications=Applications
+properties.applications.mnemonic=A
 properties.makeindex=Path to Makeindex:
 properties.makeindex.mnemonic=M
 properties.xindy=Path to Xindy:
@@ -170,10 +175,25 @@ properties.language.mnemonic=G
 properties.encoding=Encoding
 properties.encoding.mnemonic=E
 properties.diagnostics=Diagnostics
+properties.diagnostics.mnemonic=D
 properties.docdefcheck=Check for document definitions
-properties.docdefcheck.mnemonic=F
+properties.docdefcheck.mnemonic=D
 properties.langcheck=Check for missing language modules
 properties.langcheck.mnemonic=M
+properties.gui=GUI
+properties.gui.mnemonic=G
+properties.font.sample=Sample Text
+properties.font=Font
+properties.font.mnemonic=F
+properties.bold.font=Bold
+properties.bold.font.mnemonic=B
+properties.italic.font=Italic
+properties.italic.font.mnemonic=I
+properties.size.font=Size
+properties.size.font.mnemonic=Z
+properties.look_and_feel=Look and Feel
+properties.look_and_feel.mnemonic=K
+properties.restart=(restart required)
 
 # batch mode messages
 message.loading=Loading '$1'

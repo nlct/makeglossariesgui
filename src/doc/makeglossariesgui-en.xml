@@ -118,7 +118,10 @@
    A file can be loaded from the command line invocation 
    (see <ref tag="introduction"/>) or in the <acr tag="gui"/> using the 
    <menu tag="file.open"/> menu item. You can also use the load file button
-   on the toolbar or drag and drop the file onto the main window.
+   on the toolbar or drag and drop the file onto the main window. The
+   input file should be the <tt>.aux</tt> file created by <LaTeX/>, but if
+   you try to load the main document <tt>.tex</tt> file, <app/> will assume 
+   you meant the associated <tt>.aux</tt> file.
    </p>
    <example>
    <p>
@@ -146,19 +149,20 @@ A \gls{sample} document.
    <tt>basic-sample.aux</tt> as well as some other files including 
    <tt>basic-sample.glo</tt> and <tt>basic-sample.ist</tt>. Now load the auxiliary file
    (<tt>basic-sample.aux</tt>) into <app/>. (Since the main <tt>.tex</tt> file
-   has the same basename as the <tt>.aux</tt> file, you can also use that.
-   <app/> will interpret this as meaning you want the <tt>.aux</tt> file
-   associated with that <tt>.tex</tt> file.)
+   has the same basename as the <tt>.aux</tt> file, you can also use that, as
+   mentioned above.)
    </p>
    <p>
-   Once <app/> has successfully loaded the file, it will run 
+   Once <app/> has successfully loaded the <tt>.aux</tt> file, it will run 
    <term tag="makeindex"/> on the associated <tt>.glo</tt> file (with the
    <tt>.ist</tt> file as the style).
    In this case, there are no problems with the document and the
    <tt>.tex</tt> file is now ready for another <LaTeX/> run. The general
    information panel (<ref tag="basicsample"/>) shows a summary of 
    document glossaries. In this case, there's only one glossary (the
-   <tt>main</tt> one).
+   <tt>main</tt> one). If you edit the document source code (<tt>.tex</tt> file)
+   you can use the <menu tag="file.reload"/> menu item to reload the updated
+   <tt>.aux</tt> file in <app/>.
    </p>
    <p>
    <float type="figure" tag="basicsample"
@@ -168,7 +172,7 @@ A \gls{sample} document.
    </float>
    </p>
    <p>
-   Only one entry has been indexed in the <tt>main</tt> glossary. You
+   In this example, only one entry has been indexed in the <tt>main</tt> glossary. You
    can find out more information by clicking on the <dq>Details</dq>
    link, which will open the window shown in <ref tag="basicsampledetails"/>.
    </p>
@@ -235,7 +239,7 @@ Test: \gls{S}, $\gls{alpha}$, $\gls{beta}$.
 \end{document}
    </pre>
    <p>
-   As before, run <LaTeX/> as usual on this document. Since the xindy
+   As before, run <LaTeX/> as usual on this document. Since the <tt>xindy</tt>
    package option has been used, this will create a <tt>.xdy</tt> file
    instead of a <tt>.ist</tt> file and the <tt>.glo</tt>
    file is now in <term tag="xindy"/>'s format. There are, however, problems
@@ -351,7 +355,7 @@ No glossary <sq>acronym</sq>.
 <blockquote>
 It looks as though you might have done something like 
 <tt><cs tag="printglossary"/>[type=<marg>acronym</marg>]</tt>, but there's no 
-<sq>acronym</sq> glossary.
+<tt>acronym</tt> glossary.
 </blockquote>
    <p>
    If you switch to the <dq>General Information</dq> panel,
@@ -408,16 +412,23 @@ A sample document.
    The diagnostics panel shows the following message:
    </p>
    <blockquote>
-   There were no entries listed for the main glossary. Remember that you must 
-   index entries for them to appear in the glossary using the commands provided 
-   by the glossaries package. Entries that have been defined but not indexed 
-   won't be listed. Check that you have used commands like <cs tag="gls"/> or 
-   <cs tag="glsadd"/>. If you don't want to use this glossary, add the 
-   <sq>nomain</sq> package option to your document.
+There were no entries listed for the <tt>main</tt> glossary. Remember that you 
+must index entries for them to appear in the glossary using the commands 
+provided by the glossaries package. Entries that have been defined but not 
+indexed won't be listed. If you don't want to use this glossary, 
+add the <tt>nomain</tt> package option to your document. Check the following:
+<ul>
+<li>Have you used commands like <cs tag="gls"/> or <cs tag="glsadd"/> in the
+document? (If you haven't, you need to add them.)</li>
+<li>If you have used commands like <cs tag="glsadd"/> or <cs tag="glsaddall"/> 
+in the preamble, have you remembered to put them <em>after</em> 
+<cs tag="makeglossaries"/></li>
+<li>If you have at least version 4.24 of the glossaries package, have you used the debug option? (That might provide some more information for me to analyse.)</li>
+</ul>
    </blockquote>
    <p>
-   (The final sentence only appears if there are no entries for the 
-   <tt>main</tt> glossary, but not for any other glossaries.)
+   (The sentence referencing <tt>nomain</tt> only appears if there are 
+   no entries for the <tt>main</tt> glossary, but not for any other glossaries.)
    </p>
    </example>
    <p>
@@ -482,14 +493,14 @@ A \gls{sample} document.
    <blockquote>
 <p>
 Package glossaries Warning: Empty glossary for 
-<cs tag="printnoidxglossary"/>[type=<marg>acronym</marg>] Rerun may be 
+<tt><cs tag="printnoidxglossary"/>[type=<marg>acronym</marg>]</tt> Rerun may be 
 required (or you may have forgotten to use commands like <cs tag="gls"/>) on input 
 line 13.
 </p>
 <p>
 It looks as though you might have done something like 
-<cs tag="printnoidxglossary"/>[type=<marg>acronym</marg>], but there's no
-<sq>acronym</sq> glossary.
+<tt><cs tag="printnoidxglossary"/>[type=<marg>acronym</marg>]</tt>, but there's no
+<tt>acronym</tt> glossary.
 </p>
    </blockquote>
    <p>
@@ -541,33 +552,43 @@ if you don't want any glossaries.) This document will not have a glossary.
    <node type="chapter" tag="properties" title="Settings" >
    <p>
    The application settings can be adjusted through the <menu tag="settings"/>
-   menu. The <menu tag="settings.incsize"/> or <menu tag="settings.decsize"/> 
-   menu items can be used to change the font size used in the 
-   <dq>General Information</dq> and <dq>Diagnostics</dq> panels. The
-   <menu tag="settings.editproperties"/> menu item will open the 
-   <dq>Properties</dq> dialog window (see <ref tag="propertiesdialog"/>).
+   menu. The
+   <menu tag="settings.editproperties"/> menu item (or toolbar button) will 
+   open the 
+   <button tag="properties.title"/> dialog window.
+   This has four tabs: <button tag="properties.start_dir"/>, 
+   <button tag="properties.diagnostics"/>,
+   <button tag="properties.applications"/> and 
+   <button tag="properties.gui"/>.
    </p>
+   </node>
+   <node type="section" tag="startdirtab" title="Start Up Directory">
    <p>
-   <float type="figure" tag="propertiesdialog"
-     caption="Properties Dialog" pos="htbp">
-   <image src="images/properties.png" alt="image of properties dialog"
+   <float type="figure" tag="propertiesdialog-startdir"
+     caption="Properties Dialog (Start Up Directory)" pos="htbp">
+   <image src="images/properties-startdir.png"
+    alt="image of properties dialog with start up tab selected"
     scale="0.8"/>
    </float>
    </p>
    <p>
-   You can specify the directory to use on start up. This is the 
-   directory the file chooser will be set to initially. You can also
-   specify the path to <term tag="makeindex"/> and <term tag="xindy"/>.
-   <app/> will try to determine this information from your system's path.
+   The <button tag="properties.start_dir"/> 
+   (<ref tag="propertiesdialog-startdir"/>) tab allows you to
+   select the directory to use on start up. This is the 
+   directory the file chooser will be set to initially.
+   </p>
+   </node>
+   <node type="section" tag="diagnosticstab" title="Diagnostic Settings">
+   <p>
+   <float type="figure" tag="propertiesdialog-diagnostics"
+     caption="Properties Dialog (Diagnostics)" pos="htbp">
+   <image src="images/properties-diagnostics.png"
+    alt="image of properties dialog with diagnostics tab selected"
+    scale="0.8"/>
+   </float>
    </p>
    <p>
-   <app/> will try to determine the language and input encoding from the
-   <tt>.aux</tt> file, but you can override this if you want to. Make sure
-   that the <button tag="properties.override"/> check box is selected, and change the
-   language and encoding as appropriate.
-   </p>
-   <p>
-   <app/> will also try to determine if you have defined any 
+   <app/> will try to determine if you have defined any 
    entries within the <env tag="document"/> environment.
    Although the <sty>glossaries</sty> package allows 
    document definitions, the manual encourages defining
@@ -590,6 +611,87 @@ if you don't want any glossaries.) This document will not have a glossary.
    of the <sty>glossaries</sty> user manual. If you want to
    skip this check, deselect the
    <button tag="properties.langcheck"/> check box.
+   </p>
+   </node>
+   <node type="section" tag="applicationstab" title="Indexing Applications">
+   <p>
+   <float type="figure" tag="propertiesdialog-applications"
+     caption="Properties Dialog (Applications)" pos="htbp">
+   <image src="images/properties-applications.png"
+    alt="image of properties dialog with applications tab selected"
+    scale="0.8"/>
+   </float>
+   </p>
+   <p>
+   The <button tag="properties.applications"/> tab lists the paths to
+   <term tag="makeindex"/> and <term tag="xindy"/>. <app/> will attempt
+   to locate them on your system's path, but if they can't be detected,
+   you'll need to specify the correct location. You can omit the location
+   for an unrequired application.
+   </p>
+   <p>
+   <app/> will try to determine the language and input encoding from the
+   <tt>.aux</tt> file to pass to <term tag="xindy"/>, but you can override 
+   this if you want to. Make sure that the <button tag="properties.override"/> 
+   check box is selected, and change the language and encoding as appropriate.
+   Note that the batch mode will also use these settings, although they can
+   only be adjusted in the <cs tag="gui"/> mode.
+   </p>
+   </node>
+   <node type="section" tag="guitab" title="GUI Preferences">
+   <p>
+   <float type="figure" tag="propertiesdialog-gui-metal"
+     caption="GUI Preferences (Metal Look and Feel)" pos="htbp">
+   <image src="images/properties-gui-metal.png"
+    alt="image of properties dialog with GUI tab selected (Metal Look and Feel)"
+    scale="0.8"/>
+   </float>
+   </p>
+   <p>
+   The font used in the 
+   <dq>General Information</dq> and <dq>Diagnostics</dq> panels can be 
+   set in the <button tag="properties.gui"/> tab. In addition to 
+   adjusting the font size through the
+    <menu tag="settings.incsize"/> or <menu tag="settings.decsize"/> 
+   menu items, you can also set the required font size in this panel. 
+   </p>
+   <p>
+   The Java <dq>Look And Feel</dq> can be set by selecting the required
+   option in the <button tag="properties.look_and_feel"/> drop-down menu.
+   Note that a restart is required as the Look and Feel is set on start up.
+   The title bar appearance is governed by your usual operating system
+   preference. The Look and Feel changes the way the window elements are
+   displayed.
+   <ref tag="propertiesdialog-gui-metal"/> shows the <dq>Metal</dq> 
+   Look and Feel.
+   <ref tag="propertiesdialog-gui-nimbus"/> shows the <dq>Nimbus</dq> 
+   Look and Feel.
+   <ref tag="propertiesdialog-gui-cde"/> shows the <dq>CDE/Motif</dq> 
+   Look and Feel.
+   <ref tag="propertiesdialog-gui-gtk"/> shows the <dq>GTK+</dq> 
+   Look and Feel.
+   You may not have all these options on your system or you may have
+   additional options, depending on your Java installation.
+   </p>
+   <p>
+   <float type="figure" tag="propertiesdialog-gui-nimbus"
+     caption="GUI Preferences (Nimbus Look and Feel)" pos="htbp">
+   <image src="images/properties-gui-nimbus.png"
+    alt="image of properties dialog with GUI tab selected (Nimbus Look and Feel)"
+    scale="0.8"/>
+   </float>
+   <float type="figure" tag="propertiesdialog-gui-cde"
+     caption="GUI Preferences (CDE/Motif Look and Feel)" pos="htbp">
+   <image src="images/properties-gui-cde.png"
+    alt="image of properties dialog with GUI tab selected (Cde/motif Look and Feel)"
+    scale="0.8"/>
+   </float>
+   <float type="figure" tag="propertiesdialog-gui-gtk"
+     caption="GUI Preferences (GTK+ Look and Feel)" pos="htbp">
+   <image src="images/properties-gui-gtk.png"
+    alt="image of properties dialog with GUI tab selected (GTK+ Look and Feel)"
+    scale="0.8"/>
+   </float>
    </p>
    </node>
    <node type="chapter" tag="licence" title="Licence" >

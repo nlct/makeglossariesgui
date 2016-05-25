@@ -9,6 +9,7 @@ import java.awt.event.*;
 
 import javax.swing.*;
 import javax.swing.text.*;
+import javax.swing.text.html.*;
 import javax.swing.event.*;
 import javax.help.*;
 
@@ -86,7 +87,9 @@ public class MakeGlossariesGUI extends JFrame
 
       settingsM.add(dryRunItem);
 
-      settingsM.add(createMenuItem("settings", "editproperties"));
+      settingsM.add(createMenuButtonItem("settings", "editproperties",
+        KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK),
+        "general/Preferences24"));
 
       initHelp();
 
@@ -275,30 +278,24 @@ public class MakeGlossariesGUI extends JFrame
          Font font = getFont();
 
          int size = font.getSize()+1;
-         int style = font.getStyle();
-         String name = font.getFontName();
 
-         setFont(new Font(name, style, size));
          invoker.getProperties().setFontSize(size);
 
-         updateAll();
+         updateFont();
       }
       else if (action.equals("decsize"))
       {
          Font font = getFont();
          int size = font.getSize()-1;
-         int style = font.getStyle();
-         String name = font.getFontName();
 
          if (size < 2)
          {
             return;
          }
 
-         setFont(new Font(name, style, size));
          invoker.getProperties().setFontSize(size);
 
-         updateAll();
+         updateFont();
       }
       else if (action.equals("dryrun"))
       {
@@ -436,6 +433,15 @@ public class MakeGlossariesGUI extends JFrame
       });
    }
 
+   public void updateFont()
+   {
+      MakeGlossariesProperties properties = invoker.getProperties();
+      setFont(new Font(properties.getFontName(),
+        properties.getFontStyle(), properties.getFontSize()));
+
+      updateAll();
+   }
+
    public void updateAll()
    {
       Component comp = tabbedPane.getSelectedComponent();
@@ -448,13 +454,20 @@ public class MakeGlossariesGUI extends JFrame
       }
       catch (Exception e)
       {
-         error(this, e.getMessage());
+         error(e);
       }
    }
 
    public void updateDiagnostics()
    {
-      diagnosticArea.setFont(getFont());
+      Font font = getFont();
+
+      StyleSheet stylesheet = ((HTMLDocument)diagnosticArea.getDocument()).getStyleSheet();
+
+      stylesheet.addRule("body { font-size: "+font.getSize()+"pt; }");
+      stylesheet.addRule("body { font-family: "+font.getName()+"; }");
+      stylesheet.addRule("body { font-weight: "+(font.isBold()?"bold":"normal")+"; }");
+      stylesheet.addRule("body { font-style:  "+(font.isItalic()?"italic":"normal")+"; }");
 
       if (invoker.getGlossaries() != null)
       {
@@ -787,7 +800,19 @@ public class MakeGlossariesGUI extends JFrame
 
    public void error(Exception e)
    {
-      error(this, e.getMessage());
+      String msg = e.getMessage();
+
+      if (msg == null || msg.isEmpty())
+      {
+         msg = e.getClass().getName();
+      }
+
+      error(this, msg);
+
+      if (invoker.isDebugMode())
+      {
+         e.printStackTrace();
+      }
    }
 
    public void error(String message)
@@ -799,6 +824,23 @@ public class MakeGlossariesGUI extends JFrame
    {
       JOptionPane.showMessageDialog(parent, message, getLabel("error.title"),
          JOptionPane.ERROR_MESSAGE);
+   }
+
+   public void error(Component parent, Exception e)
+   {
+      String msg = e.getMessage();
+
+      if (msg == null || msg.isEmpty())
+      {
+         msg = e.getClass().getName();
+      }
+
+      error(parent, msg);
+
+      if (invoker.isDebugMode())
+      {
+         e.printStackTrace();
+      }
    }
 
    public void fatalError(Exception e)
@@ -977,6 +1019,20 @@ public class MakeGlossariesGUI extends JFrame
 
    public static void createAndShowGUI(final MakeGlossariesInvoker invoker)
    {
+      String lookAndFeel = invoker.getProperties().getLookAndFeel();
+
+      if (lookAndFeel != null && !lookAndFeel.isEmpty())
+      {
+         try
+         {
+            UIManager.setLookAndFeel(lookAndFeel);
+         }
+         catch (Exception e)
+         {
+            invoker.getMessageSystem().debug(e);
+         }
+      }
+
       SwingUtilities.invokeLater(new Runnable()
       {
          public void run()

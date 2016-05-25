@@ -8,15 +8,19 @@ import java.util.Iterator;
 import java.util.Arrays;
 
 import javax.swing.*;
+import javax.swing.event.*;
 
 public class PropertiesDialog extends JDialog
-      implements ActionListener,ItemListener
+      implements ActionListener,ItemListener,ChangeListener
 {
    public PropertiesDialog(MakeGlossariesGUI application)
    {
       super(application, application.getLabel("properties.title"), true);
 
       app = application;
+
+      JTabbedPane tabbedPane = new JTabbedPane();
+      getContentPane().add(tabbedPane, "Center");
 
       properties = app.getProperties();
 
@@ -29,14 +33,7 @@ public class PropertiesDialog extends JDialog
       fileChooser = new JFileChooser(getDir());
 
       Box box = Box.createVerticalBox();
-      getContentPane().add(box, "Center");
-
-      JLabel dirLabel = new JLabel(app.getLabel("properties.start_dir"));
-      dirLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-      box.add(dirLabel);
-
-      Dimension dim = dirLabel.getPreferredSize();
-      int maxWidth = (int)dim.getWidth();
+      newTab(tabbedPane, box, "properties.start_dir");
 
       Box startDirBox = Box.createVerticalBox();
       startDirBox.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -44,44 +41,28 @@ public class PropertiesDialog extends JDialog
 
       ButtonGroup bg = new ButtonGroup();
 
-      homeButton = new JRadioButton(app.getLabel("properties.dir.home"));
-      homeButton.setActionCommand("disablecustom");
-      homeButton.addActionListener(this);
-      homeButton.setMnemonic(app.getMnemonicInt("properties.dir.home"));
-      homeButton.setAlignmentX(Component.LEFT_ALIGNMENT);
-      bg.add(homeButton);
+      homeButton = createRadioButton("properties.dir.home", "disablecustom",
+        bg);
       startDirBox.add(homeButton);
 
-      dim = homeButton.getPreferredSize();
-      maxWidth = (int)Math.max(maxWidth, dim.getWidth());
-
-      lastButton = new JRadioButton(app.getLabel("properties.dir.last"));
-      lastButton.setActionCommand("disablecustom");
-      lastButton.setMnemonic(app.getMnemonicInt("properties.dir.last"));
-      lastButton.addActionListener(this);
-      lastButton.setAlignmentX(Component.LEFT_ALIGNMENT);
-      bg.add(lastButton);
+      lastButton = createRadioButton("properties.dir.last", "disablecustom",
+        bg);
       startDirBox.add(lastButton);
-
-      dim = lastButton.getPreferredSize();
-      maxWidth = (int)Math.max(maxWidth, dim.getWidth());
 
       Box panel = Box.createHorizontalBox();
       panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+      panel.setAlignmentY(Component.TOP_ALIGNMENT);
       startDirBox.add(panel);
 
-      customButton = new JRadioButton(app.getLabel("properties.dir.custom"));
-      customButton.setMnemonic(app.getMnemonicInt("properties.dir.custom"));
-      customButton.setActionCommand("enablecustom");
-      customButton.addActionListener(this);
-      bg.add(customButton);
+      customButton = createRadioButton("properties.dir.custom", "enablecustom",
+        bg);
+      customButton.setAlignmentY(Component.TOP_ALIGNMENT);
       panel.add(customButton);
-
-      dim = customButton.getPreferredSize();
-      maxWidth = (int)Math.max(maxWidth, dim.getWidth());
 
       customField = new FileField(app, this, fileChooser,
         JFileChooser.DIRECTORIES_ONLY);
+      customField.setOpaque(false);
+      customField.setAlignmentY(Component.TOP_ALIGNMENT);
       panel.add(customField);
 
       if (setting.equals("home"))
@@ -100,17 +81,19 @@ public class PropertiesDialog extends JDialog
          customField.setFileName(file.getAbsolutePath());
       }
 
-      box.add(new JLabel(app.getLabel("properties", "diagnostics")));
+      box = Box.createVerticalBox();
+      newTab(tabbedPane, box, "properties.diagnostics");
 
-      docDefCheckBox = new JCheckBox(app.getLabel("properties", "docdefcheck"), 
+      docDefCheckBox = createCheckBox("properties", "docdefcheck", 
          properties.isDocDefsCheckOn());
-      docDefCheckBox.setMnemonic(app.getMnemonic("properties", "docdefcheck"));
       box.add(docDefCheckBox);
 
-      missingLangModBox = new JCheckBox(app.getLabel("properties", "langcheck"),
+      missingLangModBox = createCheckBox("properties", "langcheck",
          properties.isMissingLangCheckOn());
-      missingLangModBox.setMnemonic(app.getMnemonic("properties", "langcheck"));
       box.add(missingLangModBox);
+
+      box = Box.createVerticalBox();
+      newTab(tabbedPane, box, "properties.applications");
 
       Box makeindexBox = Box.createVerticalBox();
       makeindexBox.setBorder(BorderFactory.createEtchedBorder());
@@ -120,18 +103,15 @@ public class PropertiesDialog extends JDialog
       panel.setAlignmentX(Component.LEFT_ALIGNMENT);
       makeindexBox.add(panel);
 
-      JLabel makeindexLabel = new JLabel(app.getLabel("properties.makeindex"));
-      makeindexLabel.setDisplayedMnemonic(app.getMnemonic("properties.makeindex"));
+      JLabel makeindexLabel = createLabel("properties.makeindex");
       panel.add(makeindexLabel);
-
-      dim = makeindexLabel.getPreferredSize();
-      maxWidth = (int)Math.max(maxWidth, dim.getWidth());
 
       makeindexField = new FileField(app, this,
         properties.getMakeIndexApp(),
         fileChooser);
       makeindexLabel.setLabelFor(makeindexField.getTextField());
       panel.add(makeindexField);
+      makeindexField.setOpaque(false);
 
       Box xindyBox = Box.createVerticalBox();
       xindyBox.setBorder(BorderFactory.createEtchedBorder());
@@ -141,16 +121,15 @@ public class PropertiesDialog extends JDialog
       panel.setAlignmentX(Component.LEFT_ALIGNMENT);
       xindyBox.add(panel);
 
-      JLabel xindyLabel = new JLabel(app.getLabel("properties.xindy"));
-      xindyLabel.setDisplayedMnemonic(app.getMnemonic("properties.xindy"));
+      JLabel xindyLabel = createLabel("properties.xindy");
       panel.add(xindyLabel);
 
       JPanel xindyDefaultsPanel = new JPanel();
       xindyDefaultsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
       xindyBox.add(xindyDefaultsPanel);
+      xindyDefaultsPanel.setOpaque(false);
 
-      langLabel = new JLabel(app.getLabel("properties.language"));
-      langLabel.setDisplayedMnemonic(app.getMnemonic("properties.language"));
+      langLabel = createLabel("properties.language");
       xindyDefaultsPanel.add(langLabel);
 
       String[] languages = XindyModule.getKnownLanguages();
@@ -166,6 +145,7 @@ public class PropertiesDialog extends JDialog
 
       xindyModuleLayout = new CardLayout();
       modulesPanel = new JPanel(xindyModuleLayout);
+      modulesPanel.setOpaque(false);
 
       initVariants((String)languageBox.getSelectedItem(),
         properties.getDefaultXindyVariant(),
@@ -173,43 +153,94 @@ public class PropertiesDialog extends JDialog
 
       xindyDefaultsPanel.add(modulesPanel);
 
-      overrideBox = new JCheckBox(app.getLabel("properties", "override"), properties.isOverride());
-      overrideBox.setMnemonic(app.getMnemonic("properties", "override"));
-      overrideBox.setActionCommand("override");
-      overrideBox.addActionListener(this);
+      overrideBox = createCheckBox("properties", "override", 
+         properties.isOverride());
       xindyBox.add(overrideBox);
-
-      dim = xindyLabel.getPreferredSize();
-      maxWidth = (int)Math.max(maxWidth, dim.getWidth());
 
       xindyField = new FileField(app, this,
         properties.getXindyApp(), fileChooser);
       xindyLabel.setLabelFor(xindyField.getTextField());
       panel.add(xindyField);
+      xindyField.setOpaque(false);
 
-      dim = dirLabel.getPreferredSize();
-      dim.width = maxWidth;
-      dirLabel.setPreferredSize(dim);
+      box = Box.createVerticalBox();
+      newTab(tabbedPane, box, "properties.gui");
 
-      dim = homeButton.getPreferredSize();
-      dim.width = maxWidth;
-      homeButton.setPreferredSize(dim);
+      JPanel lfPanel = new JPanel();
+      lfPanel.setOpaque(false);
+      box.add(lfPanel);
 
-      dim = lastButton.getPreferredSize();
-      dim.width = maxWidth;
-      lastButton.setPreferredSize(dim);
+      JLabel lfLabel = createLabel("properties.look_and_feel");
+      lfPanel.add(lfLabel);
 
-      dim = customButton.getPreferredSize();
-      dim.width = maxWidth;
-      customButton.setPreferredSize(dim);
+      UIManager.LookAndFeelInfo[] lfInfo = UIManager.getInstalledLookAndFeels();
 
-      dim = makeindexLabel.getPreferredSize();
-      dim.width = maxWidth;
-      makeindexLabel.setPreferredSize(dim);
+      lookAndFeelBox = new JComboBox<UIManager.LookAndFeelInfo>(lfInfo);
+      lookAndFeelBox.setRenderer(new LookAndFeelCellRenderer());
 
-      dim = xindyLabel.getPreferredSize();
-      dim.width = maxWidth;
-      xindyLabel.setPreferredSize(dim);
+      String currentLF = properties.getLookAndFeel();
+
+      if (currentLF != null)
+      {
+         for (int i = 0; i < lfInfo.length; i++)
+         {
+            if (lfInfo[i].getClassName().equals(currentLF))
+            {
+               lookAndFeelBox.setSelectedIndex(i);
+               break;
+            }
+         }
+      }
+
+      lfPanel.add(lookAndFeelBox);
+      lfLabel.setLabelFor(lookAndFeelBox);
+
+      JLabel restartLabel = new JLabel(app.getLabel("properties.restart"));
+      lfPanel.add(restartLabel);
+
+      JPanel fontPanel = new JPanel();
+      fontPanel.setOpaque(false);
+      box.add(fontPanel);
+
+      JLabel fontLabel = createLabel("properties.font");
+      fontPanel.add(fontLabel);
+
+      GraphicsEnvironment env =
+         GraphicsEnvironment.getLocalGraphicsEnvironment();
+
+      fontBox = new JComboBox<String>(env.getAvailableFontFamilyNames());
+      fontBox.setSelectedItem(properties.getFontName());
+      fontBox.addItemListener(this);
+      fontPanel.add(fontBox);
+
+      int style = properties.getFontStyle();
+
+      boldBox = createCheckBox("properties.bold", "font",
+        (style & Font.BOLD) != 0);
+      fontPanel.add(boldBox);
+
+      italicBox = createCheckBox("properties.italic", "font", 
+        (style & Font.ITALIC) != 0);
+      fontPanel.add(italicBox);
+
+      JLabel fontSizeLabel = createLabel("properties.size.font");
+      fontPanel.add(fontSizeLabel);
+
+      fontSizeBox = new JSpinner(
+         new SpinnerNumberModel(properties.getFontSize(), 2,100,1));
+      fontPanel.add(fontSizeBox);
+      fontSizeLabel.setLabelFor(fontSizeBox);
+      fontSizeBox.addChangeListener(this);
+
+      JPanel p = new JPanel();
+      box.add(p);
+
+      fontSample = new JLabel(app.getLabel("properties.font.sample"));
+      p.setBackground(Color.white);
+      p.setOpaque(true);
+      p.add(fontSample);
+
+      updateFontSample();
 
       JPanel buttonPanel = new JPanel();
       getContentPane().add(buttonPanel, "South");
@@ -227,6 +258,46 @@ public class PropertiesDialog extends JDialog
       setLocationRelativeTo(app);
 
       updateOverride();
+   }
+
+   private void newTab(JTabbedPane tabbedPane, JComponent comp,
+     String label)
+   {
+      tabbedPane.add(app.getLabel(label), comp);
+      tabbedPane.setMnemonicAt(tabbedPane.getTabCount()-1, 
+         app.getMnemonicInt(label));
+   }
+
+   private JRadioButton createRadioButton(String label, String action,
+     ButtonGroup bg)
+   {
+      JRadioButton button = new JRadioButton(app.getLabel(label));
+      button.setMnemonic(app.getMnemonicInt(label));
+      button.setActionCommand(action);
+      button.addActionListener(this);
+      bg.add(button);
+      button.setOpaque(false);
+
+      return button;
+   }
+
+   private JCheckBox createCheckBox(String parent, String label, boolean set)
+   {
+      JCheckBox box = new JCheckBox(app.getLabel(parent, label), set);
+      box.setMnemonic(app.getMnemonic(parent, label));
+      box.setActionCommand(label);
+      box.addActionListener(this);
+      box.setOpaque(false);
+
+      return box;
+   }
+
+   private JLabel createLabel(String label)
+   {
+      JLabel comp = new JLabel(app.getLabel(label));
+      comp.setDisplayedMnemonic(app.getMnemonic(label));
+
+      return comp;
    }
 
    private File getDir()
@@ -283,6 +354,10 @@ public class PropertiesDialog extends JDialog
          customField.setEnabled(true);
          customField.requestFocusInWindow();
       }
+      else if (action.equals("font"))
+      {
+         updateFontSample();
+      }
       else if (action.equals("cancel"))
       {
          setVisible(false);
@@ -337,6 +412,50 @@ public class PropertiesDialog extends JDialog
             properties.setDefaultCustomDir(fileName);
          }
          
+         boolean fontChanged=false;
+         String oldFont = properties.getFontName();
+         String newFont = (String)fontBox.getSelectedItem();
+         int oldStyle = properties.getFontStyle();
+         int newStyle = Font.PLAIN;
+         int oldSize = properties.getFontSize();
+         int newSize = ((Number)fontSizeBox.getValue()).intValue();
+
+         if (boldBox.isSelected())
+         {
+            newStyle = Font.BOLD;
+         }
+
+         if (italicBox.isSelected())
+         {
+            newStyle = newStyle | Font.ITALIC;
+         }
+
+         if (!oldFont.equals(newFont))
+         {
+            fontChanged = true;
+            properties.setFontName(newFont);
+         }
+
+         if (oldStyle != newStyle)
+         {
+            fontChanged = true;
+            properties.setFontStyle(newStyle);
+         }
+
+         if (oldSize != newSize)
+         {
+            fontChanged = true;
+            properties.setFontSize(newSize);
+         }
+
+         if (fontChanged)
+         {
+            app.updateFont();
+         }
+
+         properties.setLookAndFeel(
+           (UIManager.LookAndFeelInfo)lookAndFeelBox.getSelectedItem());
+
          setVisible(false);
       }
    }
@@ -394,10 +513,44 @@ public class PropertiesDialog extends JDialog
 
    public void itemStateChanged(ItemEvent e)
    {
-      if (e.getSource() == languageBox)
+      Object source = e.getSource();
+
+      if (source == languageBox)
       {
          updateXindyModule();
       }
+      else if (source == fontBox)
+      {
+         updateFontSample();
+      }
+   }
+
+   public void stateChanged(ChangeEvent e)
+   {
+      if (e.getSource() == fontSizeBox)
+      {
+         updateFontSample();
+      }
+   }
+
+   private void updateFontSample()
+   {
+      int style = Font.PLAIN;
+
+      if (boldBox.isSelected())
+      {
+         style = Font.BOLD;
+      }
+
+      if (italicBox.isSelected())
+      {
+         style = style | Font.ITALIC;
+      }
+
+      fontSample.setFont(new Font((String)fontBox.getSelectedItem(),
+        style, ((Number)fontSizeBox.getValue()).intValue()));
+
+      fontSample.repaint();
    }
 
    private void updateXindyModule()
@@ -427,22 +580,26 @@ public class PropertiesDialog extends JDialog
 
    private JPanel modulesPanel;
 
-   private JLabel langLabel;
+   private JLabel langLabel, fontSample;
 
    private XindyModulePanel currentModule;
 
    private JRadioButton homeButton, lastButton, customButton;
 
-   private JComboBox<String> languageBox;
+   private JComboBox<String> languageBox, fontBox;
+
+   private JComboBox<UIManager.LookAndFeelInfo> lookAndFeelBox;
+
+   private JSpinner fontSizeBox;
 
    private FileField customField, makeindexField, xindyField;
 
    private JFileChooser fileChooser;
 
-   private JCheckBox overrideBox, docDefCheckBox, missingLangModBox;
+   private JCheckBox overrideBox, docDefCheckBox, missingLangModBox,
+     boldBox, italicBox;
 
    private MakeGlossariesProperties properties;
-
 }
 
 class XindyModulePanel extends JPanel
@@ -458,6 +615,7 @@ class XindyModulePanel extends JPanel
       super();
       setName(module.getLanguage());
       this.module = module;
+      setOpaque(false);
 
       encodingLabel = new JLabel(app.getLabel("properties.encoding"));
       encodingLabel.setDisplayedMnemonic(app.getMnemonic("properties.encoding"));
@@ -514,3 +672,19 @@ class XindyModulePanel extends JPanel
    private JLabel encodingLabel;
 }
 
+class LookAndFeelCellRenderer extends DefaultListCellRenderer
+{
+   public Component getListCellRendererComponent(JList<?> list,
+    Object value, int index, boolean isSelected, boolean cellHasFocus)
+   {
+      Component comp = super.getListCellRendererComponent(list, value, index,
+        isSelected, cellHasFocus);
+
+      if (value instanceof UIManager.LookAndFeelInfo)
+      {
+         setText(((UIManager.LookAndFeelInfo)value).getName());
+      }
+
+      return comp;
+   }
+}

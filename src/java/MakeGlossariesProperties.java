@@ -8,6 +8,8 @@ import java.awt.event.ActionListener;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JToolBar;
+import javax.swing.UIManager;
+import javax.swing.LookAndFeel;
 
 public class MakeGlossariesProperties extends Properties
 {
@@ -369,6 +371,33 @@ public class MakeGlossariesProperties extends Properties
    public void setXindyApp(String pathToApp)
    {
       setProperty("xindy", pathToApp);
+   }
+
+   public String getLookAndFeel()
+   {
+      String prop = getProperty("look_and_feel");
+
+      if (prop == null)
+      {
+         LookAndFeel current = UIManager.getLookAndFeel();
+
+         if (current == null) return null;
+
+         prop = current.getClass().getName();
+         setProperty("look_and_feel", prop);
+      }
+
+      return prop;
+   }
+
+   public void setLookAndFeel(UIManager.LookAndFeelInfo info)
+   {
+      setLookAndFeel(info.getClassName());
+   }
+
+   public void setLookAndFeel(String lookAndFeel)
+   {
+      setProperty("look_and_feel", lookAndFeel);
    }
 
    private void loadRecentFiles(BufferedReader in)

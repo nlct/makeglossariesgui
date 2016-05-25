@@ -53,14 +53,19 @@ public class GlossariesPanel extends JEditorPane
       throws BadLocationException,IOException
    {
       HTMLDocument doc = (HTMLDocument)getDocument();
-      Glossaries glossaries =  app.getGlossaries();
+      Glossaries glossaries = app.getGlossaries();
+
+      if (glossaries == null)
+      {
+         return;
+      }
 
       for (int i = 0, n = Glossaries.getNumFields(); i < n; i++)
       {
          Element e = Glossaries.getFieldLabelElement(doc, i);
          String tag = e.getName();
 
-	doc.setOuterHTML(e, "<"+tag+">"+glossaries.getFieldLabel(i)+"</"+tag+">");
+	 doc.setOuterHTML(e, "<"+tag+">"+glossaries.getFieldLabel(i)+"</"+tag+">");
       }
    }
 
