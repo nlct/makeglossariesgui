@@ -13,7 +13,8 @@ import javax.swing.event.*;
 import javax.help.*;
 
 public class MakeGlossariesGUI extends JFrame
-  implements ActionListener,MenuListener,GlossaryMessage
+  implements ActionListener,MenuListener,GlossaryMessage,
+    HyperlinkListener
 {
    public MakeGlossariesGUI(MakeGlossariesInvoker invoker)
    {
@@ -126,6 +127,7 @@ public class MakeGlossariesGUI extends JFrame
 //      diagnosticArea = new JTextArea();
       diagnosticArea = new JEditorPane("text/html", "");
       diagnosticArea.setEditable(false);
+      diagnosticArea.addHyperlinkListener(this);
 /*
       diagnosticArea.setLineWrap(true);
       diagnosticArea.setWrapStyleWord(true);
@@ -181,6 +183,52 @@ public class MakeGlossariesGUI extends JFrame
       if (invoker.getFileName() != null)
       {
          load(invoker.getFile());
+      }
+   }
+
+   public void hyperlinkUpdate(HyperlinkEvent evt)
+   {
+      Desktop desktop = Desktop.isDesktopSupported() ?
+                        Desktop.getDesktop() : null;
+
+      if (desktop == null)
+      {
+         debug("desktop not supported");
+         return;
+      }
+
+      HyperlinkEvent.EventType type = evt.getEventType();
+
+      URL url = evt.getURL();
+      Object source = evt.getSource();
+
+      if (type == HyperlinkEvent.EventType.ACTIVATED)
+      {
+         if (desktop.isSupported(Desktop.Action.BROWSE))
+         {
+            try
+            {
+               desktop.browse(url.toURI());
+            }
+            catch (Exception e)
+            {
+               debug(e);
+            }
+         }
+      }
+      else if (type == HyperlinkEvent.EventType.ENTERED)
+      {
+         if (source instanceof JComponent)
+         {
+            ((JComponent)source).setToolTipText(url.toString());
+         }
+      }
+      else if (type == HyperlinkEvent.EventType.EXITED)
+      {
+         if (source instanceof JComponent)
+         {
+            ((JComponent)source).setToolTipText(null);
+         }
       }
    }
 
