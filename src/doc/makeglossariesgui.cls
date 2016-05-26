@@ -83,6 +83,10 @@
 
 \newcommand*{\element}[1]{\texttt{\char`\<#1\char`\>}}
 
+\newcommand*{\htmltt}[1]{\texttt{#1}}
+\newcommand*{\htmlem}[1]{\emph{#1}}
+\newcommand*{\htmli}[1]{\textit{#1}}
+
 % Default definition.
 % (Overridden by context label in dictionary file.)
 \providecommand{\idxenvname}{environment}

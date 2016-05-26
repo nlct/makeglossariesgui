@@ -384,6 +384,13 @@ public class Glossaries
 
       if (invoker.isBatchMode()) return;
 
+      parseLog(dir, baseName);
+   }
+
+   public void parseLog(File dir, String baseName)
+     throws IOException
+   {
+
       // Now check the log file for any problems
 
       File log = new File(dir, baseName+".log");
@@ -578,8 +585,18 @@ public class Glossaries
             {
                line = reader.readLine();
 
-               addDiagnosticMessage(invoker.getLabelWithValue(
-                 "diagnostics.undef_cs", line));
+               m = fragileBrokenPattern.matcher(line);
+
+               if (m.matches())
+               {
+                  addDiagnosticMessage(invoker.getLabel(
+                    "diagnostics.fragile"));
+               }
+               else
+               {
+                  addDiagnosticMessage(invoker.getLabelWithValue(
+                    "diagnostics.undef_cs", line));
+               }
 
                continue;
             }
@@ -751,9 +768,17 @@ public class Glossaries
 
    public String getDiagnostics()
    {
+      String mess;
+
       if (!noidx && istName == null && order == null)
       {
-         if (glossaryList.size() == 0)
+         mess = getDiagnosticMessages();
+
+         if (mess != null)
+         {
+            return mess;
+         }
+         else if (glossaryList.size() == 0)
          {
             return invoker.getFileName().toLowerCase().endsWith(".aux") ?
                    invoker.getLabel("diagnostics.no_glossaries"):
@@ -765,7 +790,7 @@ public class Glossaries
          }
       }
 
-      String mess = getIndexerError();
+      mess = getIndexerError();
 
       if (mess != null)
       {
@@ -948,6 +973,9 @@ public class Glossaries
 
    private static final Pattern undefControlSequencePattern
       = Pattern.compile(".* Undefined control sequence.");
+
+   private static final Pattern fragileBrokenPattern
+      = Pattern.compile(".*\\\\in@ #1#2->\\\\begingroup \\\\def \\\\in@@\\s*");
 
    private static final Pattern unknownOptPattern
       = Pattern.compile(".*Unknown option `(.*)' for package `glossaries'.*");

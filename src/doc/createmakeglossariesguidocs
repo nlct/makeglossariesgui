@@ -870,6 +870,7 @@ sub start_newterm{
    if ($attrs{description})
    {
       $terms{$tag}->{Description} = $attrs{description};
+      $terms{$tag}->{Fmt} = $attrs{fmt};
 
       # write html file used by popup window if a description has been
       # supplied
@@ -879,15 +880,38 @@ sub start_newterm{
 
       print FD &html_head($attrs{text});
 
-      print FD "<body>\n<h1>$attrs{text}</h1>\n",
-         ucfirst($attrs{description}), ".\n";
+      print FD "<body>\n<h1>";
+
+      if ($attrs{fmt})
+      {
+         print FD "<$attrs{fmt}>$attrs{text}</$attrs{fmt}>";
+      }
+      else
+      {
+         print FD $attrs{text};
+      }
+
+      print FD "</h1>\n", ucfirst($attrs{description}), ".\n";
 
       print FD "</body>\n</html>\n";
 
       close FD;
 
-      print TEXFD "\\newglossaryentry{$attrs{tag}}{name={",
-       $attrs{text}, "},description={", $attrs{description}, "}}\n";
+      if ($attrs{fmt})
+      {
+         print TEXFD "\\newglossaryentry{$attrs{tag}}{name={",
+          "\\html$attrs{fmt}\{", 
+          $attrs{text}, "}},sort={",
+          $attrs{text}, "},description={",
+          $attrs{description},
+          "\\index{$attrs{text}\@\\html$attrs{fmt}\{", 
+          $attrs{text}, "}}}}\n";
+      }
+      else
+      {
+         print TEXFD "\\newglossaryentry{$attrs{tag}}{name={",
+          $attrs{text}, "},description={", $attrs{description}, "\\index{$attrs{text}}}}\n";
+      }
    }
 }
 
@@ -1869,6 +1893,12 @@ sub start_term{
    }
 
    my $html = $terms{$hstag}->{Text};
+   my $fmt = $terms{$hstag}->{Fmt};
+
+   if ($fmt)
+   {
+      $html = "<$fmt>$html</$fmt>";
+   }
 
    unless ($terms{$hstag}->{Ref})
    {
@@ -1877,16 +1907,29 @@ sub start_term{
 
    if ($terms{$hstag}->{Description})
    {
-      $html = &hs_popup("gls_".$attrs{tag}.".html", $html);
+      if ($attrs{hyper} and $attrs{hyper} eq 'false')
+      {
+         print TEXFD "\\gls*{", $attrs{tag}, "}";
+      }
+      else
+      {
+         $html = &hs_popup("gls_".$attrs{tag}.".html", $html);
 
-      print TEXFD "\\gls{", $attrs{tag}, "}";
+         print TEXFD "\\gls{", $attrs{tag}, "}";
+      }
    }
    else
    {
       my $text = $terms{$hstag}->{Text};
+
       my $idx  = $text;
 
       $idx=~s/([!@"|])/"$1/g;
+
+      if ($fmt)
+      {
+         $idx = "$idx\@\\html$fmt\{$idx\}";
+      }
 
       print TEXFD "$text\\index{$idx}";
    }

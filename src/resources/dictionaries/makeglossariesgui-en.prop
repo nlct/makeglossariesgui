@@ -158,6 +158,8 @@ diagnostics.dry_run=Dry run mode on. System command would've been:
 diagnostics.wrglossary=It seems you have tried to index an entry in the <tt>$1</tt> glossary on <b>line $2</b>, but the associated file hasn't been opened. Remember to use <code>\\makeglossaries</code> before commands like <code>\\glsadd</code> and <code>\\glsaddall</code>. Details of lost indexing code:
 diagnostics.mapped_lang=Your document has requested that xindy be run with language '$1'. This is a babel or polyglossia language identifier. I'm going to assume you meant the xindy language module '$2'.
 diagnostics.variant=Your document has requested that xindy be run with codepage '$2', but language '$1' requires additional information. I'm going to assume you meant '$3-$2' for the codepage. (Use <b>Dry Run Mode</b> to find the exact call to xindy.)
+diagnostics.no_aux=Since the aux file doesn't exist, there's not much I can do to help, but I'll parse the log file in case there are any clues there.
+diagnostics.fragile=It's possible that there's an expansion issue involving a fragile command. Have you used a fragile command in your entry definitions? Things to check for:<ul><li>Have you used a class like <tt>beamer</tt> that doesn't make common formatting commands like <tt>\\textit</tt> robust?</li><li>Have you tried using <code>\\protect</code> in front of commands contained within your entry definitions?</li><li>Have you tried switching off the expansion using commands like <code>\\glsnoexpandfields</code>? (See section <a href="http://mirror.ctan.org/macros/latex/contrib/glossaries/glossaries-user.html#sec:expansion">4.6 Expansion</a> in the <tt>glossaries</tt> user manual.)</li></ul>
 
 # Properties dialog
 properties.title=Preferences

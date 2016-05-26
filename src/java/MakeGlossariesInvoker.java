@@ -58,7 +58,9 @@ public class MakeGlossariesInvoker
 
    public void load(File file)
    {
-      if (file.getName().toLowerCase().endsWith(".tex"))
+      String lc = file.getName().toLowerCase();
+
+      if (lc.endsWith(".tex") || lc.endsWith(".log"))
       {
          int idx = file.getName().length()-4;
 
@@ -79,8 +81,48 @@ public class MakeGlossariesInvoker
    {
       if (!file.exists())
       {
-         getMessageSystem().error(getLabelWithValue(
-           "error.io.file_doesnt_exist", file.getAbsolutePath()));
+         // Does the log file exists?
+
+         File log = null;
+
+         String name = file.getName();
+
+         if (!isBatchMode() && name.toLowerCase().endsWith(".aux"))
+         {
+            name = name.substring(0, name.length()-4);
+            log = new File(file.getParentFile(), name+".log");
+
+            if (!log.exists())
+            {
+               log = null;
+            }
+            else
+            {
+               glossaries = new Glossaries(this);
+               glossaries.addDiagnosticMessage(
+                 getLabel("diagnostics.no_aux"));
+               glossaries.addErrorMessage(getLabelWithValue(
+                 "error.io.file_doesnt_exist", file.toString()));
+
+               try
+               {
+                  glossaries.parseLog(log.getParentFile(), name);
+               }
+               catch (Exception e)
+               {
+                  getMessageSystem().error(e);
+               }
+
+               getMessageSystem().showMessages();
+            }
+         }
+
+         if (log == null)
+         {
+            getMessageSystem().error(getLabelWithValue(
+              "error.io.file_doesnt_exist", file.getAbsolutePath()));
+         }
+
          return;
       }
 

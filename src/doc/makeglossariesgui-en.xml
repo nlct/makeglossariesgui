@@ -15,16 +15,16 @@
     <newacro short="GUI" long="graphical user interface" tag="gui" />
     <!-- Define Terms. If a description is included it's a glossary
          term otherwise it goes in the index -->
-    <newterm tag="makeglossaries" text="makeglossaries" 
+    <newterm tag="makeglossaries" text="makeglossaries" fmt="tt"
       description="a Perl script provided with the glossaries package
       which runs either makeindex or xindy, depending on the
       settings in the .aux file"/>
-    <newterm tag="makeglossarieslite" text="makeglossaries-lite.lua" 
+    <newterm tag="makeglossarieslite" text="makeglossaries-lite.lua" fmt="tt"
       description="a Lua script provided with the glossaries package
       as a light-weight alternative to makeglossaries"/>
-    <newterm tag="makeindex" text="makeindex" 
+    <newterm tag="makeindex" text="makeindex" fmt="tt"
       description="an indexing application"/>
-    <newterm tag="xindy" text="xindy" 
+    <newterm tag="xindy" text="xindy"  fmt="tt"
       description="an indexing application written in Perl"/>
   </preamble>
   <document>
@@ -35,23 +35,24 @@
      directly using <LaTeX />, using <term tag="makeindex"/> or using 
      <term tag="xindy"/>.  The first option requires two <LaTeX/> runs
      (as with cross-references), the last two options requires a <LaTeX/> 
-     run followed by running the indexing application (<term tag="makeindex"/>
-     or <term tag="xindy"/>), followed by another <LaTeX/> run. 
+     run followed by running the indexing application 
+     (<term hyper="false" tag="makeindex"/>
+     or <term hyper="false" tag="xindy"/>), followed by another <LaTeX/> run. 
      </p>
      <p>
      The <sty>glossaries</sty> package provides a Perl script called 
      <term tag="makeglossaries"/> that's intended to simplify this step
      for options 2 and 3. However, sometimes things can go wrong and users
-     may not be able to work out why. The <term tag="makeglossaries"/> 
+     may not be able to work out why. The 
+     <term hyper="false" tag="makeglossaries"/> 
      script tries to diagnose problems, but not everyone wants to install 
      Perl for some reason (which is a shame, as there are some useful 
      <TeX/>-related Perl scripts, including <term tag="xindy"/>). 
      The <sty>glossaries</sty> package also provides a light-weight Lua 
      alternative, <term tag="makeglossarieslite"/>, but that doesn't provide 
      any diagnostics. <app/> is a Java application that (when run in batch 
-     mode) can be used instead of <term tag="makeglossaries"/> or 
-     <term tag="makeglossarieslite"/>, although the overhead of using Java 
-     is naturally higher than Perl or Lua. However <app/>'s primary
+     mode) can be used instead of <term hyper="false" tag="makeglossaries"/> or 
+     <term hyper="false" tag="makeglossarieslite"/> however its primary
      purpose is a <acr tag="gui"/> tool for determining what's gone wrong
      when the glossary doesn't appear or is incomplete.
      </p>
@@ -70,7 +71,8 @@
      The <meta>filename</meta> must be supplied when run in batch mode, but
      is optional in <acr tag="gui"/> mode. The <meta>filename</meta> should
      be the auxiliary file produced by the <LaTeX/> run, but may also be
-     the <tt>.tex</tt> file if it has the same basename as the auxiliary file.
+     the <tt>.tex</tt> or <tt>.log</tt> file if it has the same basename as
+     the auxiliary file.
      The <tt>.aux</tt> extension may be omitted. Unlike 
      <term tag="makeglossaries"/> and <term tag="makeglossarieslite"/>, 
      <meta>filename</meta> may include the directory path.
@@ -118,8 +120,8 @@
    <menu tag="file.open"/> menu item. You can also use the load file button
    on the toolbar or drag and drop the file onto the main window. The
    input file should be the <tt>.aux</tt> file created by <LaTeX/>, but if
-   you try to load the main document <tt>.tex</tt> file, <app/> will assume 
-   you meant the associated <tt>.aux</tt> file.
+   you try to load the main document <tt>.tex</tt> or <tt>.log</tt> file,
+   <app/> will assume you meant the associated <tt>.aux</tt> file.
    </p>
    <example>
    <p>
@@ -559,15 +561,121 @@ if you don't want any glossaries.) This document will not have a glossary.
    If you suppress these warnings then <app/> can't help.
    </p>
    </example>
+   <p>
+   Sometimes things can go so badly wrong that <LaTeX/> doesn't even
+   generate an auxiliary file. In this case you can load the <tt>.log</tt>
+   file instead. (You'll need to change the file selector filter to 
+   show all files.) <app/> will parse the log file to see if it recognises
+   any of the error messages. Some <LaTeX/> error messages can be quite
+   crytic so there's no guarantee that <app/> will be able to help, but it
+   might detect something useful. Note that this option isn't available in
+   batch mode.
+   </p>
+   <example>
+   <p>
+   Consider the following document:
+   </p>
+<pre>
+\batchmode
+\documentclass{beamer}
+
+\usepackage{glossaries}
+
+\makeglossaries
+
+\newglossaryentry{sample}{name=sample,first={\textit{sample}},
+  description={an example}}
+
+\begin{document}
+
+\begin{frame}
+\gls{sample}
+\end{frame}
+
+\begin{frame}
+\printglossary
+\end{frame}
+
+\end{document}
+</pre>
+   <p>
+   This document goes badly wrong. The first error message is:
+   </p>
+<pre>
+! Undefined control sequence.
+\in@ #1#2->\begingroup \def \in@@
+</pre>
+   <p>
+   If I load the log file into <app/>, the diagnostic panel displays the
+following:
+   </p>
+<blockquote>
+<p>
+Since the aux file doesn't exist, there's not much I can do to help, 
+but I'll parse the log file in case there are any clues there.
+</p>
+<p>
+It's possible that there's an expansion issue involving a fragile command. 
+Have you used a fragile command in your entry definitions? Things to check for:
+</p>
+<ul>
+<li>Have you used a class like <tt>beamer</tt> that doesn't make common 
+formatting commands like <cs tag="textit"/> robust?</li>
+<li>Have you tried using <cs tag="protect"/> in front of commands contained 
+within your entry definitions?</li>
+<li>Have you tried switching off the expansion using commands like 
+<cs tag="glsnoexpandfields"/>? (See section 4.6 Expansion in the 
+<tt>glossaries</tt> user manual.)</li>
+</ul>
+</blockquote>
+   <p>
+   The problem here is that a fragile command has been used in the entry 
+   definition. The problematic command in this example is 
+   <cs tag="textit"/>, which is normally robust, but it happens to be
+   fragile with the <tt>beamer</tt> class. The solution is to either 
+   protect the problematic command with <cs tag="protect"/> or
+   use <cs tag="glsnoexpandfields"/> before you define the entries.
+   For example:
+   </p>
+<pre>
+\documentclass{beamer}
+
+\usepackage{glossaries}
+
+\makeglossaries
+
+\glsnoexpandfields
+
+\newglossaryentry{sample}{name=sample,first={\textit{sample}},
+  description={an example}}
+
+\begin{document}
+
+\begin{frame}
+\gls{sample}
+\end{frame}
+
+\begin{frame}
+\printglossary
+\end{frame}
+
+\end{document}
+</pre>
+   </example>
    </node>
    <node type="chapter" tag="properties" title="Settings" >
    <p>
    The application settings can be adjusted through the <menu tag="settings"/>
-   menu. The
-   <menu tag="settings.editproperties"/> menu item (or toolbar button) will 
-   open the 
-   <button tag="properties.title"/> dialog window.
-   This has four tabs: <button tag="properties.start_dir"/>, 
+   menu. This has menu items for increasing or decreasing the font size
+   (<menu tag="settings.incsize"/> or <menu tag="settings.decsize"/>),
+   setting the dry run mode (<menu tag="settings.dryrun"/>) or 
+   open the <button tag="properties.title"/> dialog window
+   (<menu tag="settings.editproperties"/>). Note that the dry run mode is the 
+   only setting that isn't remembered the next time you run <app/>.
+   </p>
+   <p>
+   The <button tag="properties.title"/> dialog 
+   has four tabs: <button tag="properties.start_dir"/>, 
    <button tag="properties.diagnostics"/>,
    <button tag="properties.applications"/> and 
    <button tag="properties.gui"/>.

@@ -556,7 +556,9 @@ public class MakeGlossariesGUI extends JFrame
 
    public void load(File file)
    {
-      if (file.getName().toLowerCase().endsWith(".tex"))
+      String lc = file.getName().toLowerCase();
+
+      if (lc.endsWith(".tex") || lc.endsWith(".log"))
       {
          int idx = file.getName().length()-4;
 

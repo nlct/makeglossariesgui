@@ -1,0 +1,23 @@
+\batchmode
+\documentclass{beamer}
+
+\usepackage{glossaries}
+
+%\glsnoexpandfields
+
+\makeglossaries
+
+\newglossaryentry{sample}{name=sample,first={\textit{sample}},
+  description={an example}}
+
+\begin{document}
+
+\begin{frame}
+\gls{sample}
+\end{frame}
+
+\begin{frame}
+\printglossary
+\end{frame}
+
+\end{document}
