@@ -106,6 +106,12 @@ entry.find.tooltip=Find entry
 entry.find_label=Tag:
 entry.find_label.mnemonic=T
 
+# popup menu
+popup.select_all=Select All
+popup.select_all.mnemonic=A
+popup.copy=Copy
+popup.copy.mnemonic=C
+
 # Diagnostics panel
 diagnostics.title=Diagnostics
 diagnostics.title.mnemonic=D
@@ -139,7 +145,8 @@ diagnostics.missing_lang=You don't have any glossaries support for language <tt>
 diagnostics.missing_sty=The package <tt>$1</tt> is required but doesn't seem to be installed. Use your TeX package manager to install it. If your package manager can't find it, try searching for it on CTAN <a href="http://ctan.org/search/?phrase=$1"><tt>http://ctan.org/search/?phrase=$1</tt></a>
 diagnostics.missing_datatool_base=The package <tt>'datatool-base'</tt> is required but doesn't seem to be installed. This package is part of the <tt>datatool</tt> bundle. If you already have <tt>datatool</tt> installed it could be that you have an old version that doesn't include <tt>datatool-base.sty</tt>. Use your TeX package manager to install or update <tt>datatool</tt>.
 diagnostics.noidx=It seems you've used <code>\\makenoidxglossaries</code>, which means you don't need xindy or makeindex, you just need a second LaTeX run to get the glossary up to date.
-diagnostics.shell_disabled=It seems that TeX refused to run the system command <tt>$1</tt>. This could be because the shell escape has been disabled or it could be that TeX is running in restricted mode and the given system command isn't a trusted application.
+diagnostics.shell_disabled=It seems that TeX refused to run the system command <pre>$1</pre> because the shell escape had been disabled.
+diagnostics.shell_restricted=It seems that TeX refused to run the system command <pre>$1</pre> because restricted mode was on and the given system command isn't a trusted application.
 diagnostics.no_glossaries=The document doesn't define any glossaries. Have you used the <code>nomain</code> option by mistake?
 diagnostics.undef_cs=LaTeX reported an undefined control sequence. Perhaps you're trying to use a command that has been introduced in a later version of one of the packages you're using. If this is the case, you'll need to use your TeX package manager to update the relevant package. Alternatively, you may simply have misspelt the command or forgotten to define it or forgotten to load the package that provides it. Details:<pre>$1</pre>
 diagnostics.one_too_long=One entry was too long for makeindex. Do you have an excessively long <code>sort</code> field or label for that entry?
@@ -149,6 +156,8 @@ diagnostics.old_too_long=$1 entries were too long for makeindex. If you upgrade 
 diagnostics.undef_opt=Your version of glossaries doesn't provide the package option <code>$1</code>. This may be because that option was introduced to a later version, in which case you will need to use your TeX package manager to update the glossaries package, or it may be that you have misspelt the option.
 diagnostics.dry_run=Dry run mode on. System command would've been:
 diagnostics.wrglossary=It seems you have tried to index an entry in the <tt>$1</tt> glossary on <b>line $2</b>, but the associated file hasn't been opened. Remember to use <code>\\makeglossaries</code> before commands like <code>\\glsadd</code> and <code>\\glsaddall</code>. Details of lost indexing code:
+diagnostics.mapped_lang=Your document has requested that xindy be run with language '$1'. This is a babel or polyglossia language identifier. I'm going to assume you meant the xindy language module '$2'.
+diagnostics.variant=Your document has requested that xindy be run with codepage '$2', but language '$1' requires additional information. I'm going to assume you meant '$3-$2' for the codepage. (Use <b>Dry Run Mode</b> to find the exact call to xindy.)
 
 # Properties dialog
 properties.title=Preferences

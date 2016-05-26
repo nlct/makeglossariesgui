@@ -51,7 +51,7 @@
      any diagnostics. <app/> is a Java application that (when run in batch 
      mode) can be used instead of <term tag="makeglossaries"/> or 
      <term tag="makeglossarieslite"/>, although the overhead of using Java 
-     is naturally a lot higher than Perl or Lua. However <app/>'s primary
+     is naturally higher than Perl or Lua. However <app/>'s primary
      purpose is a <acr tag="gui"/> tool for determining what's gone wrong
      when the glossary doesn't appear or is incomplete.
      </p>
@@ -107,7 +107,7 @@
      When run in batch mode, <app/> behaves much like 
      <term tag="makeglossaries"/>. It reads the auxiliary file to determine
      whether to use <term tag="makeindex"/> or <term tag="xindy"/> and
-     what options to pass to them. The <ref text="settings" tag="properties"/>
+     what options to pass to them. The <acr tag="gui"/> <ref text="settings" tag="properties"/>
      will be honoured.
      </p>
    </node>
@@ -716,7 +716,6 @@ if you don't want any glossaries.) This document will not have a glossary.
      <verbtabinput src="LICENSE"/>
    </node>
    <printglossary />
-   <printacronyms />
    <printindex />
   </document>
 </manual>

@@ -548,7 +548,7 @@ public class Glossaries
             {
                StringBuilder builder = new StringBuilder(line);
 
-               while ((line = reader.readLine()) != null)
+               while (!line.endsWith(".") && (line = reader.readLine()) != null)
                {
                   if (line.isEmpty())
                   {
@@ -563,7 +563,10 @@ public class Glossaries
                if (m.matches())
                {
                   addDiagnosticMessage(invoker.getLabelWithValue(
-                     "diagnostics.shell_disabled", m.group(1)));
+                     m.groupCount() == 1 ?
+                     "diagnostics.shell_disabled":
+                     "diagnostics.shell_restricted",
+                     m.group(1)));
                }
 
                continue;
@@ -784,7 +787,7 @@ public class Glossaries
             }
             else
             {
-               mess = String.format("%s%n%s", mess, errmess);
+               mess = String.format("%s%n<p>%s", mess, errmess);
             }
          }
       }
@@ -805,7 +808,6 @@ public class Glossaries
       }
       else
       {
-         //diagnosticMessages.append(String.format("%n%s", mess));
          diagnosticMessages.append(String.format("<p>%s", mess));
       }
    }
@@ -942,7 +944,7 @@ public class Glossaries
       = Pattern.compile("runsystem\\(.*");
 
    private static final Pattern disabledSystemPattern
-      = Pattern.compile("runsystem\\((.*)\\)\\.\\.\\.disabled\\..*");
+      = Pattern.compile("runsystem\\((.*)\\)\\.\\.\\.disabled(\\s+\\(restricted\\))?\\.");
 
    private static final Pattern undefControlSequencePattern
       = Pattern.compile(".* Undefined control sequence.");

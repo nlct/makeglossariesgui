@@ -60,7 +60,7 @@ public class XindyModule
       {
          for (int j = 0; j < codepages.length; j++)
          {
-            if (code.equals(variants[i]+"-"+codepages[i]))
+            if (code.equals(variants[i]+"-"+codepages[j]))
             {
                return true;
             }

@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.regex.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.datatransfer.*;
 
 import javax.swing.*;
 import javax.swing.text.*;
@@ -15,7 +16,7 @@ import javax.help.*;
 
 public class MakeGlossariesGUI extends JFrame
   implements ActionListener,MenuListener,GlossaryMessage,
-    HyperlinkListener
+    HyperlinkListener,MouseListener
 {
    public MakeGlossariesGUI(MakeGlossariesInvoker invoker)
    {
@@ -127,22 +128,62 @@ public class MakeGlossariesGUI extends JFrame
       tabbedPane.add(scrollPane, 0);
       tabbedPane.setMnemonicAt(0, getMnemonicInt("main.title"));
 
-//      diagnosticArea = new JTextArea();
-      diagnosticArea = new JEditorPane("text/html", "");
-      diagnosticArea.setEditable(false);
-      diagnosticArea.addHyperlinkListener(this);
-/*
-      diagnosticArea.setLineWrap(true);
-      diagnosticArea.setWrapStyleWord(true);
-*/
-      diagnosticArea.setFont(getFont());
-      diagnosticArea.setTransferHandler(getTransferHandler());
+      diagnosticArea = new DiagnosticPanel(this);
 
       diagnosticSP = new JScrollPane(diagnosticArea);
 
       diagnosticSP.setName(getLabel("diagnostics.title"));
       tabbedPane.add(diagnosticSP, 1);
       tabbedPane.setMnemonicAt(1, getMnemonicInt("diagnostics.title"));
+
+      popupM = new JPopupMenu();
+
+      popupM.add(createMenuItem("popup", "select_all"));
+
+      copyItem = createMenuItem("popup", "copy");
+      popupM.add(copyItem);
+
+      addMouseListener(this);
+
+      ActionMap actionMap = tabbedPane.getActionMap();
+      InputMap inputMap = tabbedPane.getInputMap(
+         JComponent.WHEN_IN_FOCUSED_WINDOW);
+
+      
+      inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_CONTEXT_MENU, 0),
+         "popup");
+      inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_F10, 
+         InputEvent.SHIFT_DOWN_MASK),
+         "popup");
+      actionMap.put("popup", new AbstractAction()
+      {
+         public void actionPerformed(ActionEvent evt)
+         {
+            showPopup();
+         }
+      });
+
+      AbstractAction copyAction = new AbstractAction("copy")
+      {
+         public void actionPerformed(ActionEvent evt)
+         {
+            // omit html when copying
+
+            JTextComponent textComp = getSelectedTextComponent();
+
+            if (textComp != null)
+            {
+               StringSelection sel = new StringSelection(
+                 textComp.getSelectedText());
+               Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+               cb.setContents(sel, null);
+            }
+         }
+      };
+
+      actionMap.put("copy", copyAction);
+      diagnosticArea.getActionMap().put("copy", copyAction);
+      mainPanel.getActionMap().put("copy", copyAction);
 
       auxFileFilter = new AuxFileFilter(getLabel("filter.aux"));
 
@@ -179,8 +220,6 @@ public class MakeGlossariesGUI extends JFrame
             invoker.getProperties().setXindyApp(file);
             propertiesDialog.setXindy(file);
          }
-
-         propertiesDialog.display();
       }
 
       if (invoker.getFileName() != null)
@@ -233,6 +272,99 @@ public class MakeGlossariesGUI extends JFrame
             ((JComponent)source).setToolTipText(null);
          }
       }
+   }
+
+   public JTextComponent getSelectedTextComponent()
+   {
+      Component tab = tabbedPane.getSelectedComponent();
+
+      if (tab instanceof JScrollPane)
+      {
+         tab = ((JScrollPane)tab).getViewport().getView();
+      }
+
+      if (tab instanceof JTextComponent)
+      {
+         return (JTextComponent)tab;
+      }
+
+      return null;
+   }
+
+   public void showPopup()
+   {
+      JTextComponent textComp = getSelectedTextComponent();
+
+      if (textComp != null)
+      {
+         copyItem.setEnabled(textComp.getSelectedText() != null);
+
+         int x = 0;
+         int y = 0;
+
+         try
+         {
+            Point p = textComp.getMousePosition();
+
+            if (p != null)
+            {
+               x = (int)p.getX();
+               y = (int)p.getY();
+            }
+         }
+         catch (HeadlessException e)
+         {
+            debug(e);
+         }
+
+         popupM.show(textComp, x, y);
+      }
+   }
+
+   public void showPopup(Component comp, int x, int y)
+   {
+      JTextComponent textComp = getSelectedTextComponent();
+
+      if (textComp != null)
+      {
+         copyItem.setEnabled(textComp.getSelectedText() != null);
+
+         popupM.show(comp, x, y);
+      }
+   }
+
+   public void mousePressed(MouseEvent evt)
+   {
+      checkForPopupTrigger(evt);
+   }
+
+   public void mouseReleased(MouseEvent evt)
+   {
+      checkForPopupTrigger(evt);
+   }
+
+   public void mouseExited(MouseEvent evt)
+   {
+   }
+
+   public void mouseEntered(MouseEvent evt)
+   {
+   }
+
+   public void mouseClicked(MouseEvent evt)
+   {
+   }
+
+   private boolean checkForPopupTrigger(MouseEvent evt)
+   {
+      if (evt.isPopupTrigger())
+      {
+         showPopup(evt.getComponent(), evt.getX(), evt.getY());
+
+         return true;
+      }
+
+      return false;
    }
 
    public void actionPerformed(ActionEvent evt)
@@ -306,6 +438,26 @@ public class MakeGlossariesGUI extends JFrame
       else if (action.equals("editproperties"))
       {
          propertiesDialog.display();
+      }
+      else if (action.equals("select_all"))
+      {
+         JTextComponent textComp = getSelectedTextComponent();
+
+         if (textComp != null)
+         {
+            textComp.requestFocusInWindow();
+            textComp.selectAll();
+         }
+      }
+      else if (action.equals("copy"))
+      {
+         JTextComponent textComp = getSelectedTextComponent();
+
+         if (textComp != null)
+         {
+            textComp.requestFocusInWindow();
+            textComp.copy();
+         }
       }
       else if (action.equals("about"))
       {
@@ -462,29 +614,7 @@ public class MakeGlossariesGUI extends JFrame
 
    public void updateDiagnostics()
    {
-      Font font = getFont();
-
-      StyleSheet stylesheet = ((HTMLDocument)diagnosticArea.getDocument()).getStyleSheet();
-
-      stylesheet.addRule("body { font-size: "+font.getSize()+"pt; }");
-      stylesheet.addRule("body { font-family: "+font.getName()+"; }");
-      stylesheet.addRule("body { font-weight: "+(font.isBold()?"bold":"normal")+"; }");
-      stylesheet.addRule("body { font-style:  "+(font.isItalic()?"italic":"normal")+"; }");
-
-      if (invoker.getGlossaries() != null)
-      {
-         String diagnostics = invoker.getGlossaries().getDiagnostics();
-
-         if (diagnostics == null)
-         {
-            diagnosticArea.setText(getLabel("diagnostics.no_errors"));
-         }
-         else
-         {
-            diagnosticArea.setText(diagnostics);
-            tabbedPane.setSelectedComponent(diagnosticSP);
-         }
-      }
+      diagnosticArea.updateDiagnostics();
    }
 
    private JMenu createMenu(String label)
@@ -625,6 +755,11 @@ public class MakeGlossariesGUI extends JFrame
       }
 
       return item;
+   }
+
+   public MakeGlossariesInvoker getInvoker()
+   {
+      return invoker;
    }
 
    public String getLabelOrDef(String label, String def)
@@ -1064,8 +1199,11 @@ public class MakeGlossariesGUI extends JFrame
 
    private JScrollPane scrollPane, diagnosticSP;
 
-   //private JTextArea diagnosticArea;
-   private JEditorPane diagnosticArea;
+   private DiagnosticPanel diagnosticArea;
+
+   private JPopupMenu popupM;
+
+   private JMenuItem copyItem;
 
    private JMenu recentM;
 

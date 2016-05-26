@@ -5,8 +5,10 @@ import java.net.*;
 import java.awt.*;
 import java.awt.geom.*;
 import java.awt.font.*;
+import java.awt.event.*;
 import java.util.*;
 import java.text.*;
+import java.awt.datatransfer.*;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -27,6 +29,7 @@ public class GlossariesPanel extends JEditorPane
 
       setEditable(false);
       addHyperlinkListener(this);
+      addMouseListener(app);
 
       HTMLDocument doc = (HTMLDocument)getDocument();
    }
@@ -38,10 +41,14 @@ public class GlossariesPanel extends JEditorPane
 
       Font font = app.getFont();
 
-      stylesheet.addRule("body { font-size: "+font.getSize()+"pt; }");
-      stylesheet.addRule("body { font-family: "+font.getName()+"; }");
-      stylesheet.addRule("body { font-weight: "+(font.isBold()?"bold":"normal")+"; }");
-      stylesheet.addRule("body { font-style:  "+(font.isItalic()?"italic":"normal")+"; }");
+      stylesheet.addRule(String.format("body { font-size: %dpt; }",
+        font.getSize()));
+      stylesheet.addRule(String.format("body { font-family: %s; }",
+        font.getName()));
+      stylesheet.addRule(String.format("body { font-weight: %s; }",
+        (font.isBold()?"bold":"normal")));
+      stylesheet.addRule(String.format("body { font-style: %s; }",
+        (font.isItalic()?"italic":"normal")));
 
       setText(app.getMainInfoTemplate());
       updateHeaders();
@@ -65,7 +72,8 @@ public class GlossariesPanel extends JEditorPane
          Element e = Glossaries.getFieldLabelElement(doc, i);
          String tag = e.getName();
 
-	 doc.setOuterHTML(e, "<"+tag+">"+glossaries.getFieldLabel(i)+"</"+tag+">");
+	 doc.setOuterHTML(e, String.format("<%s>%s</%s>",
+            tag, glossaries.getFieldLabel(i), tag));
       }
    }
 
@@ -97,16 +105,17 @@ public class GlossariesPanel extends JEditorPane
          {
             if (field == null)
             {
-               content = "<font class=errormess>"+err+"</font>";
+               content = String.format("<font class=errormess>%s</font>", err);
             }
             else
             {
-               content = "<font class=error>"+field
-                  +" <font class=errormess>"+err+"</font></font>";
+               content = String.format(
+                 "<font class=error>%s <font class=errormess>%s</font></font>",
+                  field, err);
             }
          }
 
-         doc.setOuterHTML(e, "<td id="+tag+">"+content+"</td>");
+         doc.setOuterHTML(e, String.format("<td id=%s>%s</td>", tag, content));
       }
    }
 
@@ -154,7 +163,8 @@ public class GlossariesPanel extends JEditorPane
          Element e = doc.getElement("loglabel-"+g.label);
          String tag = e.getName();
 
-	 doc.setOuterHTML(e, "<"+tag+">"+app.getLabel("main.glossary.log")+"</"+tag+">");
+	 doc.setOuterHTML(e, String.format("<%s>%s</%s>",
+            tag, app.getLabel("main.glossary.log"), tag));
 
          if (transFile.exists())
          {
@@ -165,18 +175,21 @@ public class GlossariesPanel extends JEditorPane
                 app.getLabel("main.out_of_date"):
                 app.getLabel("main.up_to_date"));
             doc.setOuterHTML(doc.getElement("logview-"+g.label),
-                "<a href="+transFile.toURI()+">"+viewLabel+"</a>");
+                String.format("<a href=\"%s\">%s</a>", 
+                   transFile.toURI(), viewLabel));
          }
          else
          {
             doc.setInnerHTML(doc.getElement("loginfo-"+g.label),
-               "<font class=error>"+app.getLabel("error.no_such_file")+"</font>");
+               String.format("<font class=error>%s</font>", 
+                 app.getLabel("error.no_such_file")));
          }
 
          e = doc.getElement("glslabel-"+g.label);
          tag = e.getName();
 
-	 doc.setOuterHTML(e, "<"+tag+">"+app.getLabel("main.glossary.gls")+"</"+tag+">");
+	 doc.setOuterHTML(e, String.format("<%s>%s</%s>",
+            tag, app.getLabel("main.glossary.gls"), tag));
 
          if (glsFile.exists())
          {
@@ -189,18 +202,21 @@ public class GlossariesPanel extends JEditorPane
                 app.getLabel("main.out_of_date"):
                 app.getLabel("main.up_to_date")));
             doc.setOuterHTML(doc.getElement("glsview-"+g.label),
-                "<a href="+glsFile.toURI()+">"+viewLabel+"</a>");
+                String.format("<a href=\"%s\">%s</a>",
+                   glsFile.toURI(), viewLabel));
          }
          else
          {
             doc.setInnerHTML(doc.getElement("glsinfo-"+g.label),
-               "<font class=error>"+app.getLabel("error.no_such_file")+"</font>");
+               String.format("<font class=error>%s</font>", 
+                  app.getLabel("error.no_such_file")));
          }
 
          e = doc.getElement("glolabel-"+g.label);
          tag = e.getName();
 
-	 doc.setOuterHTML(e, "<"+tag+">"+app.getLabel("main.glossary.glo")+"</"+tag+">");
+	 doc.setOuterHTML(e, String.format("<%s>%s</%s>",
+            tag, app.getLabel("main.glossary.glo"), tag));
 
 
          if (gloFile.exists())
@@ -210,12 +226,14 @@ public class GlossariesPanel extends JEditorPane
             doc.setOuterHTML(doc.getElement("glomod-"+g.label),
                 df.format(new Date(gloFile.lastModified())));
             doc.setOuterHTML(doc.getElement("gloview-"+g.label),
-                "<a href="+gloFile.toURI()+">"+viewLabel+"</a>");
+               String.format("<a href=\"%s\">%s</a>",
+                  gloFile.toURI(), viewLabel));
          }
          else
          {
             doc.setInnerHTML(doc.getElement("gloinfo-"+g.label),
-               "<font class=error>"+app.getLabel("error.no_such_file")+"</font>");
+               String.format("<font class=error>%s</font>",
+                  app.getLabel("error.no_such_file")));
          }
 
 
@@ -224,7 +242,8 @@ public class GlossariesPanel extends JEditorPane
             e = doc.getElement("langlabel-"+g.label);
             tag = e.getName();
 
-	    doc.setOuterHTML(e, "<"+tag+">"+app.getLabel("main.glossary.language")+"</"+tag+">");
+	    doc.setOuterHTML(e, String.format("<%s>%s</%s>",
+               tag, app.getLabel("main.glossary.language"), tag));
 
             doc.setInnerHTML(doc.getElement("langinfo-"+g.label),
                g.displayLanguage());
@@ -232,7 +251,8 @@ public class GlossariesPanel extends JEditorPane
             e = doc.getElement("codelabel-"+g.label);
             tag = e.getName();
 
-	    doc.setOuterHTML(e, "<"+tag+">"+app.getLabel("main.glossary.codepage")+"</"+tag+">");
+	    doc.setOuterHTML(e, String.format("<%s>%s</%s>",
+               tag, app.getLabel("main.glossary.codepage"), tag));
 
             doc.setInnerHTML(doc.getElement("codeinfo-"+g.label),
                g.displayCodePage());
@@ -245,7 +265,8 @@ public class GlossariesPanel extends JEditorPane
          e = doc.getElement("entrieslabel-"+g.label);
          tag = e.getName();
 
-	 doc.setOuterHTML(e, "<"+tag+">"+app.getLabel("main.num_entries")+"</"+tag+">");
+	 doc.setOuterHTML(e, String.format("<%s>%s</%s>",
+            tag, app.getLabel("main.num_entries"), tag));
 
          e = doc.getElement("entriesinfo-"+g.label);
          tag = e.getName();
@@ -254,18 +275,20 @@ public class GlossariesPanel extends JEditorPane
 
          if (g.getNumEntries() > 0)
          {
-            detailsLink = " <a description="+g.label+" href="+g.label+">"+detailsLabel+"</a>";
+            detailsLink = String.format(
+              " <a description=\"%s\" href=\"%s\">%s</a>",
+              g.label, g.label, detailsLabel);
          } 
 
-	 doc.setOuterHTML(e, "<"+tag+">"+g.getNumEntries()+detailsLink
-            +"</"+tag+">");
+	 doc.setOuterHTML(e, String.format("<%s>%s%s</%s>",
+            tag, g.getNumEntries(), detailsLink, tag));
 
          String errMess = g.getErrorMessages();
 
          if (errMess != null)
          {
             doc.setOuterHTML(doc.getElement("error-"+g.label), 
-                "<font class=error>"+errMess+"</font>");
+                String.format("<font class=error>%s</font>", errMess));
          }
       }
    }

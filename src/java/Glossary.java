@@ -45,6 +45,19 @@ public class Glossary
 
       if (!invoker.getProperties().isOverride())
       {
+         XindyModule mod = XindyModule.getModule(language);
+
+         if (mod != null)
+         {
+            String variant = mod.getDefaultVariant();
+
+            if (variant != null && !mod.hasCodePage(codepage))
+            {
+               addDiagnosticMessage(invoker.getLabelWithValues(
+                 "diagnostics.variant", language, codepage, variant));
+               codepage = variant+"-"+codepage;
+            }
+         }
       }
 
       String style = istName;
@@ -696,7 +709,18 @@ public class Glossary
 
    public void setLanguage(String language)
    {
-      this.language = invoker.getLanguage(language);
+      String mappedLang = invoker.getLanguage(language);
+
+      if (!mappedLang.equals(language))
+      {
+         addDiagnosticMessage(invoker.getLabelWithValues(
+           "diagnostics.mapped_lang", language, mappedLang));
+         this.language = mappedLang;
+      }
+      else
+      {
+         this.language = language;
+      }
    }
 
    public void setCodePage(String codepage)
@@ -758,7 +782,6 @@ public class Glossary
       }
       else
       {
-         //diagnosticMessage.append(String.format("%n%s", mess));
          diagnosticMessage.append(String.format("<p>%s", mess));
       }
    }

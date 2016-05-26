@@ -642,7 +642,7 @@ sub start_preamble{
       "\\usepackage{makeidx}\n",
       "\\usepackage{babel}\n",
       "\\usepackage[colorlinks]{hyperref}\n",
-      "\\usepackage[acronym,toc]{glossaries}\n",
+      "\\usepackage[toc]{glossaries}\n",
       "\\makeglossaries\n\\makeindex\n",
       $languagedefinitions;
 }

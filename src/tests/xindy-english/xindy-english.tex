@@ -2,17 +2,17 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[ngerman]{babel}
+\usepackage[english]{babel}
 \usepackage[xindy,automake]{glossaries}
 
 \makeglossaries
 
-\newglossaryentry{Uberlingen}{name={{Ü}berlingen},
-  description={a place}}
+\newglossaryentry{sample}{name={sample},
+ description={an example}}
 
 \begin{document}
-
-\gls{Uberlingen}
+A \gls{sample} document.
 
 \printglossaries
+
 \end{document}

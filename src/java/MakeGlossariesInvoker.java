@@ -330,6 +330,64 @@ public class MakeGlossariesInvoker
       return builder.toString();
    }
 
+   public String getLabelWithValues(String label, String value1,
+      String value2, String value3)
+   {
+      String prop = getLabel(label);
+
+      if (!isBatchMode())
+      {
+         value1 = escapeHTML(value1);
+         value2 = escapeHTML(value2);
+         value3 = escapeHTML(value3);
+      }
+
+      StringBuilder builder = new StringBuilder(prop.length());
+
+      for (int i = 0; i < prop.length(); i++)
+      {
+         char c = prop.charAt(i);
+
+         if (c == '$')
+         {
+            i++;
+
+            if (i == prop.length())
+            {
+               builder.append(c);
+            }
+            else
+            {
+              char c2 = prop.charAt(i);
+
+              if (c2 == '1')
+              {
+                 builder.append(value1);
+              }
+              else if (c2 == '2')
+              {
+                 builder.append(value2);
+              }
+              else if (c2 == '3')
+              {
+                 builder.append(value3);
+              }
+              else
+              {
+                 builder.append(c);
+                 builder.append(c2);
+              }
+            }
+         }
+         else
+         {
+            builder.append(c);
+         }
+      }
+
+      return builder.toString();
+   }
+
    public MakeGlossariesProperties getProperties()
    {
       return properties;
@@ -443,6 +501,7 @@ public class MakeGlossariesInvoker
       languageMap.put("germanb", "german");
       languageMap.put("magyar", "hungarian");
       languageMap.put("ngermanb", "german");
+      languageMap.put("ngerman", "german");
       languageMap.put("norsk", "norwegian");
       languageMap.put("portuges", "portuguese");
       languageMap.put("russianb", "russian");
