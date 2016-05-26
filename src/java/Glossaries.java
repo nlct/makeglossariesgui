@@ -404,6 +404,8 @@ public class Glossaries
 
       BufferedReader reader = null;
 
+      boolean checkNonAscii = false;
+
       try
       {
          reader = new BufferedReader(new FileReader(log));
@@ -528,6 +530,16 @@ public class Glossaries
 
                String msg = builder.toString();
 
+               if (msg.contains("Package inputenc Error: Unicode char"))
+               {
+                  // If a warning message contains this, it's likely
+                  // that an entry label contains non-ASCII
+                  // characters.
+
+                  checkNonAscii = true;
+                  continue;
+               }
+
                addDiagnosticMessage(msg);
 
                if (noidx)
@@ -591,12 +603,18 @@ public class Glossaries
                {
                   addDiagnosticMessage(invoker.getLabel(
                     "diagnostics.fragile"));
+                  continue;
                }
-               else
+
+               if (line.contains("\\GenericError"))
                {
-                  addDiagnosticMessage(invoker.getLabelWithValue(
-                    "diagnostics.undef_cs", line));
+                  // Too complicated, so don't show to avoid
+                  // overcluttering the diagnostic panel.
+                  continue;
                }
+
+               addDiagnosticMessage(invoker.getLabelWithValue(
+                 "diagnostics.undef_cs", line));
 
                continue;
             }
@@ -649,6 +667,20 @@ public class Glossaries
             reader.close();
          }
       }     
+
+
+      if (checkNonAscii)
+      {
+         addDiagnosticMessage(invoker.getLabel(
+            "diagnostics.inputenc"));
+
+         for (int i = 0, n = glossaryList.size(); i < n; i++)
+         {
+            Glossary glossary = glossaryList.get(i);
+
+            glossary.checkNonAsciiLabels();
+         }
+      }
    }
 
    public String displayGlossaryList()

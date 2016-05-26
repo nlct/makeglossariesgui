@@ -1,18 +1,18 @@
 \documentclass{article}
 
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage[ngerman]{babel}
-\usepackage[xindy,automake]{glossaries}
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setmainlanguage[spelling=new]{german}
+\usepackage[xindy]{glossaries}
 
 \makeglossaries
 
-\newglossaryentry{Uberlingen}{name={{Ü}berlingen},
+\newglossaryentry{Überlingen}{name={Überlingen},
   description={a place}}
 
 \begin{document}
 
-\gls{Uberlingen}
+\gls{Überlingen}
 
 \printglossaries
 \end{document}

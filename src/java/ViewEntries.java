@@ -30,7 +30,7 @@ public class ViewEntries extends JDialog
 
          public Class<?> getColumnClass(int column)
          {
-            return String.class;
+            return column < 2 ? String.class : Integer.class;
          }
 
          public Object getValueAt(int row, int column)
@@ -67,6 +67,9 @@ public class ViewEntries extends JDialog
       };
 
       table = new JTable(model);
+
+      table.setAutoCreateRowSorter(true);
+
       table.setDefaultRenderer(String.class, 
         new EntryTableCellRenderer(this));
       table.setFont(app.getFont());

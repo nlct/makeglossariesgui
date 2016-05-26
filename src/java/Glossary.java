@@ -786,6 +786,53 @@ public class Glossary
       }
    }
 
+
+   public void checkNonAsciiLabels()
+   {
+      int numFound = 0;
+      StringBuilder builder = null;
+
+      for (Enumeration<String> en=entryTable.keys(); en.hasMoreElements();)
+      {
+         String key = en.nextElement();
+
+         for (int i = 0, n = key.length(); i < n; i++)
+         {
+            int c = key.charAt(i);
+
+            if (c > '|' || c < '!' || c == '#' || c == '$' || c == '&'
+             || c == '\\' || c == '^' || c == '_')
+            {
+               numFound++;
+
+               if (builder == null)
+               {
+                  builder = new StringBuilder(key);
+               }
+               else
+               {
+                  builder.append(", ");
+                  builder.append(key);
+               }
+
+               break;
+            }
+         }
+      }
+
+      if (numFound == 1)
+      {
+         addDiagnosticMessage(invoker.getLabelWithValues(
+           "diagnostics.label_with_problem_char", label, builder.toString()));
+      }
+      else if (numFound > 1)
+      {
+         addDiagnosticMessage(invoker.getLabelWithValues(
+           "diagnostics.labels_with_problem_char",
+              ""+numFound, label, builder.toString()));
+      }
+   }
+
    public String label, transExt, glsExt, gloExt;
 
    private String language, codepage;

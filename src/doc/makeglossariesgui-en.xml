@@ -158,7 +158,7 @@ A \gls{sample} document.
    <tt>.ist</tt> file as the style).
    In this case, there are no problems with the document and the
    <tt>.tex</tt> file is now ready for another <LaTeX/> run. The general
-   information panel (<ref tag="basicsample"/>) shows a summary of 
+   information panel (<ref tag="basicsample"/>) shows a summary of the
    document glossaries. In this case, there's only one glossary (the
    <tt>main</tt> one). If you edit the document source code (<tt>.tex</tt> file)
    you can use the <menu tag="file.reload"/> menu item to reload the updated
@@ -188,8 +188,22 @@ A \gls{sample} document.
    column lists the entry's label, the second column lists the entry's sort
    field and the third column shows the number of times that entry was indexed
    in the document. If you have a long list of entries, you can use the search
-   box to find an entry according to its <em>label</em>. Regular
-   expressions are permitted.
+   box to find an entry according to its <em>label</em>. (The sort column
+   isn't searched.) Regular expressions are permitted.
+   </p>
+   <p>
+   The <button tag="diagnostics.title"/> tab
+   (<ref tag="basicsamplediagnostics"/>) provides information, warnings
+   and suggestions. In this example, there are no errors detected, so it
+   just provides suggestions in case there are any missing entries that
+   you've detected, but there are no clues provided in the transcript files.
+   </p>
+   <p>
+   <float type="figure" tag="basicsamplediagnostics"
+     caption="Diagnostics Tab (Basic Sample)" pos="htbp">
+   <image src="images/basic-sample-diagnostics.png" 
+          alt="image of diagnostics window"/>
+   </float>
    </p>
    </example>
    <p>
@@ -283,9 +297,8 @@ Xindy failed with exit code 1.
    </float>
    </p>
    <p>
-   (You can adjust the font size using the increase or decrease buttons, or 
-   the <menu tag="settings.incsize"/> or <menu tag="settings.decsize"/> menu
-   items.)
+   (You can adjust the font used by these messages if you like,
+    see <ref tag="properties"/>.)
    </p>
    <p>
    In the <button tag="main.title"/> panel, the <dq>Details</dq>
