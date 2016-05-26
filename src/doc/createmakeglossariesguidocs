@@ -1267,7 +1267,7 @@ sub end_footnote{
 sub start_blockquote{
    my ($expat, %attrs) = @_;
 
-   print TEXFD "\\begin{quote}";
+   print TEXFD "\\begin{blockquote}";
 
    &handle_html('<blockquote>');
 }
@@ -1275,7 +1275,7 @@ sub start_blockquote{
 sub end_blockquote{
    my ($expat) = @_;
 
-   print TEXFD "\\end{quote}";
+   print TEXFD "\\end{blockquote}";
 
    &handle_html('</blockquote>');
 }
@@ -1723,9 +1723,9 @@ sub start_app{
 
    my $text = &get_label($tag, \%attrs, $expat);
 
-   &handle_html("<tt>$text</tt>");
+   &handle_html("<font class=\"appname\">$text</font>");
 
-   print TEXFD "\\texttt{$text}";
+   print TEXFD "\\appfmt{$text}";
 }
 
 sub end_app{
@@ -1765,7 +1765,7 @@ sub start_button{
 
    $text=~s/:\s*$//;
 
-   &handle_html("<b>$text</b>");
+   &handle_html("<font class=\"button\">$text</font>");
 
    print TEXFD "\\button{$text}";
 }
@@ -1826,7 +1826,7 @@ sub start_menu{
       $index .= "$text@\\menu{$text}";
    }
 
-   &handle_html("<tt>$html</tt>");
+   &handle_html("<font class=\"menu\">$html</font>");
 
    print TEXFD "\\index{$index}";
 }
@@ -2302,6 +2302,20 @@ xml:lang="en-GB">
     {
        text-align: center;
        padding-top: 16;
+    }
+    .menu
+    {
+      font-weight: bold;
+      font-family: sans-serif;
+    }
+    .button
+    {
+      font-weight: bold;
+      font-family: sans-serif;
+    }
+    .appname
+    {
+      font-family: sans-serif;
     }
   </style>
   <title>$title</title>

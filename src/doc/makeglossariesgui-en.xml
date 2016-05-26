@@ -26,6 +26,9 @@
       description="an indexing application"/>
     <newterm tag="xindy" text="xindy"  fmt="tt"
       description="an indexing application written in Perl"/>
+    <newterm tag="lookandfeel" text="Look and Feel"
+      description="the appearance (look) of Java applications
+       and how the widgets behave (feel)"/>
   </preamble>
   <document>
    <node tag="introduction" type="chapter" title="Introduction">
@@ -113,7 +116,7 @@
      will be honoured.
      </p>
    </node>
-   <node type="chapter" tag="main" title="Main Panel">
+   <node type="chapter" tag="main" title="Basic Use (GUI Mode)">
    <p>
    A file can be loaded from the command line invocation 
    (see <ref tag="introduction"/>) or in the <acr tag="gui"/> using the 
@@ -178,7 +181,7 @@ A \gls{sample} document.
    </p>
    <p>
    <float type="figure" tag="basicsampledetails"
-     caption="Entry Details (Basic Sample)" pos="htbp">
+     caption="Entry Details (Basic Sample)" pos="tbp">
    <image src="images/basic-sample-details.png" 
           alt="image of details window"/>
    </float>
@@ -200,7 +203,7 @@ A \gls{sample} document.
    </p>
    <p>
    <float type="figure" tag="basicsamplediagnostics"
-     caption="Diagnostics Tab (Basic Sample)" pos="htbp">
+     caption="Diagnostics Tab (Basic Sample)" pos="tbp">
    <image src="images/basic-sample-diagnostics.png" 
           alt="image of diagnostics window"/>
    </float>
@@ -210,13 +213,13 @@ A \gls{sample} document.
    If you have defined an entry in your document, but it's not listed in
    the details window for the relevant glossary, then it hasn't been indexed
    in your document. Remember that the commands described in section<nbsp/>9
-   (Using Glossary Terms Without Links) of the <sty>glossaries</sty> manual
-   don't index the terms. These essentially are all the commands in the
+   (<dq>Using Glossary Terms Without Links</dq>) of the <sty>glossaries</sty>
+   manual don't index the terms. These essentially are all the commands in the
    form <backslash/><tt>glsentry</tt><meta>field</meta> or
    <backslash/><tt>glossentryname</tt><meta>field</meta>, such as
-   <cs tag="glsentrytext"/> or <cs tag="glsentrylong"/>
-   or <cs tag="glossentryname"/>, and their case-changing variants. 
-   Also <cs tag="glsentrytitlecase"/> and
+   <cs tag="glsentrytext"/>,  <cs tag="glsentryshort"/>,
+   <cs tag="glsentrylong"/> or <cs tag="glossentryname"/>, and their 
+   case-changing variants.  Also <cs tag="glsentrytitlecase"/> and
    <cs tag="glshyperlink"/>.
    </p>
    <p>
@@ -283,22 +286,21 @@ Xindy has ignored one or more entries with empty sort strings.
 Xindy failed with exit code 1.
 </blockquote>
    <p>
-   Once this error message has been dismissed, the <dq>Diagnostics</dq> tab
+   Once this error message has been dismissed, the 
+   <button tag="diagnostics.title"/> tab
    should automatically be selected (see <ref tag="missingsortdiagnostics"/>).
    This identifies the problem entries and recommends a solution, in this case, 
    add the <tt>sort</tt> key to the entry definition. The actual warning and
    error message reported by <term tag="xindy"/> are shown at the end.
+   (You can adjust the font used by these messages if you like,
+    see <ref tag="properties"/>.)
    </p>
    <p>
    <float type="figure" tag="missingsortdiagnostics"
-     caption="Diagnostics Panel" pos="htbp">
+     caption="Diagnostics Panel" pos="tbp">
    <image src="images/missing-sort-diagnostics.png" scale="0.8"
           alt="image of diagnostics panel"/>
    </float>
-   </p>
-   <p>
-   (You can adjust the font used by these messages if you like,
-    see <ref tag="properties"/>.)
    </p>
    <p>
    In the <button tag="main.title"/> panel, the <dq>Details</dq>
@@ -384,7 +386,7 @@ It looks as though you might have done something like
 <tt>acronym</tt> glossary.
 </blockquote>
    <p>
-   If you switch to the <dq>General Information</dq> panel,
+   If you switch to the <button tag="main.title"/> panel,
    the labels for the glossaries defined in the document are
    listed next to <dq><dict tag="main.list"/></dq> so you
    can check the indicated type against it. In this example,
@@ -581,8 +583,8 @@ if you don't want any glossaries.) This document will not have a glossary.
    show all files.) <app/> will parse the log file to see if it recognises
    any of the error messages. Some <LaTeX/> error messages can be quite
    crytic so there's no guarantee that <app/> will be able to help, but it
-   might detect something useful. Note that this option isn't available in
-   batch mode.
+   might detect something useful. Note that this option is only available
+   in <acr tag="gui"/> mode.
    </p>
    <example>
    <p>
@@ -629,13 +631,13 @@ but I'll parse the log file in case there are any clues there.
 </p>
 <p>
 It's possible that there's an expansion issue involving a fragile command. 
-Have you used a fragile command in your entry definitions? Things to check for:
+Things to check for:
 </p>
 <ul>
 <li>Have you used a class like <tt>beamer</tt> that doesn't make common 
 formatting commands like <cs tag="textit"/> robust?</li>
-<li>Have you tried using <cs tag="protect"/> in front of commands contained 
-within your entry definitions?</li>
+<li>Have you tried using <cs tag="protect"/> in front of fragile commands
+contained within your entry definitions?</li>
 <li>Have you tried switching off the expansion using commands like 
 <cs tag="glsnoexpandfields"/>? (See section 4.6 Expansion in the 
 <tt>glossaries</tt> user manual.)</li>
@@ -767,7 +769,7 @@ within your entry definitions?</li>
    this if you want to. Make sure that the <button tag="properties.override"/> 
    check box is selected, and change the language and encoding as appropriate.
    Note that the batch mode will also use these settings, although they can
-   only be adjusted in the <cs tag="gui"/> mode.
+   only be adjusted in the <acr tag="gui"/> mode.
    </p>
    </node>
    <node type="section" tag="guitab" title="GUI Preferences">
@@ -780,15 +782,15 @@ within your entry definitions?</li>
    </float>
    </p>
    <p>
-   The font used in the 
-   <dq>General Information</dq> and <dq>Diagnostics</dq> panels can be 
+   The font used in the <button tag="main.title"/>
+   and <button tag="diagnostics.title"/> panels can be 
    set in the <button tag="properties.gui"/> tab. In addition to 
    adjusting the font size through the
     <menu tag="settings.incsize"/> or <menu tag="settings.decsize"/> 
-   menu items, you can also set the required font size in this panel. 
+   menu items, you can also set the required font size in this tab. 
    </p>
    <p>
-   The Java <dq>Look And Feel</dq> can be set by selecting the required
+   The <term tag="lookandfeel"/> can be set by selecting the required
    option in the <button tag="properties.look_and_feel"/> drop-down menu.
    Note that a restart is required as the Look and Feel is set on start up.
    The title bar appearance is governed by your usual operating system

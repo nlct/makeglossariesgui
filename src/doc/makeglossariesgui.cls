@@ -32,6 +32,8 @@
 \newcommand*{\menu}[1]{\textsf{#1}}
 \newcommand*{\mto}{$\to$}
 
+\newcommand*{\appfmt}[1]{\textsf{#1}}
+
 \newcommand*{\lessthan}{\ifmmode<\else\textless\fi}
 \newcommand*{\greaterthan}{\ifmmode>\else\textgreater\fi}
 \newcommand*{\nbsp}{~}
@@ -108,5 +110,9 @@
 
 \theoremstyle{example}
 \newtheorem{example}{\examplename}
+
+\newenvironment{blockquote}%
+{\begin{quote}\sffamily\raggedright}%
+{\end{quote}}
 
 \endinput
