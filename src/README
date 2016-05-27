@@ -17,6 +17,9 @@ doesn't exist)
 In the lib/ directory, make a symbolic link to resources/
 images/icons/ and images/splash.png
 
+In the resources/ directory, make a symbolic link to
+doc/LICENSE
+
 The Java helpset files and the .tex file for the documentation
 is created from the .xml file using the Perl script in the 
 doc/ directory. The JavaHelp indexer then needs to be run

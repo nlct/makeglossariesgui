@@ -11,7 +11,7 @@
      applications="no"
      desktop="yes"
      target="java"
-     commandLine="-splash:&quot;$INSTALL_PATH/lib/\makeglossariesgui-splash.png&quot; -jar &quot;$INSTALL_PATH/lib/makeglossariesgui.jar&quot;"
+     commandLine="-splash:&quot;$INSTALL_PATH/lib/makeglossariesgui-splash.png&quot; -jar &quot;$INSTALL_PATH/lib/makeglossariesgui.jar&quot;"
      workingDirectory=""
      description="GUI to accompany glossaries.sty"
      iconFile="$INSTALL_PATH/lib/icons/makeglossariesgui-logosmall.png"

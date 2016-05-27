@@ -25,11 +25,14 @@ lib/resources   :
 resources/icons	: 
 	cd resources; ln -s ../images/icons
 
+resources/LICENSE	:
+	cd resources; ln -s ../doc/LICENSE
+
 lib/makeglossariesgui-splash.png	: lib
 		cd lib; ln -s -f ../images/makeglossariesgui-splash.png
 
 lib/makeglossariesgui.jar	: java/Manifest.txt \
-			resources/icons \
+			resources/icons resources/LICENSE \
 			classes/com/dickimawbooks/makeglossariesgui/MakeGlossariesInvoker.class \
 			doc/createmakeglossariesguidocs doc/makeglossariesgui-*.xml doc/makeglossariesgui.dtd
 	make -C doc

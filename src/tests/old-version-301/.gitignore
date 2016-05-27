@@ -6,3 +6,7 @@
 *.ist
 *.xdy
 *.pdf
+*.nav
+*.out
+*.snm
+*.toc
