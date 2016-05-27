@@ -3,10 +3,10 @@
 <izpack:shortcuts version="5.0" xmlns:izpack="http://izpack.org/schema/shortcuts" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://izpack.org/schema/shortcuts http://izpack.org/schema/5.0/izpack-shortcuts-5.0.xsd">
 
   <skipIfNotSupported/>
-  <programGroup defaultName="DickimawBooks\DatatoolTk"
+  <programGroup defaultName="DickimawBooks\MakeGlossariesGUI"
                 location="startMenu"/>
   <shortcut
-    name="DatatoolTk GUI"
+    name="MakeGlossariesGUI"
     target="$JAVA_HOME\bin\javaw.exe"
     commandLine="-splash:&quot;$INSTALL_PATH\lib\makeglossariesgui-splash.png&quot; -jar &quot;$INSTALL_PATH\lib\makeglossariesgui.jar&quot;"
     workingDirectory="$INSTALL_PATH"
@@ -34,7 +34,7 @@
     commandLine=""
     iconFile="%SystemRoot%\system32\SHELL32.dll"
     iconIndex="31"
-    description="Uninstall DatatoolTk"
+    description="Uninstall MakeGlossariesGUI"
     initialState="noShow"
   >
 
@@ -48,31 +48,14 @@
     applications="no"
     startMenu="no"
     startup="no"
-    target="$INSTALL_PATH\doc\makeglossariesgui-en-GB.pdf"
+    target="$INSTALL_PATH\doc\makeglossariesgui-en.pdf"
     commandLine=""
     encoding="UTF-8"
     iconFile="%SystemRoot%\system32\SHELL32.dll"
     iconIndex="23"
     description="MakeGlossariesGUI user manual (PDF format)">
 
-    <createForPack name="Documentation GB"/>
-  </shortcut>
-
-  <shortcut
-    name="MakeGlossariesGUI Documentation"
-    programGroup="yes"
-    desktop="no"
-    applications="no"
-    startMenu="no"
-    startup="no"
-    target="$INSTALL_PATH\doc\makeglossariesgui-en-US.pdf"
-    commandLine=""
-    encoding="UTF-8"
-    iconFile="%SystemRoot%\system32\SHELL32.dll"
-    iconIndex="23"
-    description="MakeGlossariesGUI user manual (PDF format)">
-
-    <createForPack name="Documentation US"/>
+    <createForPack name="Documentation"/>
   </shortcut>
 
 </izpack:shortcuts>

@@ -71,16 +71,12 @@
             </fileset>
             <executable targetfile="$INSTALL_PATH/bin/makeglossariesgui"
             stage="never"/>
-            <executable targetfile="$INSTALL_PATH/bin/makeglossariesgui-gui"
+            <executable targetfile="$INSTALL_PATH/bin/makeglossariesgui"
             stage="never"/>
         </pack>
-        <pack name="Documentation GB" required="no" preselected="no">
+        <pack name="Documentation" required="no" preselected="no">
             <description>The makeglossariesgui documentation</description>
-            <fileset dir="doc" includes="**/*-en-GB.pdf" targetdir="$INSTALL_PATH/doc"/>
-        </pack>
-        <pack name="Documentation US" required="no" preselected="no">
-            <description>The makeglossariesgui documentation</description>
-            <fileset dir="doc" includes="**/*-en-US.pdf" targetdir="$INSTALL_PATH/doc"/>
+            <fileset dir="doc" includes="**/*-en.pdf" targetdir="$INSTALL_PATH/doc"/>
         </pack>
         <pack name="Source" required="no" preselected="no">
             <description>The source code</description>

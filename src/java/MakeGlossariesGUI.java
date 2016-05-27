@@ -473,7 +473,7 @@ public class MakeGlossariesGUI extends JFrame
                getLabelWithValues("about.version", invoker.appVersion,
                   invoker.appDate),
                getLabelWithValues("about.copyright", "Nicola L. C. Talbot",
-                  "2011/09/16"),
+                  "2011"),
                "http://www.dickimaw-books.com/"
             };
          }
@@ -485,7 +485,7 @@ public class MakeGlossariesGUI extends JFrame
                getLabelWithValues("about.version", invoker.appVersion,
                 invoker.appDate),
                getLabelWithValues("about.copyright", "Nicola L. C. Talbot",
-                "2011/09/16"),
+                "2011"),
                "http://www.dickimaw-books.com/",
                translator
             };

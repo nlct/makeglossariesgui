@@ -1,0 +1,36 @@
+Application  : MakeGlossariesGUI
+
+Author       : Nicola L. C. Talbot 
+               www.dickimaw-books.com
+
+License      : GPLv3+
+
+Requirements : Java Runtime Environment
+
+DESCRIPTION
+===========
+
+MakeGlossariesGUI is a Java GUI that can be used as a diagnostic
+tool when there are problems with a document that uses the
+glossaries package.
+
+It can also be used as alternative to the makeglossaries
+Perl script and the makeglossaries-lite.lua Lua script supplied by
+the glossaries package (ctan.org/pkg/glossaries). However, since
+it requires the Java Runtime Environment (JRE) it naturally has
+larger overheads than a simple Perl or Lua script.
+
+
+Third Party Libraries
+=====================
+
+MakeGlossariesGUI depends on the following third party libraries whose jar
+files are placed in the application's lib directory by the
+installer:
+
+ - Java Help (https://javahelp.java.net/) GPL
+ - The Java Look and Feel Graphics Repository
+   (http://www.oracle.com/technetwork/java/index-138612.html)
+   JLFGR License
+
+

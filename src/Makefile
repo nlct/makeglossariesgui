@@ -7,7 +7,7 @@ test	: app
 app	: lib lib/icons lib/makeglossariesgui.jar lib/resources lib/makeglossariesgui-splash.png
 
 dist	: ../dist/makeglossariesgui-installer.jar
-	cp doc/makeglossariesgui-en-GB.pdf ../dist
+	cp doc/makeglossariesgui-en.pdf ../dist
 
 ../dist/makeglossariesgui-installer.jar	: app installer/install.xml
 	$(IZPACKDIR)/bin/compile installer/install.xml -b . \

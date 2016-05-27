@@ -31,33 +31,15 @@
      desktop="no"
      workingDirectory=""
      target="evince"
-     commandLine="$INSTALL_PATH/doc/makeglossariesgui-en-GB.pdf"
+     commandLine="$INSTALL_PATH/doc/makeglossariesgui-en.pdf"
      initialState="normal"
-     url="$INSTALL_PATH/doc/makeglossariesgui-en-GB.pdf"
+     url="$INSTALL_PATH/doc/makeglossariesgui-en.pdf"
      type="Application"
      mimetype="application/pdf"
      encoding="UTF-8"
      description="MakeGlossariesGUI user documentation (PDF format)">
 
-     <createForPack name="Documentation GB"/>
-   </shortcut>
-
-   <shortcut
-     name="MakeGlossariesGUI Documentation"
-     programGroup="yes"
-     applications="no"
-     desktop="no"
-     workingDirectory=""
-     target="evince"
-     commandLine="$INSTALL_PATH/doc/makeglossariesgui-en-US.pdf"
-     initialState="normal"
-     url="$INSTALL_PATH/doc/makeglossariesgui-en-US.pdf"
-     type="Application"
-     mimetype="application/pdf"
-     encoding="UTF-8"
-     description="MakeGlossariesGUI user documentation (PDF format)">
-
-     <createForPack name="Documentation US"/>
+     <createForPack name="Documentation"/>
    </shortcut>
 
    <shortcut

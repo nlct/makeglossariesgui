@@ -589,7 +589,7 @@ public class MakeGlossariesInvoker
      System.out.println(getLabelWithValues("about.version",
        appVersion, appDate));
      System.out.println(getLabelWithValues("about.copyright", 
-      "Nicola L. C. Talbot", "2011/09/16"));
+      "Nicola L. C. Talbot", "2011"));
      System.out.println("http://www.dickimaw-books.com/");
 
      if (translator != null && !translator.isEmpty())
@@ -719,7 +719,7 @@ public class MakeGlossariesInvoker
 
    public static final String appVersion = "2.0";
 
-   public static final String appDate = "2016-05-23";
+   public static final String appDate = "2016-05-27";
 
    private boolean quiet=false, debug=false, batchMode=false, dryRun=false; 
 
