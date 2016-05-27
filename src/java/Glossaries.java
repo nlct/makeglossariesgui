@@ -670,6 +670,13 @@ public class Glossaries
                   continue;
                }
 
+               if (line.endsWith("\\indexspace "))
+               {
+                  addDiagnosticMessage(invoker.getLabel(
+                    "diagnostics.undef_indexspace"));
+                  continue;
+               }
+
                addDiagnosticMessage(invoker.getLabelWithValue(
                  "diagnostics.undef_cs", line));
 

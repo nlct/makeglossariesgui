@@ -1,11 +1,15 @@
-\documentclass{article}
+%\documentclass{article}
+\documentclass{beamer}
 
-\usepackage[automake]{glossaries}
+\usepackage[automake,style=tree]{glossaries}
 
 \makeglossaries
 
 \newglossaryentry{sample}{name={sample},
  description={an example}}
+
+\newglossaryentry{another}{name={another sample},
+ description={another example}}
 
 \newglossaryentry{long-sample}{name={long sample},
  description={Lorem ipsum dolor sit amet, consectetuer
@@ -52,6 +56,7 @@ mi.
 
 \begin{document}
 A \gls{sample} document with a \gls{long-sample}.
+\Gls{another}.
 
 \printglossaries
 

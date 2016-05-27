@@ -149,6 +149,7 @@ diagnostics.shell_disabled=It seems that TeX refused to run the system command <
 diagnostics.shell_restricted=It seems that TeX refused to run the system command <pre>$1</pre> because restricted mode was on and the given system command isn't a trusted application.
 diagnostics.no_glossaries=The document doesn't define any glossaries. Have you used the <code>nomain</code> option by mistake?
 diagnostics.undef_cs=LaTeX reported an undefined control sequence. Perhaps you're trying to use a command that has been introduced in a later version of one of the packages you're using. If this is the case, you'll need to use your TeX package manager to update the relevant package. Alternatively, you may simply have misspelt the command or forgotten to define it or forgotten to load the package that provides it. Details:<pre>$1</pre>
+diagnostics.undef_indexspace=It seems that <code>\\indexspace</code> hasn't been defined. This suggests you're using an old version of <tt>glossaries</tt> with a class that doesn't define this command. I recommend you upgrade to a newer version of <tt>glossaries</tt>.
 diagnostics.one_too_long=One entry was too long for makeindex. Do you have an excessively long <code>sort</code> field or label for that entry?
 diagnostics.too_long=$1 entries were too long for makeindex. Do you have an excessively long <code>sort</code> field or label for that entry?
 diagnostics.old_one_too_long=One entry was too long for makeindex. If you upgrade to at least v4.0 of the glossaries package, this shouldn't be a problem.
