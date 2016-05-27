@@ -71,13 +71,13 @@
       <tt>makeglossariesgui</tt> [<meta>options</meta>] [<meta>filename</meta>]
      </p>
      <p noindent="true">
-     The <meta>filename</meta> must be supplied when run in batch mode, but
+     The <meta>filename</meta> must be supplied when run in batch mode
+     (the <tt>.aux</tt> extension may be omitted), but
      is optional in <acr tag="gui"/> mode. The <meta>filename</meta> should
      be the auxiliary file produced by the <LaTeX/> run, but may also be
      the <tt>.tex</tt> or <tt>.log</tt> file if it has the same basename as
-     the auxiliary file.
-     The <tt>.aux</tt> extension may be omitted. Unlike 
-     <term tag="makeglossaries"/> and <term tag="makeglossarieslite"/>, 
+     the auxiliary file and is located in the same directory.
+     Unlike <term tag="makeglossaries"/> and <term tag="makeglossarieslite"/>, 
      <meta>filename</meta> may include the directory path.
      </p>
      <p>
@@ -121,10 +121,14 @@
    A file can be loaded from the command line invocation 
    (see <ref tag="introduction"/>) or in the <acr tag="gui"/> using the 
    <menu tag="file.open"/> menu item. You can also use the load file button
-   on the toolbar or drag and drop the file onto the main window. The
-   input file should be the <tt>.aux</tt> file created by <LaTeX/>, but if
-   you try to load the main document <tt>.tex</tt> or <tt>.log</tt> file,
+   on the toolbar or (if permitted by your operating system) drag and drop 
+   the file onto the main window. The input file should be the <tt>.aux</tt> 
+   file created by <LaTeX/>, but if you try to load the main document 
+   <tt>.tex</tt> file or the <tt>.log</tt> transcript file,
    <app/> will assume you meant the associated <tt>.aux</tt> file.
+   (If you have used <LaTeX/>'s <tt>-jobname</tt> or <tt>-output-directory</tt>
+   options, then you won't be able to use the <tt>.tex</tt> file and will have 
+   to use either the <tt>.aux</tt> or <tt>.log</tt> file.)
    </p>
    <example>
    <p>
@@ -494,7 +498,7 @@ need xindy or makeindex, you just need a second LaTeX run to get the glossary
 up to date.
    </blockquote>
    <p>
-   Note that <app/> still provides some limited diagnostics even when
+   Note that <app/> can still provide some limited diagnostics even when
    <cs tag="makenoidxglossaries"/> has been used. To illustrate this, if we
    modify the above sample document slightly, introducing an error:
    </p>
