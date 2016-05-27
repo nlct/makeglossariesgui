@@ -844,10 +844,10 @@ public class Glossary
    private MakeGlossariesInvoker invoker;
 
    private static final Pattern makeindexAcceptedPattern 
-      = Pattern.compile(".*(\\d+)\\s+entries\\s+accepted.*(\\d+)\\s+rejected.*");
+      = Pattern.compile(".*?(\\d+)\\s+entries\\s+accepted.*(\\d+)\\s+rejected.*");
 
    private static final Pattern makeindexIstAttributePattern
-      = Pattern.compile(".*(\\d+)\\s+attributes\\s+redefined.*(\\d+).*ignored.*");
+      = Pattern.compile(".*?(\\d+)\\s+attributes\\s+redefined.*(\\d+).*ignored.*");
 
    private static final Pattern makeindexTooLongPattern
       = Pattern.compile("\\s+-- First argument too long \\(max \\d+\\)\\.");
