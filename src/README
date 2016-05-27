@@ -1,0 +1,26 @@
+makeglossariesgui source code
+
+License: GPL
+
+Requirements:
+
+Java Help (https://javahelp.java.net/)
+Java Look and Feel Graphics Repository
+(http://www.oracle.com/technetwork/java/index-138612.html)
+
+Instructions:
+
+Fetch the above and copy or symlink the jar files (javahelp2.jar
+and jlfgr-1_0.jar) in the lib/ directory (create lib/ if it 
+doesn't exist)
+
+In the lib/ directory, make a symbolic link to resources/
+images/icons/ and images/splash.png
+
+The Java helpset files and the .tex file for the documentation
+is created from the .xml file using the Perl script in the 
+doc/ directory. The JavaHelp indexer then needs to be run
+on the helpset files and LaTeX on the .tex file (pdflatex,
+makeglossaries, pdflatex, makeindex, pdflatex).
+
+www.dickimaw-books.com

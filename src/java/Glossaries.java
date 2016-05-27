@@ -71,104 +71,8 @@ public class Glossaries
 
       while ((line = in.readLine()) != null)
       {
-         Matcher matcher = newGlossaryPattern.matcher(line);
-
-         if (matcher.matches())
-         {
-            glossaries.add(new Glossary(invoker, matcher.group(1), matcher.group(2),
-              matcher.group(3), matcher.group(4)));
-
-            continue;
-         }
-
-         matcher = istFilePattern.matcher(line);
-
-         if (matcher.matches())
-         {
-            glossaries.istName = matcher.group(1);
-            continue;
-         }
-
-         matcher = orderPattern.matcher(line);
-
-         if (matcher.matches())
-         {
-            glossaries.order = matcher.group(1);
-            continue;
-         }
-
-         if (!override)
-         {
-            matcher = languagePattern.matcher(line);
-
-            if (matcher.matches())
-            {
-               String label = matcher.group(1);
-
-               String language = matcher.group(2);
-
-               if (language.isEmpty())
-               {
-                  language = invoker.getDefaultLanguage();
-
-                  String variant = invoker.getDefaultXindyVariant();
-
-                  if (variant != null && !variant.isEmpty())
-                  {
-                     language = String.format("%s-%s", language, variant);
-                  }
-
-                  glossaries.addErrorMessage(invoker.getLabelWithValue(
-                     "error.no_language", label));
-                  glossaries.addDiagnosticMessage(invoker.getLabelWithValues(
-                     "diagnostics.no_language", label, language));
-               }
-
-               languages.put(label, language);
-
-               continue;
-            }
-
-            matcher = codepagePattern.matcher(line);
-
-            if (matcher.matches())
-            {
-               String label = matcher.group(1);
-
-               String code = matcher.group(2);
-
-               if (code.isEmpty())
-               {
-                  code = invoker.getDefaultCodePage();
-
-                  glossaries.addErrorMessage(invoker.getLabelWithValue(
-                     "error.no_codepage", label));
-                  glossaries.addDiagnosticMessage(invoker.getLabelWithValues(
-                     "diagnostics.no_codepage", label, code));
-               }
-
-               codePages.put(label, code);
-
-               continue;
-            }
-         }
-
-         matcher = glsreferencePattern.matcher(line);
-
-         if (matcher.matches())
-         {
-            glossaries.noidx = true;
-            continue;
-         }
-
-         matcher = extraMakeIndexOptsPattern.matcher(line);
-
-         if (matcher.matches())
-         {
-            String opts = matcher.group(1);
-
-            glossaries.extraMakeIndexOpts = splitArgs(opts);
-         }
+         glossaries.parseAux(file.getParentFile(),
+            line, override, languages, codePages);
       }
 
       in.close();
@@ -221,6 +125,151 @@ public class Glossaries
       }
 
       return glossaries;
+   }
+
+   private void parseAux(File dir, String line, boolean override,
+     Hashtable<String,String> languages, Hashtable<String,String> codePages)
+   throws IOException
+   {
+      Matcher matcher = newGlossaryPattern.matcher(line);
+
+      if (matcher.matches())
+      {
+         add(new Glossary(invoker, matcher.group(1), matcher.group(2),
+           matcher.group(3), matcher.group(4)));
+
+         return;
+      }
+
+      matcher = istFilePattern.matcher(line);
+
+      if (matcher.matches())
+      {
+         istName = matcher.group(1);
+         return;
+      }
+
+      matcher = orderPattern.matcher(line);
+
+      if (matcher.matches())
+      {
+         order = matcher.group(1);
+         return;
+      }
+
+      if (!override)
+      {
+         matcher = languagePattern.matcher(line);
+
+         if (matcher.matches())
+         {
+            String label = matcher.group(1);
+
+            String language = matcher.group(2);
+
+            if (language.isEmpty())
+            {
+               language = invoker.getDefaultLanguage();
+
+               String variant = invoker.getDefaultXindyVariant();
+
+               if (variant != null && !variant.isEmpty())
+               {
+                  language = String.format("%s-%s", language, variant);
+               }
+
+               addErrorMessage(invoker.getLabelWithValue(
+                  "error.no_language", label));
+               addDiagnosticMessage(invoker.getLabelWithValues(
+                  "diagnostics.no_language", label, language));
+            }
+
+            languages.put(label, language);
+
+            return;
+         }
+
+         matcher = codepagePattern.matcher(line);
+
+         if (matcher.matches())
+         {
+            String label = matcher.group(1);
+
+            String code = matcher.group(2);
+
+            if (code.isEmpty())
+            {
+               code = invoker.getDefaultCodePage();
+
+               addErrorMessage(invoker.getLabelWithValue(
+                  "error.no_codepage", label));
+               addDiagnosticMessage(invoker.getLabelWithValues(
+                  "diagnostics.no_codepage", label, code));
+            }
+
+            codePages.put(label, code);
+
+            return;
+         }
+      }
+
+      matcher = glsreferencePattern.matcher(line);
+
+      if (matcher.matches())
+      {
+         noidx = true;
+         return;
+      }
+
+      matcher = extraMakeIndexOptsPattern.matcher(line);
+
+      if (matcher.matches())
+      {
+         String opts = matcher.group(1);
+
+         extraMakeIndexOpts = splitArgs(opts);
+
+         return;
+      }
+
+      matcher = inputPattern.matcher(line);
+
+      if (matcher.matches())
+      {
+         BufferedReader in = null;
+
+         String aux = matcher.group(1)+".aux";
+
+         String[] split = aux.split("/");
+
+         File f = dir;
+
+         for (int i = 0; i < split.length; i++)
+         {
+            f = new File(f, split[i]);
+         }
+
+         try
+         {
+            invoker.getMessageSystem().message(
+              invoker.getLabelWithValue("message.loading", f.toString()));
+            in = new BufferedReader(new FileReader(f));
+
+            while ((line = in.readLine()) != null)
+            {
+               parseAux(f.getParentFile(), line, override, languages, codePages);
+            }
+         }
+         finally
+         {
+            if (in != null)
+            {
+               in.close();
+            }
+         }
+
+         return;
+      }
    }
 
    public static Vector<String> splitArgs(String str)
@@ -305,7 +354,15 @@ public class Glossaries
 
          if (mess != null)
          {
-            throw new GlossaryException(mess);
+            if (invoker.isBatchMode())
+            {
+               throw new GlossaryException(mess);
+            }
+
+            addErrorMessage(mess);
+            parseLog(dir, baseName);
+
+            return;
          }
 
          String lang = null;
@@ -656,6 +713,24 @@ public class Glossaries
                       info));
                }
 
+               continue;
+            }
+
+            m = inputPattern.matcher(line);
+
+            if (m.matches())
+            {
+               addDiagnosticMessage(invoker.getLabelWithValue(
+                  "diagnostics.include", m.group(1)));
+               continue;
+            }
+
+            m = istFilePattern.matcher(line);
+
+            if (m.matches())
+            {
+               addDiagnosticMessage(invoker.getLabel(
+                  "diagnostics.ist_in_log"));
                continue;
             }
          }
@@ -1017,6 +1092,9 @@ public class Glossaries
 
    private static final Pattern wrglossaryPattern
       = Pattern.compile("wrglossary\\((.*?)\\)\\((.*)\\) on input line (\\d+).*");
+
+   private static final Pattern inputPattern
+      = Pattern.compile("\\\\@input\\{(.*)\\.aux\\}");
 
    private static final String[] fields =
    {
