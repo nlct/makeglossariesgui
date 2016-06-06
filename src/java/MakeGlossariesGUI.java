@@ -36,7 +36,7 @@ public class MakeGlossariesGUI extends JFrame
       });
 
       setIconImage(new ImageIcon(getClass().getResource(
-        "/icons/makeglossariesgui-logosmall.png")).getImage());
+        "/resources/icons/makeglossariesgui-logosmall.png")).getImage());
 
       try
       {

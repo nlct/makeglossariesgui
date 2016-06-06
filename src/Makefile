@@ -4,7 +4,7 @@ IZPACKDIR=/usr/local/IzPack
 test	: app
 	bin/makeglossariesgui --debug
 
-app	: lib lib/icons lib/makeglossariesgui.jar lib/resources lib/makeglossariesgui-splash.png
+app	: lib lib/makeglossariesgui.jar lib/resources lib/makeglossariesgui-splash.png
 
 dist	: ../dist/makeglossariesgui-installer.jar
 	cp doc/makeglossariesgui-en.pdf ../dist
@@ -15,9 +15,6 @@ dist	: ../dist/makeglossariesgui-installer.jar
 
 lib	:
 	mkdir -p lib
-
-lib/icons	:
-		cd lib; ln -s ../images/icons
 
 lib/resources   :
 	cd lib; ln -s ../resources
