@@ -1,0 +1,17 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[colorlinks]{hyperref}
+\usepackage[acronym,xindy]{glossaries}
+
+\makeglossaries
+
+\loadglsentries{example-glossaries-brief}
+\loadglsentries[acronym]{example-glossaries-acronym}
+
+\begin{document}
+\glsaddall
+
+\printglossaries
+\end{document}

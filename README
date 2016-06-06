@@ -11,15 +11,17 @@ Requirements	: Java Runtime Environment
 DESCRIPTION
 ===========
 
-MakeGlossariesGUI is a Java GUI that can be used as a diagnostic
-tool when there are problems with a document that uses the
-glossaries package.
+MakeGlossariesGui is a Java GUI diagnostic tool for the glossaries
+LaTeX package (http://ctan.org/pkg/glossaries). It can check for
+common problems that can cause the entries within the glossary or
+the entire glossary to be omitted. In GUI mode it parses both the
+.aux and the .log file for known error and warning messages.
 
-It can also be used as alternative to the makeglossaries
-Perl script and the makeglossaries-lite.lua Lua script supplied by 
-the glossaries package (ctan.org/pkg/glossaries). However, since
-it requires the Java Runtime Environment (JRE) it naturally has
-larger overheads than a simple Perl or Lua script.
+When run in batch mode, it can be used as alternative to the
+makeglossaries Perl script and the makeglossaries-lite.lua Lua
+script supplied by the glossaries package. (It doesn't parse the log
+file in batch mode or show all the diagnostic information that the
+GUI mode provides.)
 
 Third Party Libraries
 =====================

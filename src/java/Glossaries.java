@@ -463,6 +463,8 @@ public class Glossaries
 
       boolean checkNonAscii = false;
 
+      String vers = null;
+
       try
       {
          reader = new BufferedReader(new FileReader(log));
@@ -480,7 +482,7 @@ public class Glossaries
                String year = m.group(1);
                String mon  = m.group(2);
                String day  = m.group(3);
-               String vers = m.group(4);
+               vers = m.group(4);
 
                try
                {
@@ -750,6 +752,11 @@ public class Glossaries
          }
       }     
 
+      if (vers == null)
+      {
+         addDiagnosticMessage(invoker.getLabel(
+          "diagnostics.no_version"));
+      }
 
       if (checkNonAscii)
       {
