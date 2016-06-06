@@ -719,7 +719,7 @@ public class MakeGlossariesInvoker
 
    public static final String appVersion = "2.0";
 
-   public static final String appDate = "2016-05-27";
+   public static final String appDate = "2016-06-06";
 
    private boolean quiet=false, debug=false, batchMode=false, dryRun=false; 
 
