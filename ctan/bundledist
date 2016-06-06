@@ -2,8 +2,9 @@
 
 mkdir -p makeglossariesgui
 cp ../dist/* makeglossariesgui
+cp ../README makeglossariesgui
 mkdir -p doc/support/makeglossariesgui
-cp ../dist/*.pdf ../dist/README doc/support/makeglossariesgui
+cp ../dist/*.pdf ../README doc/support/makeglossariesgui
 mkdir -p scripts/makeglossariesgui
 cp ../dist/*.jar scripts/makeglossariesgui
 mkdir -p source/support/makeglossariesgui/src
@@ -14,7 +15,7 @@ tar xvf tmp.tar -C source/support/makeglossariesgui/src
 mkdir -p makeglossariesgui/src
 tar xvf tmp.tar -C makeglossariesgui/src
 rm tmp.tar
-cp ../dist/README source/support/makeglossariesgui
+cp ../README source/support/makeglossariesgui
 mv source/support/makeglossariesgui/src/README source/support/makeglossariesgui/src/README-src
 mv makeglossariesgui/src/README makeglossariesgui/src/README-src
 zip -r makeglossariesgui.tds.zip source scripts doc

@@ -6,7 +6,7 @@ License         : GPLv3+ <http://gnu.org/licenses/gpl.html>
 
 Home Page       : http://www.dickimaw-books.com/software/makeglossariesgui/
 
-Requirements	: Java Runtime Environment
+Requirements	: Java Runtime Environment (JRE 8)
 
 DESCRIPTION
 ===========
@@ -22,6 +22,13 @@ makeglossaries Perl script and the makeglossaries-lite.lua Lua
 script supplied by the glossaries package. (It doesn't parse the log
 file in batch mode or show all the diagnostic information that the
 GUI mode provides.)
+
+Installation
+============
+
+Run the installer:
+
+java -jar makeglossariesgui-installer.jar
 
 Third Party Libraries
 =====================
