@@ -717,9 +717,9 @@ public class MakeGlossariesInvoker
 
    public static final String appName = "MakeGlossariesGUI";
 
-   public static final String appVersion = "2.0";
+   public static final String appVersion = "2.1";
 
-   public static final String appDate = "2016-06-06";
+   public static final String appDate = "2016-06-09";
 
    private boolean quiet=false, debug=false, batchMode=false, dryRun=false; 
 

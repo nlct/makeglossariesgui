@@ -868,13 +868,13 @@ public class Glossary
       = Pattern.compile("\\\\glossaryentry\\{(.*?)\\?\\\\glossaryentryfield\\{(.*?)\\}.*");
 
    private static final Pattern makeindexEntryPattern
-      = Pattern.compile("\\\\glossaryentry\\{(.*?)\\?\\\\glossentry\\{(.*?)\\}.*");
+      = Pattern.compile("\\\\glossaryentry\\{(.*?)\\?(?:\\\\gls(?:no)?nextpages\\s)?\\\\glossentry\\{(.*?)\\}.*");
 
    private static final Pattern xindyOldEntryPattern = Pattern.compile(
    "\\(indexentry\\s+:tkey\\s*\\(\\s*\\(\\s*\"(.*?)\"\\s+\"\\\\\\\\glossaryentryfield\\{(.*?)\\}.*\".*");
 
    private static final Pattern xindyEntryPattern = Pattern.compile(
-   "\\(indexentry\\s+:tkey\\s*\\(\\s*\\(\\s*\"(.*?)\"\\s+\"\\\\\\\\glossentry\\{(.*?)\\}.*\".*");
+   "\\(indexentry\\s+:tkey\\s*\\(\\s*\\(\\s*\"(.*?)\"\\s+\"(?:\\\\\\\\gls(?:no)?nextpages\\s)?\\\\\\\\glossentry\\{(.*?)\\}.*\".*");
 
    private static final Pattern xindyEmptySortPattern = Pattern.compile(
    "(?:\\$|\\{\\\\[a-zA-Z@]+ *\\}|\\\\[a-zA-Z@]+ *)+");
