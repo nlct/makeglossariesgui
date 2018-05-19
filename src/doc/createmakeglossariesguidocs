@@ -44,15 +44,15 @@ my %dict = ();
 
 while (<FD>)
 {
-   if (/\bstatic +final +String +appName *= *"(.+)";/)
+   if (/\bstatic +final +String +APP_NAME *= *"(.+)";/)
    {
       $dict{appname} = $1;
    }
-   elsif (/\bstatic +final +String +appVersion *= *"(.+)";/)
+   elsif (/\bstatic +final +String +APP_VERSION *= *"(.+)";/)
    {
       $dict{appversion} = $1;
    }
-   elsif (/\bstatic +final +String +appDate *= *"([^"]+)"/)
+   elsif (/\bstatic +final +String +APP_DATE *= *"([^"]+)"/)
    {
       $dict{appdate} = $1;
    }
@@ -79,9 +79,22 @@ unless (-e $propfile)
 }
 
 open FD, "$propfile" or die "Can't open '$propfile' $!\n";
-binmode(FD, ":$encoding_file");
 
-my $linenum = 0;
+$_ = <FD>;
+
+if (/# Encoding: ([^s]+)/)
+{
+   binmode(FD, ":encoding($1)");
+}
+else
+{
+   die "Encoding comment line missing from line 1 of '$propfile'\n";
+}
+
+my $linenum = 1;
+
+my $openquote = chr(hex(2018));
+my $closequote = chr(hex(2019));
 
 while (<FD>)
 {
@@ -91,7 +104,28 @@ while (<FD>)
 
    if (/^([^=]+)=(.*)$/)
    {
-      $dict{$1} = $2;
+      my $dictkey = $1;
+      my $value = $2;
+
+      $value=~s/\\{1}[nt]/ /g;
+      $value=~s/(\w)''(\w)/$1$closequote$2/g;
+      $value=~s/'{2}([^']+)'{2}/$openquote$1$closequote/g;
+      $value=~s/'{2}/$closequote/g;
+      $value=~s/\|([a-zA-Z]+)\|/\\cs{$1}/g;
+
+      # strip any trailing ellipsis
+      $value=~s/\.{3}$//g;
+
+      # Don't need the complexity of the Java application here.
+      # (Many of the messages aren't used in the manual, just the 
+      # menu items, button labels and dialog titles are required.)
+
+      $value=~s/\{\d,choice,[^\}]+\|<([^\}]*)\}/$1/g;
+
+      $value=~s/\{(\d+)(,[^\}]+)?\}/&arg_placeholder($1)/eg;
+
+      $dict{$dictkey} = $value;
+
    }
    else
    {
@@ -2370,6 +2404,10 @@ sub html_nav{
   }
 
   "$nav</td></tr></table>"
+}
+
+sub arg_placeholder{
+   "<ARG#" . ($_[0]) . "/>";
 }
  
 1;

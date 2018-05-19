@@ -20,7 +20,7 @@ public class MakeGlossariesGUI extends JFrame
 {
    public MakeGlossariesGUI(MakeGlossariesInvoker invoker)
    {
-      super(invoker.appName);
+      super(invoker.APP_NAME);
       this.invoker = invoker;
 
       invoker.setMessageSystem(this);
@@ -126,7 +126,7 @@ public class MakeGlossariesGUI extends JFrame
 
       scrollPane.setName(getLabel("main.title"));
       tabbedPane.add(scrollPane, 0);
-      tabbedPane.setMnemonicAt(0, getMnemonicInt("main.title"));
+      tabbedPane.setMnemonicAt(0, getMnemonic("main.title"));
 
       diagnosticArea = new DiagnosticPanel(this);
 
@@ -134,7 +134,7 @@ public class MakeGlossariesGUI extends JFrame
 
       diagnosticSP.setName(getLabel("diagnostics.title"));
       tabbedPane.add(diagnosticSP, 1);
-      tabbedPane.setMnemonicAt(1, getMnemonicInt("diagnostics.title"));
+      tabbedPane.setMnemonicAt(1, getMnemonic("diagnostics.title"));
 
       popupM = new JPopupMenu();
 
@@ -205,7 +205,7 @@ public class MakeGlossariesGUI extends JFrame
       if ((xindy == null || xindy.equals(""))
        &&(makeindex == null || makeindex.equals("")))
       {
-         File file = appSelector.findApp("makeindex");
+         File file = findApplication("makeindex");
 
          if (file != null)
          {
@@ -213,7 +213,7 @@ public class MakeGlossariesGUI extends JFrame
             propertiesDialog.setMakeIndex(file);
          }
 
-         file = appSelector.findApp("xindy");
+         file = findApplication("xindy");
 
          if (file != null)
          {
@@ -226,6 +226,16 @@ public class MakeGlossariesGUI extends JFrame
       {
          load(invoker.getFile());
       }
+   }
+
+   public File findApplication(String name)
+   {
+      return invoker.findApp(name);
+   }
+
+   public File findApplication(String name, String altName, String altName2)
+   {
+      return invoker.findApp(name, altName, altName2);
    }
 
    public void hyperlinkUpdate(HyperlinkEvent evt)
@@ -469,11 +479,11 @@ public class MakeGlossariesGUI extends JFrame
          {
             str = new String[]
             {
-               invoker.appName,
-               getLabelWithValues("about.version", invoker.appVersion,
-                  invoker.appDate),
+               invoker.APP_NAME,
+               getLabelWithValues("about.version", invoker.APP_VERSION,
+                  invoker.APP_DATE),
                getLabelWithValues("about.copyright", "Nicola L. C. Talbot",
-                  "2011"),
+                  String.format("2011-%s", invoker.APP_DATE.substring(0,4))),
                "http://www.dickimaw-books.com/"
             };
          }
@@ -481,18 +491,18 @@ public class MakeGlossariesGUI extends JFrame
          {
             str = new String[]
             {
-               invoker.appName,
-               getLabelWithValues("about.version", invoker.appVersion,
-                invoker.appDate),
+               invoker.APP_NAME,
+               getLabelWithValues("about.version", invoker.APP_VERSION,
+                invoker.APP_DATE),
                getLabelWithValues("about.copyright", "Nicola L. C. Talbot",
-                "2011"),
+                String.format("2011-%s", invoker.APP_DATE.substring(0,4))),
                "http://www.dickimaw-books.com/",
                translator
             };
          }
 
          JOptionPane.showMessageDialog(this, str,
-            getLabelWithValue("about.title", invoker.appName),
+            getLabelWithValues("about.title", invoker.APP_NAME),
             JOptionPane.PLAIN_MESSAGE);
       }
       else if (action.equals("license"))
@@ -566,7 +576,8 @@ public class MakeGlossariesGUI extends JFrame
            file.getName().substring(0,idx)+".aux");
       }
 
-      setTitle(getLabelWithValues("app.title", invoker.appName, file.getName()));
+      setTitle(getLabelWithValues("app.title", 
+        invoker.APP_NAME, file.getName()));
 
       invoker.setFile(file);
       invoker.getProperties().addRecentFile(file.getAbsolutePath());
@@ -779,35 +790,19 @@ public class MakeGlossariesGUI extends JFrame
       return invoker.getLabel(parent, label);
    }
 
-   public char getMnemonic(String label)
+   public int getMnemonic(String label)
    {
       return invoker.getMnemonic(label);
    }
 
-   public char getMnemonic(String parent, String label)
+   public int getMnemonic(String parent, String label)
    {
       return invoker.getMnemonic(parent, label);
    }
 
-   public int getMnemonicInt(String label)
+   public String getLabelWithValues(String label, Object... args)
    {
-      return invoker.getMnemonicInt(label);
-   }
-
-   public int getMnemonicInt(String parent, String label)
-   {
-      return invoker.getMnemonicInt(parent, label);
-   }
-
-   public String getLabelWithValue(String label, String value)
-   {
-      return invoker.getLabelWithValue(label, value);
-   }
-
-   public String getLabelWithValues(String label, String value1,
-      String value2)
-   {
-      return invoker.getLabelWithValues(label, value1, value2);
+      return invoker.getLabelWithValues(label, args);
    }
 
    public String getDefaultLanguage()
@@ -986,7 +981,7 @@ public class MakeGlossariesGUI extends JFrame
    {
       JOptionPane.showMessageDialog(null,
         String.format("%s%n%s",
-          getLabelWithValue("error.fatal.info", invoker.appName),
+          getLabelWithValues("error.fatal.info", invoker.APP_NAME),
           e.getMessage()),
         getLabel("error.fatal.title"), JOptionPane.ERROR_MESSAGE);
 

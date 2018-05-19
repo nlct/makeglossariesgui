@@ -3,7 +3,10 @@ DICTDIR=../resources/dictionaries
 TARGETBACKREF=../../doc
 MAINCLASS=../java/MakeGlossariesInvoker.java
 
-all	: en
+all	: en makeglossariesgui.1
+
+makeglossariesgui.1     : makeglossariesgui.pod
+	pod2man -c makeglossariesgui makeglossariesgui.pod makeglossariesgui.1
 
 en	: $(TARGETDIR)/makeglossariesgui-en/makeglossariesgui.html \
 	  makeglossariesgui-en.pdf

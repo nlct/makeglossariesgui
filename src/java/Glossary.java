@@ -28,7 +28,7 @@ public class Glossary
       {
          throw new GlossaryException(invoker.getLabelWithValues(
             "error.no_indexer_app", "xindy", xindyApp.getAbsolutePath()),
-            invoker.getLabelWithValue("diagnostics.no_indexer", "xindy"));
+            invoker.getLabelWithValues("diagnostics.no_indexer", "xindy"));
       }
 
       String transFileName = baseName+"."+transExt;
@@ -290,7 +290,8 @@ public class Glossary
          }
          else if (processErrors != null)
          {
-            addDiagnosticMessage(invoker.getLabelWithValues("diagnostics.app_err",
+            addDiagnosticMessage(invoker.getLabelWithValues(
+               "diagnostics.app_err",
                "Xindy", processErrors.toString()));
          }
          else
@@ -300,8 +301,8 @@ public class Glossary
       }
       else if (entryTable.size() == 0)
       {
-         addDiagnosticMessage(invoker.getLabelWithValue("diagnostics.no_entries",
-            label));
+         addDiagnosticMessage(invoker.getLabelWithValues(
+            "diagnostics.no_entries", label));
       }
    }
 
@@ -314,8 +315,9 @@ public class Glossary
       if (!makeindexApp.exists())
       {
          throw new GlossaryException(invoker.getLabelWithValues(
-            "error.no_indexer_app", "makeindex", makeindexApp.getAbsolutePath()),
-            invoker.getLabelWithValue("diagnostics.no_indexer", "makeindex"));
+            "error.no_indexer_app", 
+            "makeindex", makeindexApp.getAbsolutePath()),
+            invoker.getLabelWithValues("diagnostics.no_indexer", "makeindex"));
       }
 
       String transFileName = baseName+"."+transExt;
@@ -520,11 +522,12 @@ public class Glossary
       if (exitCode > 0)
       {
          addErrorMessage(invoker.getLabelWithValues("error.app_failed",
-            "Makeindex", ""+exitCode));
+            "Makeindex", exitCode));
 
          if (processErrors != null)
          {
-            addDiagnosticMessage(invoker.getLabelWithValues("diagnostics.app_err",
+            addDiagnosticMessage(invoker.getLabelWithValues(
+               "diagnostics.app_err",
                "Makeindex", processErrors.toString()));
          }
          else
@@ -534,19 +537,13 @@ public class Glossary
       }
       else if (numRejected > 0)
       {
-         if (numRejected == 1)
-         {
-            addErrorMessage(invoker.getLabel("error.entry_rejected"));
-         }
-         else
-         {
-            addErrorMessage(invoker.getLabelWithValue("error.entries_rejected", rejected));
-         }
+         addErrorMessage(invoker.getLabelWithValues("error.entries_rejected", 
+           numRejected));
 
          if (numAccepted == 0)
          {
-            addDiagnosticMessage(invoker.getLabelWithValue("diagnostics.makeindex_reject_all",
-               label));
+            addDiagnosticMessage(invoker.getLabelWithValues(
+              "diagnostics.makeindex_reject_all", label));
          }
 
          if (numIgnored > 0)
@@ -555,30 +552,17 @@ public class Glossary
                ("diagnostics.bad_attributes", istName, "makeindex"));
          }
 
-         if (numTooLong == 1)
+         if (numTooLong > 0)
          {
             if (deprecated)
             {
-               addDiagnosticMessage(
-                 invoker.getLabel("diagnostics.old_one_too_long"));
+               addDiagnosticMessage(invoker.getLabelWithValues(
+                "diagnostics.old_too_long", numTooLong));
             }
             else
             {
-               addDiagnosticMessage(
-                 invoker.getLabel("diagnostics.one_too_long"));
-            }
-         }
-         else if (numTooLong > 1)
-         {
-            if (deprecated)
-            {
-               addDiagnosticMessage(invoker.getLabelWithValue(
-                "diagnostics.old_too_long", ""+numTooLong));
-            }
-            else
-            {
-               addDiagnosticMessage(invoker.getLabelWithValue(
-                "diagnostics.too_long", ""+numTooLong));
+               addDiagnosticMessage(invoker.getLabelWithValues(
+                "diagnostics.too_long", numTooLong));
             }
          }
       }
@@ -586,15 +570,16 @@ public class Glossary
       {
          if (label.equals("main"))
          {
-            addDiagnosticMessage(invoker.getLabel("diagnostics.no_entries_main"));
+            addDiagnosticMessage(invoker.getLabel(
+               "diagnostics.no_entries_main"));
          }
          else
          {
-            addDiagnosticMessage(invoker.getLabelWithValue("diagnostics.no_entries",
-               label));
+            addDiagnosticMessage(invoker.getLabelWithValues(
+               "diagnostics.no_entries", label));
          }
 
-         addErrorMessage(invoker.getLabelWithValue("error.no_entries", label));
+         addErrorMessage(invoker.getLabelWithValues("error.no_entries", label));
       }
    }
 
@@ -820,16 +805,11 @@ public class Glossary
          }
       }
 
-      if (numFound == 1)
-      {
-         addDiagnosticMessage(invoker.getLabelWithValues(
-           "diagnostics.label_with_problem_char", label, builder.toString()));
-      }
-      else if (numFound > 1)
+      if (numFound > 0)
       {
          addDiagnosticMessage(invoker.getLabelWithValues(
            "diagnostics.labels_with_problem_char",
-              ""+numFound, label, builder.toString()));
+              numFound, label, builder.toString()));
       }
    }
 
@@ -878,7 +858,6 @@ public class Glossary
 
    private static final Pattern xindyEmptySortPattern = Pattern.compile(
    "(?:\\$|\\{\\\\[a-zA-Z@]+ *\\}|\\\\[a-zA-Z@]+ *)+");
-
 }
 
 class GlossaryEntry

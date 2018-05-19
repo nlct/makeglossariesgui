@@ -154,7 +154,7 @@ public class GlossariesPanel extends JEditorPane
             glossaryInfoTemplate);
 
          doc.setInnerHTML(doc.getElement("glossaryheader-"+g.label), 
-            app.getLabelWithValue("main.glossary", g.label));
+            app.getLabelWithValues("main.glossary", g.label));
 
          File transFile = new File(dir, baseName+"."+g.transExt);
          File gloFile = new File(dir, baseName+"."+g.gloExt);

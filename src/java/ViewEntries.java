@@ -13,7 +13,7 @@ public class ViewEntries extends JDialog
 {
    public ViewEntries(MakeGlossariesGUI application, Glossary g, Font font)
    {
-      super(application, application.getLabelWithValue("entry.title", g.label),
+      super(application, application.getLabelWithValues("entry.title", g.label),
          true);
 
       app = application;
@@ -174,7 +174,8 @@ public class ViewEntries extends JDialog
 
          if (idx == -1)
          {
-            app.error(this, app.getLabelWithValue("error.no_such_entry", label));
+            app.error(this, 
+              app.getLabelWithValues("error.no_such_entry", label));
          }
          else
          {

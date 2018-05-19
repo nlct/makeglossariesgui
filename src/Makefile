@@ -1,4 +1,4 @@
-APP_VERSION:=$(shell grep "public static final String appVersion" java/MakeGlossariesInvoker.java | sed "s/public\sstatic\sfinal\sString\sappVersion=//" | tr -d "\"\; ")
+APP_VERSION:=$(shell grep "public static final String APP_VERSION" java/MakeGlossariesInvoker.java | sed "s/public\sstatic\sfinal\sString\sAPP_VERSION=//" | tr -d "\"\; ")
 IZPACKDIR=/usr/local/IzPack
 
 test	: app

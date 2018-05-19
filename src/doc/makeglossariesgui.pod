@@ -1,0 +1,87 @@
+=head1 SYNOPSIS
+
+B<makeglossariesgui> [I<option>]+ [I<filename>]
+
+=head1 DESCRIPTION
+
+MakeGlossariesGUI is a Java GUI diagnostic tool for the glossaries
+LaTeX package. It can check for common problems that can cause the
+entries within the glossary or the entire glossary to be omitted. In
+GUI mode it parses both the .aux and the .log file for known error
+and warning messages.
+
+When run in batch mode, it can be used as alternative to the
+makeglossaries Perl script and the makeglossaries-lite.lua Lua
+script supplied by the glossaries package. (It doesn't parse the log
+file in batch mode or show all the diagnostic information that the
+GUI mode provides.)
+
+Note that if you are opting to use MakeGlossariesGUI because you
+don't want to install Perl, then you are limiting yourself to
+makeindex as xindy also requires Perl. 
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<--version> (or B<-v>)
+
+Show the version number and exit.
+
+=item B<--help> (or B<-h>)
+
+Show the help and exit.
+
+=item B<--debug>
+
+Print debug messages to STDOUT.
+
+=item B<--batch> (or B<-b>)
+
+Run in batch mode. The I<filename> must be supplied with this option 
+and should be the name of the .aux file. (The extension may be omitted.)
+
+=item B<--gui>
+
+Run in GUI mode (default).
+
+=item B<--quiet>
+
+Suppress messages that would otherwise be written to STDOUT.
+
+=item B<--dry-run> (or B<-n>)
+
+Switch dry run mode on.
+
+=item B<--nodry-run>
+
+Switch dry run mode off (default).
+
+=back
+
+=head1 REQUIRES
+
+Java 7 and a TeX distribution.
+
+=head1 LICENSE
+
+License GPLv3+: GNU GPL version 3 or later
+<http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+=head1 RECOMMENDED READING
+
+The MakeGlossariesGUI manual (available as a PDF or through the GUI).
+
+The glossaries manual:
+
+        texdoc glossaries
+
+=head1 AUTHOR
+
+Nicola L. C. Talbot,
+L<http://www.dickimaw-books.com/>
+
+=cut
+

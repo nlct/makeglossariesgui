@@ -46,6 +46,7 @@ public class GlsTransferHandler extends TransferHandler
       {
          Object data = t.getTransferData(DataFlavor.javaFileListFlavor);
 
+         @SuppressWarnings("unchecked")
          ArrayList<File> list = (ArrayList<File>)data;
 
          if (list.isEmpty())

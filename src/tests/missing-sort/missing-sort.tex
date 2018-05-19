@@ -5,6 +5,9 @@
 
 \makeglossaries
 
+\newglossaryentry{sample}{name={sample},
+ description={an example}}
+
 \newglossaryentry{S}{name={\S},
  description={section symbol}}
 
@@ -15,7 +18,7 @@
  description={beta}}
 
 \begin{document}
-Test: \gls{S}, $\gls{alpha}$, $\gls{beta}$.
+Test: \gls{sample}, \gls{S}, $\gls{alpha}$, $\gls{beta}$.
 
 \printglossaries
 

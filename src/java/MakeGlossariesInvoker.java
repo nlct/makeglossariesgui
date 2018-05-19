@@ -30,7 +30,7 @@ public class MakeGlossariesInvoker
       catch (IOException e)
       {
          getMessageSystem().error(
-           getLabelWithValue("error.prop_io", e.getMessage()));
+           getLabelWithValues("error.prop_io", e.getMessage()));
          properties = new MakeGlossariesProperties();
       }
    }
@@ -101,8 +101,8 @@ public class MakeGlossariesInvoker
                glossaries = new Glossaries(this);
                glossaries.addDiagnosticMessage(
                  getLabel("diagnostics.no_aux"));
-               glossaries.addErrorMessage(getLabelWithValue(
-                 "error.io.file_doesnt_exist", file.toString()));
+               glossaries.addErrorMessage(getLabelWithValues(
+                 "error.io.file_doesnt_exist", file));
 
                try
                {
@@ -119,7 +119,7 @@ public class MakeGlossariesInvoker
 
          if (log == null)
          {
-            getMessageSystem().error(getLabelWithValue(
+            getMessageSystem().error(getLabelWithValues(
               "error.io.file_doesnt_exist", file.getAbsolutePath()));
          }
 
@@ -208,7 +208,12 @@ public class MakeGlossariesInvoker
 
    public String getLabelOrDef(String label, String alt)
    {
-      String val = dictionary.getProperty(label);
+      if (messages == null)
+      {
+         return alt;
+      }
+
+      String val = messages.getMessageIfExists(label);
 
       return val == null ? alt : val;
    }
@@ -220,214 +225,64 @@ public class MakeGlossariesInvoker
 
    public String getLabel(String parent, String label)
    {
-      if (parent != null)
+      if (messages == null)
       {
-         label = parent+"."+label;
+         messageSystem.debug("Dictionary not loaded.");
+         return null;
       }
 
-      String prop = dictionary.getProperty(label);
+      String propLabel;
 
-      if (prop == null)
+      if (parent == null)
       {
-         System.err.println("No such dictionary property '"+label+"'");
-         return "?"+label+"?";
+         propLabel = label;
+      }
+      else
+      {
+         propLabel = String.format("%s.%s", parent, label);
       }
 
-      return prop;
+      return messages.getMessage(propLabel);
    }
 
-   public char getMnemonic(String label)
+   public int getMnemonic(String label)
    {
       return getMnemonic(null, label);
    }
 
-   public char getMnemonic(String parent, String label)
+   public int getMnemonic(String parent, String label)
    {
-      String prop = getLabel(parent, label+".mnemonic");
-
-      if (prop.equals(""))
+      if (messages == null)
       {
-         System.err.println("Empty dictionary property '"+prop+"'");
-         return label.charAt(0);
+         messageSystem.debug("Dictionary not loaded.");
+         return -1;
       }
 
-      return prop.charAt(0);
+      String propLabel = label+".mnemonic";
+
+      if (parent != null)
+      {
+         propLabel = String.format("%s.%s", parent, propLabel);
+      }
+
+      String val = messages.getMessageIfExists(propLabel);
+
+      if (val == null || val.isEmpty())
+      {
+         return -1;
+      }
+
+      return val.codePointAt(0);
    }
 
-   public int getMnemonicInt(String label)
+   public String getLabelWithValues(String label, Object... values)
    {
-      return getMnemonicInt(null, label);
-   }
-
-   public int getMnemonicInt(String parent, String label)
-   {
-      String prop = getLabel(parent, label+".mnemonic");
-
-      if (prop.equals(""))
+      if (messages == null)
       {
-         System.err.println("Empty dictionary property '"+prop+"'");
-         return label.codePointAt(0);
+         return null;
       }
 
-      return prop.codePointAt(0);
-   }
-
-   public String getLabelWithValue(String label, String value)
-   {
-      String prop = getLabel(label);
-
-      if (!isBatchMode())
-      {
-         value = escapeHTML(value);
-      }
-
-      StringBuilder builder = new StringBuilder(prop.length());
-
-      for (int i = 0; i < prop.length(); i++)
-      {
-         char c = prop.charAt(i);
-
-         if (c == '$')
-         {
-            i++;
-
-            if (i == prop.length())
-            {
-               builder.append(c);
-            }
-            else
-            {
-              char c2 = prop.charAt(i);
-
-              if (c2 == '1')
-              {
-                 builder.append(value);
-              }
-              else
-              {
-                 builder.append(c);
-                 builder.append(c2);
-              }
-            }
-         }
-         else
-         {
-            builder.append(c);
-         }
-      }
-
-      return builder.toString();
-   }
-
-   public String getLabelWithValues(String label, String value1,
-      String value2)
-   {
-      String prop = getLabel(label);
-
-      if (!isBatchMode())
-      {
-         value1 = escapeHTML(value1);
-         value2 = escapeHTML(value2);
-      }
-
-      StringBuilder builder = new StringBuilder(prop.length());
-
-      for (int i = 0; i < prop.length(); i++)
-      {
-         char c = prop.charAt(i);
-
-         if (c == '$')
-         {
-            i++;
-
-            if (i == prop.length())
-            {
-               builder.append(c);
-            }
-            else
-            {
-              char c2 = prop.charAt(i);
-
-              if (c2 == '1')
-              {
-                 builder.append(value1);
-              }
-              else if (c2 == '2')
-              {
-                 builder.append(value2);
-              }
-              else
-              {
-                 builder.append(c);
-                 builder.append(c2);
-              }
-            }
-         }
-         else
-         {
-            builder.append(c);
-         }
-      }
-
-      return builder.toString();
-   }
-
-   public String getLabelWithValues(String label, String value1,
-      String value2, String value3)
-   {
-      String prop = getLabel(label);
-
-      if (!isBatchMode())
-      {
-         value1 = escapeHTML(value1);
-         value2 = escapeHTML(value2);
-         value3 = escapeHTML(value3);
-      }
-
-      StringBuilder builder = new StringBuilder(prop.length());
-
-      for (int i = 0; i < prop.length(); i++)
-      {
-         char c = prop.charAt(i);
-
-         if (c == '$')
-         {
-            i++;
-
-            if (i == prop.length())
-            {
-               builder.append(c);
-            }
-            else
-            {
-              char c2 = prop.charAt(i);
-
-              if (c2 == '1')
-              {
-                 builder.append(value1);
-              }
-              else if (c2 == '2')
-              {
-                 builder.append(value2);
-              }
-              else if (c2 == '3')
-              {
-                 builder.append(value3);
-              }
-              else
-              {
-                 builder.append(c);
-                 builder.append(c2);
-              }
-            }
-         }
-         else
-         {
-            builder.append(c);
-         }
-      }
-
-      return builder.toString();
+      return messages.getMessage(label, values);
    }
 
    public MakeGlossariesProperties getProperties()
@@ -477,8 +332,9 @@ public class MakeGlossariesInvoker
 
       BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 
-      dictionary = new Properties();
+      Properties dictionary = new Properties();
       dictionary.load(reader);
+      messages = new MakeGlossariesDictionary(dictionary);
 
       reader.close();
 
@@ -560,36 +416,86 @@ public class MakeGlossariesInvoker
       return map == null ? language : map;
    }
 
+   public File findApp(String name)
+   {
+      return findApp(name, name+".exe", null);
+   }
+
+   public File findApp(String name, String altName, String altName2)
+   {
+      String filename = name;
+      String filename2 = (altName == null ? null : altName);
+      String filename3 = (altName2 == null ? null : altName2);
+
+      String path = System.getenv("PATH");
+      String[] split = path.split(File.pathSeparator);
+
+      for (int i = 0; i < split.length; i++)
+      {
+         File file = new File(split[i], filename);
+
+         if (file.exists())
+         {
+            return file;
+         }
+
+         if (filename2 != null)
+         {
+            file = new File(split[i], filename2);
+
+            if (file.exists())
+            {
+               return file;
+            }
+         }
+
+         if (filename3 != null)
+         {
+            file = new File(split[i], filename3);
+
+            if (file.exists())
+            {
+               return file;
+            }
+         }
+      }
+
+      return null;
+   }
+
+
+
    public void help()
    {
       System.out.println(getLabel("syntax.cmdline"));
       System.out.println();
-      System.out.println(getLabelWithValue("syntax.filename", "--batch"));
+      System.out.println(getLabelWithValues("syntax.filename", "--batch"));
       System.out.println();
       System.out.println(getLabel("syntax.options"));
       System.out.println();
       System.out.println(getLabelWithValues("syntax.help", "--help", "-h"));
       System.out.println(getLabelWithValues("syntax.version", 
          "--version", "-v"));
-      System.out.println(getLabelWithValue("syntax.debug", "--debug"));
+      System.out.println(getLabelWithValues("syntax.debug", "--debug"));
       System.out.println(getLabelWithValues("syntax.dryrun", "--dry-run", 
         "-n"));
-      System.out.println(getLabelWithValue("syntax.nodryrun", "--nodry-run"));
+      System.out.println(getLabelWithValues("syntax.nodryrun", "--nodry-run"));
       System.out.println(getLabelWithValues("syntax.batch", "--batch", "-b"));
-      System.out.println(getLabelWithValue("syntax.gui", "--gui"));
-      System.out.println(getLabelWithValue("syntax.quiet", "--quiet"));
+      System.out.println(getLabelWithValues("syntax.gui", "--gui"));
+      System.out.println(getLabelWithValues("syntax.quiet", "--quiet"));
       
    }
 
    public void version()
    {
-     String translator = dictionary.getProperty("about.translator_info");
+     String translator = getLabelOrDef("about.translator_info", null);
 
-     System.out.println(appName);
+     System.out.println(APP_NAME);
      System.out.println(getLabelWithValues("about.version",
-       appVersion, appDate));
+       APP_VERSION, APP_DATE));
      System.out.println(getLabelWithValues("about.copyright", 
-      "Nicola L. C. Talbot", "2011"));
+      "Nicola L. C. Talbot", 
+      String.format("2011-%s", APP_DATE.substring(0, 4))));
      System.out.println("http://www.dickimaw-books.com/");
 
      if (translator != null && !translator.isEmpty())
@@ -678,7 +584,8 @@ public class MakeGlossariesInvoker
          }
          else if (args[i].startsWith("-"))
          {
-            System.err.println(invoker.getLabelWithValue("error.unknown_opt", args[i]));
+            System.err.println(invoker.getLabelWithValues("error.unknown_opt", 
+              args[i]));
             System.exit(1);
          }
          else if (invoker.getFileName() == null)
@@ -713,13 +620,13 @@ public class MakeGlossariesInvoker
 
    private MakeGlossariesProperties properties;
 
-   private static Properties dictionary;
+   private MakeGlossariesDictionary messages;
 
-   public static final String appName = "MakeGlossariesGUI";
+   public static final String APP_NAME = "MakeGlossariesGUI";
 
-   public static final String appVersion = "2.1";
+   public static final String APP_VERSION = "2.1";
 
-   public static final String appDate = "2016-06-09";
+   public static final String APP_DATE = "2018-05-20";
 
    private boolean quiet=false, debug=false, batchMode=false, dryRun=false; 
 

@@ -32,6 +32,11 @@ public class AppSelector extends JDialog
       super(application, application.getLabel("appselect.title"), true);
       app = application;
 
+      if (System.getProperty("os.name").toLowerCase().startsWith("win"))
+      {
+         exeSuffix = ".exe";
+      }
+
       message = new JLabel(application.getLabel("appselect.pathlabel"));
       message.setDisplayedMnemonic(application.getMnemonic("appselect.pathlabel"));
 
@@ -49,20 +54,6 @@ public class AppSelector extends JDialog
       buttonPanel.add(app.createOkayButton(this));
       buttonPanel.add(app.createCancelButton(this));
 
-      String arch = System.getProperty("os.name").toLowerCase();
-      path = System.getenv("PATH");
-
-      if (arch.indexOf("win") >= 0)
-      {
-         pathEnvSep = ";";
-         exeSuffix = ".exe";
-      }
-      else
-      {
-         pathEnvSep = ":";
-         exeSuffix = "";
-      }
-
       pack();
       Dimension dim = getSize();
 
@@ -76,48 +67,12 @@ public class AppSelector extends JDialog
 
    public File findApp(String name)
    {
-      return findApp(name, null, null);
+      return app.findApplication(name);
    }
 
    public File findApp(String name, String altName, String altName2)
    {
-      String filename = name + exeSuffix;
-      String filename2 = (altName == null ? null : altName + exeSuffix);
-      String filename3 = (altName2 == null ? null : altName2 + exeSuffix);
-
-      String[] split = path.split(pathEnvSep);
-
-      for (int i = 0; i < split.length; i++)
-      {
-         File file = new File(split[i], filename);
-
-         if (file.exists())
-         {
-            return file;
-         }
-
-         if (filename2 != null)
-         {
-            file = new File(split[i], filename2);
-
-            if (file.exists())
-            {
-               return file;
-            }
-         }
-
-         if (filename3 != null)
-         {
-            file = new File(split[i], filename3);
-
-            if (file.exists())
-            {
-               return file;
-            }
-         }
-      }
-
-      return null;
+      return app.findApplication(name, altName, altName2);
    }
 
    public void actionPerformed(ActionEvent evt)
@@ -208,5 +163,5 @@ public class AppSelector extends JDialog
    
    private MakeGlossariesGUI app;
 
-   private String pathEnvSep = ":", exeSuffix = "", path;
+   private String exeSuffix = "";
 }

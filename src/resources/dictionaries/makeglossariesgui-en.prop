@@ -1,4 +1,7 @@
+# Encoding: UTF-8
 # English language file for makeglossaries-gui
+# Tab -> \t newline -> \n literal backslash -> \\
+# Control sequence (literal) -> |csname|
 
 # File menu
 file=File
@@ -47,23 +50,23 @@ help.manual.tooltip=Manual
 help.manual.alttext=Help
 
 # about dialog
-about.title=About $1
-about.version=Version $1 ($2)
-about.copyright=Copyright $1 $2
+about.title=About {0}
+about.version=Version {0} ({1})
+about.copyright=Copyright {0} {1}
 about.translator_info=
 
 # StdOut Syntax
 syntax.cmdline=makeglossariesgui [<options>] [<filename>]
-syntax.filename=<filename> is required with the $1 option. The ".aux" extension may be omitted.
+syntax.filename=<filename> is required with the {0} option. The ".aux" extension may be omitted.
 syntax.options=Options:
-syntax.batch=$1 (or $2)\t\trun in batch mode
-syntax.gui=$1\t\trun in GUI mode (default)
-syntax.quiet=$1\t\tsuppress messages (except errors) to stdout
-syntax.help=$1 (or $2)\t\tprint the help message
-syntax.version=$1 (or $2)\tprint the application version
-syntax.debug=$1\t\tprint debug messages to stdout
-syntax.dryrun=$1 (or $2)\tdry run mode
-syntax.nodryrun=$1\t\tnot dry run mode (default)
+syntax.batch={0} (or {1})\t\trun in batch mode
+syntax.gui={0}\t\t\trun in GUI mode (default)
+syntax.quiet={0}\t\t\tsuppress messages normally written to stdout
+syntax.help={0} (or {1})\t\tprint the help message
+syntax.version={0} (or {1})\tprint the application version
+syntax.debug={0}\t\t\tprint debug messages to stdout
+syntax.dryrun={0} (or {1})\tdry run mode
+syntax.nodryrun={0}\t\tnot dry run mode (default)
 
 # file filter
 filter.aux=Auxiliary (AUX) Files
@@ -73,7 +76,7 @@ appselect.title=Select Application
 appselect.pathlabel=Select path to application
 appselect.pathlabel.mnemonic=P
 
-app.title=$1 - $2
+app.title={0} - {1}
 
 # Main panel
 main.title=General Information
@@ -83,7 +86,7 @@ main.order=Order:
 main.ist=Style File:
 main.list=Defined Glossaries:
 main.indexer=Index Format:
-main.glossary=Glossary $1:
+main.glossary=Glossary {0}:
 main.glossary.log=Transcript:
 main.glossary.gls=Output:
 main.glossary.glo=Input:
@@ -97,7 +100,7 @@ main.view=View
 main.details=Details
 
 # Entry viewer
-entry.title=Glossary '$1'
+entry.title=Glossary ''{0}''
 entry.label=Entry Tag
 entry.sort=Sort
 entry.count=Occurrences
@@ -115,58 +118,57 @@ popup.copy.mnemonic=C
 # Diagnostics panel
 diagnostics.title=Diagnostics
 diagnostics.title.mnemonic=D
-diagnostics.no_glossaries=Either your document hasn't loaded the glossaries package, or you have selected the wrong auxiliary file.
-diagnostics.no_version=Can't detect the version number for the glossaries package. Have you remembered to load it (<code>\\usepackage{glossaries}</code>)?
-diagnostics.not_aux=The file you have selected doesn't seem to be an auxiliary (.aux) file.
-diagnostics.no_makeglossaries=Your document doesn't seem to have used <code>\\makeglossaries</code> or the appropriate information hasn't been correctly written to the .aux file.
-diagnostics.no_errors=No errors detected. If you are missing entries, check the following:<ul><li>Have you used commands like <code>\\gls</code> or <code>\\glsadd</code> in the document?</li><li>If you have used commands like <code>\\glsadd</code> or <code>\\glsaddall</code> in the preamble, have you remembered to put them <em>after</em> <code>\\makeglossaries</code></li><li>If you have cross-referenced entries (for example, you have only referenced an entry in the <code>description</code> of another entry) you may need to retry making the glossaries after you have rerun LaTeX. (If you have used the <tt>see</tt> key, you might want to consider using <a href="http://ctan.org/pkg/glossaries-extra"><tt>glossaries-extra</tt></a> if you haven't already done so.)</li><li>If you have at least version 4.24 of the <tt>glossaries</tt> package, have you used the <code>debug</code> option? (That might provide some more information for me to analyse.)</li></ul>Remember that you need to rerun LaTeX after generating the glossary files. If you're having difficulty integrating the glossary generation into your document build, the section <a href="http://www.latex-community.org/know-how/latex/55-latex-general/263-glossaries-nomenclature-lists-of-symbols-and-acronyms#makeglossaries">Using makeglossaries</a> on the LaTeX Community Forum might help.
-diagnostics.no_indexer=Use the <b>Settings</b> menu to set the correct path to the <tt>$1</tt> executable.
-diagnostics.no_language=The language is missing for glossary <tt>$1</tt>. Have you accidentally done <code>\\GlsSetXdyLanguage[$1]{}</code> or <code>xindy={language=}</code>? I've used the fallback <tt>$2</tt> instead.
-diagnostics.language_no_glossary=Check you have spelt the name of the glossary label correctly when using <code>\\GlsSetXdyLanguage[$2]{$1}</code> or check that you have defined glossary <tt>$2</tt>.
-diagnostics.codepage_no_glossary=Check you have spelt the name of the glossary label correctly when using <code>\\GlsSetXdyCodePage[$2]{$1}</code> or check that you have defined glossary <tt>$2</tt>.
-diagnostics.no_codepage=You need to specify the code page (e.g. <code>utf8</code> or <code>latin1</code>) either using the <tt>inputenc</tt> package or setting it via <code>\\GlsSetXdyCodePage</code>. I've used the fallback <tt>$2</tt> instead.
-diagnostics.makeindex_reject_all=Makeindex has rejected all entries in glossary <tt>$1</tt>.
-diagnostics.bad_attributes=The file <tt>$1</tt> doesn't seem to be a valid $2 style file. When you set the style name, make sure you use <code>\\SetStyleFile</code> instead of redefining <code>\\istfilename</code> and avoid using <code>\\glsxindytrue</code> or <code>\\glsxindyfalse</code>.
-diagnostics.no_entries=There were no entries listed for glossary <tt>$1</tt>. Remember that you must index entries for them to appear in the glossary using the commands provided by the glossaries package. Entries that have been defined but not indexed won't be listed. Check the following:<ul><li>Have you used commands like <code>\\gls</code> or <code>\\glsadd</code> in the document? (If you haven't, you need to add them.)</li><li>If you have used commands like <code>\\glsadd</code> or <code>\\glsaddall</code> in the preamble, have you remembered to put them <em>after</em> <code>\\makeglossaries</code></li><li>If you have cross-referenced entries (for example, you have only referenced an entry in the <code>description</code> of another entry) you may need to retry making the glossaries after you have rerun LaTeX.</li><li>If you have at least version 4.24 of the <tt>glossaries</tt> package, have you used the <code>debug</code> option? (That might provide some more information for me to analyse.)</li></ul>
-diagnostics.no_entries_main=There were no entries listed for the main glossary. Remember that you must index entries for them to appear in the glossary using the commands provided by the glossaries package. Entries that have been defined but not indexed won't be listed. If you don't want to use this glossary, add the <code>nomain</code> package option to your document. Check the following:<ul><li>Have you used commands like <code>\\gls</code> or <code>\\glsadd</code> in the document? (If you haven't, you need to add them.)</li><li>If you have used commands like <code>\\glsadd</code> or <code>\\glsaddall</code> in the preamble, have you remembered to put them <em>after</em> <code>\\makeglossaries</code></li><li>If you have at least version 4.24 of the <tt>glossaries</tt> package, have you used the <code>debug</code> option? (That might provide some more information for me to analyse.)</li></ul>
-diagnostics.app_err=$1 reported the following:<pre>$2</pre>
-diagnostics.app_err_null=I'm stumped. Nothing was detected on the error output stream.
-diagnostics.unknown_language_or_codepage=Xindy doesn't have a module for the combination of language <tt>$1</tt> and codepage <tt>$2</tt>. Use <code>\\GlsSetXdyLanguage</code> and/or <code>\\GlsSetXdyCodePage</code> to select the closest matching known language and codepage combination.
+diagnostics.no_glossaries=Either your document hasn''t loaded the glossaries package, or you have selected the wrong auxiliary file.
+diagnostics.no_version=Can''t detect the version number for the glossaries package. Have you remembered to load it (<code>|usepackage|'{'glossaries'}'</code>)?
+diagnostics.not_aux=The file you have selected doesn''t seem to be an auxiliary (.aux) file.
+diagnostics.no_makeglossaries=Your document doesn''t seem to have used <code>|makeglossaries|</code> or the appropriate information hasn''t been correctly written to the .aux file.
+diagnostics.no_errors=No errors detected. If you are missing entries, check the following:<ul><li>Have you used commands like <code>|gls|</code> or <code>|glsadd|</code> in the document?</li><li>If you have used commands like <code>|glsadd|</code> or <code>|glsaddall|</code> in the preamble, have you remembered to put them <em>after</em> <code>|makeglossaries|</code>?</li><li>If you have cross-referenced entries (for example, you have only referenced an entry in the <code>description</code> of another entry) you may need to retry making the glossaries after you have rerun LaTeX. (If you have used the <code>see</code> key, you might want to consider using <a href="http://ctan.org/pkg/glossaries-extra"><tt>glossaries-extra</tt></a> if you haven''t already done so.)</li><li>If you have at least version 4.24 of the <tt>glossaries</tt> package, have you used the <code>debug</code> option? (That might provide some more information for me to analyse.)</li></ul>Remember that you need to rerun LaTeX after generating the glossary files. If you''re having difficulty integrating the glossary generation into your document build, try <a href="https://tex.stackexchange.com/a/112487/19862">the answer to List of Acronyms on TeX.SE</a> or the section <a href="http://www.latex-community.org/know-how/latex/55-latex-general/263-glossaries-nomenclature-lists-of-symbols-and-acronyms#makeglossaries">Using makeglossaries</a> on the LaTeX Community Forum.
+diagnostics.no_indexer=Use the <b>Settings</b> menu to set the correct path to the <tt>{0}</tt> executable.
+diagnostics.no_language=The language is missing for glossary <tt>{0}</tt>. Have you accidentally done <code>|GlsSetXdyLanguage|[{0}]'{}'</code> or <code>xindy='{'language='}'</code>? I''ve used the fallback <tt>{1}</tt> instead.
+diagnostics.language_no_glossary=Check you have spelt the name of the glossary label correctly when using <code>|GlsSetXdyLanguage|[{1}]'{'{0}'}'</code> or check that you have defined glossary <tt>{1}</tt>.
+diagnostics.codepage_no_glossary=Check you have spelt the name of the glossary label correctly when using <code>|GlsSetXdyCodePage|[{1}]'{'{0}'}'</code> or check that you have defined glossary <tt>{1}</tt>.
+diagnostics.no_codepage=You need to specify the code page for the {0} glossary (e.g. <code>utf8</code> or <code>latin1</code>) either using the <tt>inputenc</tt> package or setting it via <code>|GlsSetXdyCodePage|[{0}]'{'<em>codepage</em>'}'</code>. I''ve used the fallback <code>{1}</code> instead.
+diagnostics.makeindex_reject_all=Makeindex has rejected all entries in glossary <tt>{0}</tt>.
+diagnostics.bad_attributes=The file <tt>{0}</tt> doesn''t seem to be a valid {1} style file. When you set the style name, make sure you use <code>|SetStyleFile|</code> instead of redefining <code>|istfilename|</code> and avoid using <code>|glsxindytrue|</code> or <code>|glsxindyfalse|</code>.
+diagnostics.no_entries=There were no entries listed for glossary <tt>{0}</tt>. Remember that you must index entries for them to appear in the glossary using the commands provided by the glossaries package. Entries that have been defined but not indexed won''t be listed. Check the following:<ul><li>Have you used commands like <code>|gls|</code> or <code>|glsadd|</code> in the document? (If you haven''t, you need to add them.)</li><li>If you have used commands like <code>|glsadd|</code> or <code>|glsaddall|</code> in the preamble, have you remembered to put them <em>after</em> <code>|makeglossaries|</code></li><li>If you have cross-referenced entries (for example, you have only referenced an entry in the <code>description</code> of another entry) you may need to retry making the glossaries after you have rerun LaTeX.</li><li>If you have at least version 4.24 of the <tt>glossaries</tt> package, have you used the <code>debug</code> option? (That might provide some more information for me to analyse.)</li></ul><p>If you don''t want to index entries, you may want to consider using <code>|printunsrtglossary|</code> provided by <a href="https://ctan.org/pkg/glossaries-extra">glossaries-extra</a> instead.
+diagnostics.no_entries_main=There were no entries listed for the main glossary. Remember that you must index entries for them to appear in the glossary using the commands provided by the glossaries package. Entries that have been defined but not indexed won''t be listed. If you don''t want to use this glossary, add the <code>nomain</code> package option to your document. Check the following:<ul><li>Have you used commands like <code>|gls|</code> or <code>|glsadd|</code> in the document? (If you haven''t, you need to add them.)</li><li>If you have used commands like <code>|glsadd|</code> or <code>|glsaddall|</code> in the preamble, have you remembered to put them <em>after</em> <code>|makeglossaries|</code>?</li><li>If you have at least version 4.24 of the <tt>glossaries</tt> package, have you used the <code>debug</code> option? (That might provide some more information for me to analyse.)</li></ul><p>If you don''t want to index entries, you may want to consider using <code>|printunsrtglossary|</code> provided by <a href="https://ctan.org/pkg/glossaries-extra">glossaries-extra</a> instead.
+diagnostics.app_err={0} reported the following:<pre>{1}</pre>
+diagnostics.app_err_null=I''m stumped. Nothing was detected on the error output stream.
+diagnostics.unknown_language_or_codepage=Xindy doesn''t have a module for the combination of language <tt>{0}</tt> and codepage <tt>{1}</tt>. Use <code>|GlsSetXdyLanguage|</code> and/or <code>|GlsSetXdyCodePage|</code> to select the closest matching known language and codepage combination.
 diagnostics.io_error=An I/O error occurred. Use the <b>Settings</b> menu to check the paths to makeindex and xindy are correct, and check that the applications have the correct permissions. If you are using xindy, make sure that you also have Perl installed.
 diagnostics.interrupt=Something interrupted the process thread.
-diagnostics.no_ist=The style file can't be found. If you have used <code>\\noist</code>, you have to supply your own style file.
-diagnostics.empty_sort=Xindy won't accept the sort value <code>$1</code> (for entry <code>$2</code>) as it's treated as an empty string. This is because xindy ignores (La)TeX commands within the sort field, and once these commands have been stripped the sort field becomes empty. You will need to explicitly set the sort field using the <code>sort</code> key in the entry definition.
-diagnostics.deprecated=You seem to be using a very old version of glossaries.sty. This may cause some complications from bugs or limitations associated with that version.
-diagnostics.oldversion=You are using version $1 ($2) of glossaries.sty. There have been some bug fixes in newer versions that may have addressed some issues you might be facing.
-diagnostics.wrong_type=It looks as though you might have done something like <code>\\printglossary[type={$1}]</code>, but there's no <tt>$1</tt> glossary.
-diagnostics.wrong_type_noidx=It looks as though you might have done something like <code>\\printnoidxglossary[type={$1}]</code>, but there's no <tt>$1</tt> glossary.
-diagnostics.no_log=I can't find the log file <tt>$1</tt>, so I can't search for any more problems.
-diagnostics.doc_defs=It seems you have defined terms in the document rather than in the preamble. <a href="http://mirror.ctan.org/macros/latex/contrib/glossaries/glossaries-user.html#sec:docdefs">This can cause complications.</a> If you really want them in the document, you may need to delete the file <tt>$1</tt> if something goes wrong or rebuild the document after making any modifications to the entry definitions. Remember that you can define terms in a separate file and load them using <code>\\loadglsentries{filename}</code>. If you really want document definitions, you can switch off this message using the <b>Settings</b> menu.
-diagnostics.missing_lang=You don't have any glossaries support for language <tt>$1</tt>. This could simply mean that you need to install <tt>glossaries-$1</tt> using your TeX package manager. However, if <tt>glossaries-$1</tt> isn't listed (or <a href="http://ctan.org/pkg/glossaries-$1"><tt>http://ctan.org/pkg/glossaries-$1</tt></a> doesn't exist), it most likely means <tt>$1</tt> isn't supported, in which case see <a href="http://mirror.ctan.org/macros/latex/contrib/glossaries/glossaries-user.html#sec:languages">section 1.3 (Multi-Lingual Support)</a> of the <a href="http://mirror.ctan.org/macros/latex/contrib/glossaries/glossaries-user.html">glossaries user manual</a> for further help.
-diagnostics.missing_sty=The package <tt>$1</tt> is required but doesn't seem to be installed. Use your TeX package manager to install it. If your package manager can't find it, try searching for it on CTAN <a href="http://ctan.org/search/?phrase=$1"><tt>http://ctan.org/search/?phrase=$1</tt></a>
-diagnostics.missing_datatool_base=The package <tt>'datatool-base'</tt> is required but doesn't seem to be installed. This package is part of the <tt>datatool</tt> bundle. If you already have <tt>datatool</tt> installed it could be that you have an old version that doesn't include <tt>datatool-base.sty</tt>. Use your TeX package manager to install or update <tt>datatool</tt>.
-diagnostics.noidx=It seems you've used <code>\\makenoidxglossaries</code>, which means you don't need xindy or makeindex, you just need a second LaTeX run to get the glossary up to date.
-diagnostics.shell_disabled=It seems that TeX refused to run the system command <pre>$1</pre> because the shell escape had been disabled.
-diagnostics.shell_restricted=It seems that TeX refused to run the system command <pre>$1</pre> because restricted mode was on and the given system command isn't a trusted application.
-diagnostics.no_glossaries=The document doesn't define any glossaries. Have you used the <code>nomain</code> option by mistake?
-diagnostics.undef_cs=LaTeX reported an undefined control sequence. Perhaps you're trying to use a command that has been introduced in a later version of one of the packages you're using. If this is the case, you'll need to use your TeX package manager to update the relevant package. Alternatively, you may simply have misspelt the command or forgotten to define it or forgotten to load the package that provides it. Details:<pre>$1</pre>
-diagnostics.undef_indexspace=It seems that <code>\\indexspace</code> hasn't been defined. This suggests you're using an old version of <tt>glossaries</tt> with a class that doesn't define this command. I recommend you upgrade to a newer version of <tt>glossaries</tt>.
-diagnostics.one_too_long=One entry was too long for makeindex. Do you have an excessively long <code>sort</code> field or label for that entry?
-diagnostics.too_long=$1 entries were too long for makeindex. Do you have an excessively long <code>sort</code> field or label for that entry?
-diagnostics.old_one_too_long=One entry was too long for makeindex. If you upgrade to at least v4.0 of the glossaries package, this shouldn't be a problem.
-diagnostics.old_too_long=$1 entries were too long for makeindex. If you upgrade to at least v4.0 of the glossaries package, this shouldn't be a problem.
-diagnostics.undef_opt=Your version of glossaries doesn't provide the package option <code>$1</code>. This may be because that option was introduced to a later version, in which case you will need to use your TeX package manager to update the glossaries package, or it may be that you have misspelt the option.
-diagnostics.dry_run=Dry run mode on. System command would've been:
-diagnostics.wrglossary=It seems you have tried to index an entry in the <tt>$1</tt> glossary on <b>line $2</b>, but the associated file hasn't been opened. Remember to use <code>\\makeglossaries</code> before commands like <code>\\glsadd</code> and <code>\\glsaddall</code>. Details of lost indexing code:
-diagnostics.mapped_lang=Your document has requested that xindy be run with language '$1'. This is a babel or polyglossia language identifier. I'm going to assume you meant the xindy language module '$2'.
-diagnostics.variant=Your document has requested that xindy be run with codepage '$2', but language '$1' requires additional information. I'm going to assume you meant '$3-$2' for the codepage. (Use <b>Dry Run Mode</b> to find the exact call to xindy.)
-diagnostics.no_aux=Since the aux file doesn't exist, there's not much I can do to help, but I'll parse the log file in case there are any clues there.
-diagnostics.fragile=It's possible that there's an expansion issue involving a fragile command. Things to check for:<ul><li>Have you used a class like <tt>beamer</tt> that doesn't make common formatting commands like <tt>\\textit</tt> robust?</li><li>Have you tried using <code>\\protect</code> in front of fragile commands contained within your entry definitions?</li><li>Have you tried switching off the expansion using commands like <code>\\glsnoexpandfields</code>? (See section <a href="http://mirror.ctan.org/macros/latex/contrib/glossaries/glossaries-user.html#sec:expansion">4.6 Expansion</a> in the <tt>glossaries</tt> user manual.)</li></ul>
-diagnostics.inputenc=There's a Unicode character error message from the <tt>inputenc</tt> package. This may or may not be related to any issues you might be having with the <tt>glossaries</tt> package, but remember that if you want to have non-ASCII characters in your entry labels (such as accented letters) you must use XeLaTeX or LuaLaTeX. 
-diagnostics.label_with_problem_char=One entry in glossary <tt>$1</tt> contains one or more problem characters in the label: $2.
-diagnostics.labels_with_problem_char=$1 entries in glossary <tt>$2</tt> contains one or more problem characters in the label: $3.
-diagnostics.include=Detected possible <code>\\include{$1}</code> in the preamble. Remember that <code>\\include</code> should only be used within the <code>document</code> environment. I recommend you use <code>\\input{$1}</code> instead. (See also <a href="http://www.dickimaw-books.com/cgi-bin/faq.cgi?action=view&categorylabel=glossaries#include">Why shouldn't I use <code>\\include</code> to include my glossary definitions?</a>)
-diagnostics.ist_in_log=The indexer information has been written to the .log file instead of the .aux file. This suggests that the .aux file wasn't available when it was written. The most probable cause is that <code>\\makeglossaries</code> has been placed in a file that has been read using <code>\\include</code> instead of <code>\\input</code>.
+diagnostics.no_ist=The style file can''t be found. If you have used <code>|noist|</code>, you have to supply your own style file.
+diagnostics.empty_sort=Xindy won''t accept the sort value <code>{0}</code> (for entry <code>{1}</code>) as it''s treated as an empty string. This is because xindy ignores (La)TeX commands within the sort field, so once all commands have been stripped from <code>{0}</code> the sort field becomes empty. You will need to explicitly set the sort field using the <code>sort</code> key in the entry definition. Alternatively, you may prefer to use <code>|glsxtrnewsymbol|</code> provided by the <code>symbols</code> package option with <a href="https://ctan.org/pkg/glossaries-extra">glossaries-extra</a> to define symbols (which uses the label as the sort value) or consider using <a href="https://ctan.org/pkg/bib2gls">bib2gls</a> instead of xindy.
+diagnostics.deprecated=You seem to be using a very old version of glossaries.sty. This may cause some complications from bugs or limitations associated with that version. I recommend you upgrade using your TeX distribution manager.
+diagnostics.oldversion=You are using version {0} ({1}) of glossaries.sty. There have been some bug fixes in newer versions that may have addressed some issues you might be facing. I recommend you upgrade using your TeX distribution manager.
+diagnostics.wrong_type=It looks as though you might have done something like <code>|printglossary|[type='{'{0}'}']</code>, but there''s no <tt>{0}</tt> glossary.
+diagnostics.wrong_type_noidx=It looks as though you might have done something like <code>|printnoidxglossary|[type='{'{0}'}']</code>, but there''s no <tt>{0}</tt> glossary.
+diagnostics.no_log=I can''t find the log file <pre>{0}</pre> so I can''t search for any more problems.
+diagnostics.multi_aux=There are multiple .aux files listed in the directory <pre>{0}</pre> Have you selected the correct file? (The base name should be the same as for the main .tex file or matching the <code>-jobname</code> option.)
+diagnostics.doc_defs=It seems you have defined terms in the document rather than in the preamble. <a href="http://mirror.ctan.org/macros/latex/contrib/glossaries/glossaries-user.html#sec:docdefs">This can cause complications.</a> If you really want them in the document, you may need to delete the file <pre>{0}</pre> if something goes wrong or rebuild the document after making any modifications to the entry definitions. Remember that you can define terms in a separate file and load them using <code>|loadglsentries|'{'<em>filename</em>'}'</code> or  <code>|input|'{'<em>filename</em>'}'</code>. If you really want document definitions, you can switch off this message using the <b>Settings</b> menu or consider using the <a href="https://ctan.org/pkg/glossaries-extra">glossaries-extra</a> package with the <code>docdef=restricted</code> option.
+diagnostics.missing_lang=You don''t have any glossaries support for language <tt>{0}</tt>. This could simply mean that you need to install <tt>glossaries-{0}</tt> using your TeX package manager. However, if <tt>glossaries-{0}</tt> isn''t listed (or <a href="https://ctan.org/pkg/glossaries-{0}"><tt>https://ctan.org/pkg/glossaries-{0}</tt></a> doesn''t exist), it most likely means <tt>{0}</tt> isn''t supported, in which case see <a href="http://mirror.ctan.org/macros/latex/contrib/glossaries/glossaries-user.html#sec:languages">section 1.4 (Multi-Lingual Support)</a> of the <a href="http://mirror.ctan.org/macros/latex/contrib/glossaries/glossaries-user.html">glossaries user manual</a> for further help.
+diagnostics.missing_sty=The package <tt>{0}</tt> is required but doesn''t seem to be installed. Use your TeX package manager to install it. If your package manager can''t find it, try searching for it on CTAN <a href="https://ctan.org/search/?phrase={0}"><tt>http://ctan.org/search/?phrase={0}</tt></a>
+diagnostics.missing_datatool_base=The package <tt>datatool-base</tt> is required but doesn''t seem to be installed. This package is part of the <a href="https://ctan.org/pkg/datatool">datatool</a> bundle. If you already have <tt>datatool</tt> installed it could be that you have an old version that doesn''t include <tt>datatool-base.sty</tt>. Use your TeX package manager to install or update <tt>datatool</tt>.
+diagnostics.noidx=It seems you''ve used <code>|makenoidxglossaries|</code>, which means you don''t need xindy or makeindex, you just need a second LaTeX run to get the glossary up to date. (This is quite a slow and unreliable method of sorting and indexing. You may want to consider using <code>|printunsrtglossary|</code> provided by <a href="https://ctan.org/pkg/glossaries-extra">glossaries-extra</a> instead. See the <a href="https://www.dickimaw-books.com/gallery/glossaries-performance.shtml">glossaries performance page</a> for a comparison.)
+diagnostics.bib2gls=It seems you''ve used <code>|GlsXtrLoadResources|</code> (or <code>|glsxtrresourcefile|</code>), which means you need to run <pre>bib2gls -g {0}</pre> (you may omit the <code>-g</code> switch if you don''t require letter groups) and then rerun LaTeX. You don''t need makeindex or xindy for this document. If you''re having difficulty integrating the glossary generation into your document build, try adapting the information given in <a href="https://tex.stackexchange.com/a/112487/19862">the answer to List of Acronyms on TeX.SE</a> or the section <a href="http://www.latex-community.org/know-how/latex/55-latex-general/263-glossaries-nomenclature-lists-of-symbols-and-acronyms#makeglossaries">Using makeglossaries</a> on the LaTeX Community Forum so that the build process runs bib2gls instead of makeglossaries.
+diagnostics.shell_disabled=It seems that TeX refused to run the system command <pre>{0}</pre> because the shell escape had been disabled.
+diagnostics.shell_restricted=It seems that TeX refused to run the system command <pre>{0}</pre> because the restricted mode was on and {1} isn''t on the list of trusted applications. You will need to incorporate the {1} call as part of your document build process. If you''re having difficulty integrating the glossary generation into your document build, try <a href="https://tex.stackexchange.com/a/112487/19862">the answer to List of Acronyms on TeX.SE</a> or the section <a href="http://www.latex-community.org/know-how/latex/55-latex-general/263-glossaries-nomenclature-lists-of-symbols-and-acronyms#makeglossaries">Using makeglossaries</a> on the LaTeX Community Forum.
+diagnostics.no_glossaries=The document doesn''t define any glossaries. Have you used the <code>nomain</code> option by mistake?
+diagnostics.undef_cs=LaTeX reported an undefined control sequence. Perhaps you''re trying to use a command that has been introduced in a later version of one of the packages you''re using. If this is the case, you''ll need to use your TeX package manager to update the relevant package. Alternatively, you may simply have misspelt the command or forgotten to define it or forgotten to load the package that provides it. Details:<pre>{0}</pre>
+diagnostics.undef_indexspace=It seems that <code>|indexspace|</code> hasn''t been defined. This suggests you''re using an old version of <tt>glossaries</tt> with a class that doesn''t define this command. I recommend you upgrade to a newer version of <tt>glossaries</tt> using your TeX package manager.
+diagnostics.too_long={0,number,integer} {0,choice,1#entry was|1<entries were} too long for makeindex. Do you have an excessively long <code>sort</code> field or label for {0,number,integer} {0,choice,1#that entry|1<those entries}?
+diagnostics.old_too_long={0,number,integer} {0,choice,1#entry was|1<entries were} too long for makeindex. If you upgrade to at least v4.0 of the glossaries package, this shouldn''t be a problem.
+diagnostics.undef_opt=Your version of glossaries doesn''t provide the package option <code>{0}</code>. This may be because that option was introduced to a later version, in which case you will need to use your TeX package manager to update the glossaries package, or it may be that you have misspelt the option.
+diagnostics.dry_run=Dry run mode on. System command would''ve been:
+diagnostics.wrglossary=It seems you have tried to index an entry in the <tt>{0}</tt> glossary on <b>line {1}</b>, but the associated file hasn''t been opened. Remember to use <code>|makeglossaries|</code> before commands like <code>|glsadd|</code> and <code>|glsaddall|</code>. Details of lost indexing code:
+diagnostics.mapped_lang=Your document has requested that xindy be run with language ''{0}''. This is a babel or polyglossia language identifier. I''m going to assume you meant the xindy language module ''{1}''.
+diagnostics.variant=Your document has requested that xindy be run with codepage ''{1}'', but language ''{0}'' requires additional information. I''m going to assume you meant ''{2}-{1}'' for the codepage. (Use <b>Dry Run Mode</b> to find the exact call to xindy.)
+diagnostics.no_aux=Since the aux file doesn''t exist, there''s not much I can do to help, but I''ll parse the log file in case there are any clues there.
+diagnostics.fragile=It''s possible that there''s an expansion issue involving a fragile command. Things to check for:<ul><li>Have you used a class like <tt>beamer</tt> that doesn''t make common formatting commands like <tt>|textit|</tt> robust?</li><li>Have you tried using <code>|protect|</code> in front of fragile commands contained within your entry definitions?</li><li>Have you tried switching off the expansion using commands like <code>|glsnoexpandfields|</code>? (See section <a href="http://mirror.ctan.org/macros/latex/contrib/glossaries/glossaries-user.html#sec:expansion">4.6 Expansion</a> in the <tt>glossaries</tt> user manual.)</li></ul>
+diagnostics.inputenc=There''s a Unicode character error message from the <tt>inputenc</tt> package. This may or may not be related to any issues you might be having with the <tt>glossaries</tt> package, but remember that if you want to have non-ASCII characters in your entry labels (such as accented letters) you must use XeLaTeX or LuaLaTeX. 
+diagnostics.labels_with_problem_char={0,number,integer} {0,choice,1#entry|1<entries} in glossary <tt>{1}</tt> {0,choice,1#contains|1<contain} one or more problem characters in the label: {2}.
+diagnostics.include=Detected possible <code>|include|'{'{0}'}'</code> in the preamble. Remember that <code>|include|</code> should only be used within the <code>document</code> environment. I recommend you use <code>|input|'{'{0}'}'</code> instead. (See also <a href="http://www.dickimaw-books.com/cgi-bin/faq.cgi?action=view&categorylabel=glossaries#include">Why shouldn''t I use <code>|include|</code> to include my glossary definitions?</a>)
+diagnostics.ist_in_log=The indexer information has been written to the .log file instead of the .aux file. This suggests that the .aux file wasn''t available when it was written. The most probable cause is that <code>|makeglossaries|</code> has been placed in a file that has been read using <code>|include|</code> instead of <code>|input|</code>.
 
 # Properties dialog
 properties.title=Preferences
@@ -214,45 +216,47 @@ properties.look_and_feel.mnemonic=K
 properties.restart=(restart required)
 
 # batch mode messages
-message.loading=Loading '$1'
+message.loading=Loading ''{0}''
+message.found=Found {0}
 
 # Error messages
 error.title=Error
-error.io.file_doesnt_exist=File '$1' doesn't exist.
+error.io.file_doesnt_exist=File ''{0}'' doesn''t exist.
 error.no_such_file=File not found.
-error.no_xindy=Can't find Xindy application.
-error.no_makeindex=Can't find Makeindex application.
+error.no_xindy=Can''t find Xindy application.
+error.no_makeindex=Can''t find Makeindex application.
+error.missing_application=Can''t find {0} on the system path (PATH={1}). Have you installed {0}?
 error.no_glossaries=No glossaries defined.
-error.invalid_order=Invalid order (must be either 'letter' or 'word').
+error.invalid_order=Invalid order ''{0}'' (must be either ''letter'' or ''word'').
 error.missing_order=Missing order.
 error.missing_ist=Missing style file.
-error.cant_determine_indexer=Can't determine indexer.
+error.cant_determine_indexer=Can''t determine indexer.
+error.bib2gls_indexer=This document requires bib2gls not makeindex or xindy.
 error.unknown=Unknown
 error.missing_dir_name=Missing directory name.
-error.no_such_directory='$1' doesn't exist or isn't a directory.
-error.no_language=Missing language for glossary '$1'.
-error.no_codepage=Missing codepage for glossary '$1'.
-error.language_no_glossary=Language is set to '$1' for glossary '$2', but no such glossary exists.
-error.codepage_no_glossary=Codepage is set to '$1' for glossary '$2', but no such glossary exists.
-error.entries_rejected=$1 entries were rejected.
-error.entry_rejected=1 entry was rejected.
-error.no_entries=No entries were found for glossary '$1'.
+error.no_such_directory=''{0}'' doesn''t exist or isn''t a directory.
+error.no_language=Missing language for glossary ''{0}''.
+error.no_codepage=Missing codepage for glossary ''{0}''.
+error.language_no_glossary=Language is set to ''{0}'' for glossary ''{1}'', but no such glossary exists.
+error.codepage_no_glossary=Codepage is set to ''{0}'' for glossary ''{1}'', but no such glossary exists.
+error.entries_rejected={0,number,integer} {0,choice,1#entry was|1<entries were} rejected.
+error.no_entries=No entries were found for glossary ''{0}''.
 error.empty_sort=Xindy has ignored one or more entries with empty sort strings.
-error.app_failed=$1 failed with exit code $2.
-error.no_indexer_app=Unable to run $1. No such file: '$2'.
-error.wrong_type=No glossary '$1'.
+error.app_failed={0} failed with exit code {1}.
+error.no_indexer_app=Unable to run {0}. No such file: ''{1}''.
+error.wrong_type=No glossary ''{0}''.
 error.interrupt=The process was interrupted.
-error.no_such_entry=Can't find entry '$1'.
+error.no_such_entry=Can''t find entry ''{0}''.
 error.io.helpset=Unable to load helpset.
-error.no_ist=The style file '$1' doesn't exist.
-error.prop_io=Unable to load properties: $1
-error.unknown_opt=Unknown option '$1'. (Use '--help' for help.)
-error.one_input=Only one input file permitted. (Use '--help' for help.)
-error.input_required=Input file required for batch mode. (Use '--help' for help.)
+error.no_ist=The style file ''{0}'' doesn''t exist.
+error.prop_io=Unable to load properties: {0}
+error.unknown_opt=Unknown option ''{0}''. (Use --help for help.)
+error.one_input=Only one input file permitted. (Use --help for help.)
+error.input_required=Input file required for batch mode. (Use --help for help.)
 
 # Fatal errors
 error.fatal.title=Fatal Error
-error.fatal.info=A fatal error has occurred. $1 will have to quit.
+error.fatal.info=A fatal error has occurred. {0} will have to quit.
 
 # Button labels
 button.okay=Okay 

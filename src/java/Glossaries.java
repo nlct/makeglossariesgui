@@ -61,13 +61,12 @@ public class Glossaries
       Hashtable<String,String> codePages = new Hashtable<String,String>();
 
       invoker.getMessageSystem().message(
-       invoker.getLabelWithValue("message.loading", file.toString()));
+       invoker.getLabelWithValues("message.loading", file));
       BufferedReader in = new BufferedReader(new FileReader(file));
 
       String line;
 
       boolean override = invoker.getProperties().isOverride();
-      glossaries.noidx = false;
 
       while ((line = in.readLine()) != null)
       {
@@ -80,6 +79,33 @@ public class Glossaries
       if (glossaries.noidx)
       {
          glossaries.addDiagnosticMessage(invoker.getLabel("diagnostics.noidx"));
+      }
+      else if (glossaries.requiresBib2Gls && glossaries.istName == null)
+      {
+         String base = file.getName();
+
+         if (base.endsWith(".aux"))
+         {
+            base = base.substring(0, base.length()-4);
+         }
+
+         glossaries.addDiagnosticMessage(invoker.getLabelWithValues(
+           "diagnostics.bib2gls", base));
+
+         // Is bib2gls on the system PATH?
+
+         File bib2gls = invoker.findApp("bib2gls", "bib2gls.exe", "bib2gls.sh");
+
+         if (bib2gls == null)
+         {
+            glossaries.addDiagnosticMessage(invoker.getLabelWithValues(
+              "error.missing_application", "bib2gls", System.getenv("PATH")));
+         }
+         else
+         {
+            glossaries.addDiagnosticMessage(invoker.getLabelWithValues(
+              "message.found", bib2gls));
+         }
       }
       else if (!override)
       {
@@ -149,6 +175,14 @@ public class Glossaries
          return;
       }
 
+      matcher = bib2glsPattern.matcher(line);
+
+      if (matcher.matches())
+      {
+         requiresBib2Gls = true;
+         return;
+      }
+
       matcher = orderPattern.matcher(line);
 
       if (matcher.matches())
@@ -178,7 +212,7 @@ public class Glossaries
                   language = String.format("%s-%s", language, variant);
                }
 
-               addErrorMessage(invoker.getLabelWithValue(
+               addErrorMessage(invoker.getLabelWithValues(
                   "error.no_language", label));
                addDiagnosticMessage(invoker.getLabelWithValues(
                   "diagnostics.no_language", label, language));
@@ -201,7 +235,7 @@ public class Glossaries
             {
                code = invoker.getDefaultCodePage();
 
-               addErrorMessage(invoker.getLabelWithValue(
+               addErrorMessage(invoker.getLabelWithValues(
                   "error.no_codepage", label));
                addDiagnosticMessage(invoker.getLabelWithValues(
                   "diagnostics.no_codepage", label, code));
@@ -252,7 +286,8 @@ public class Glossaries
          try
          {
             invoker.getMessageSystem().message(
-              invoker.getLabelWithValue("message.loading", f.toString()));
+              invoker.getLabelWithValues("message.loading", f));
+
             in = new BufferedReader(new FileReader(f));
 
             while ((line = in.readLine()) != null)
@@ -426,7 +461,8 @@ public class Glossaries
 
                if (!istFile.exists())
                {
-                  throw new GlossaryException(invoker.getLabelWithValue("error.no_ist", istName),
+                  throw new GlossaryException(invoker.getLabelWithValues(
+                     "error.no_ist", istName),
                      invoker.getLabel("diagnostics.no_ist"), e);
                }
                else
@@ -454,8 +490,25 @@ public class Glossaries
 
       if (!log.exists())
       {
-         addDiagnosticMessage(invoker.getLabelWithValue(
+         addDiagnosticMessage(invoker.getLabelWithValues(
            "diagnostics.no_log", log.getAbsolutePath()));
+
+         // Are there other .aux files in the same directory?
+
+         File[] list = dir.listFiles(new FileFilter()
+          {
+             public boolean accept(File f)
+             {
+                return f.getName().toLowerCase().endsWith(".aux");
+             }
+          });
+
+         if (list != null && list.length > 1)
+         {
+            addDiagnosticMessage(invoker.getLabelWithValues(
+              "diagnostics.multi_aux", dir));
+         }
+
          return;
       }
 
@@ -516,9 +569,9 @@ public class Glossaries
             {
                String type = m.group(2);
 
-               addDiagnosticMessage(invoker.getLabelWithValue(
+               addDiagnosticMessage(invoker.getLabelWithValues(
                  "diagnostics.wrong_type", type));
-               addErrorMessage(invoker.getLabelWithValue(
+               addErrorMessage(invoker.getLabelWithValues(
                  "error.wrong_type", type));
 
                continue;
@@ -532,7 +585,7 @@ public class Glossaries
                {
                   File f = new File(dir, baseName+".glsdefs");
 
-                  addDiagnosticMessage(invoker.getLabelWithValue(
+                  addDiagnosticMessage(invoker.getLabelWithValues(
                     "diagnostics.doc_defs", f.getAbsolutePath()));
 
                   continue;
@@ -545,7 +598,7 @@ public class Glossaries
 
                if (m.matches())
                {
-                  addDiagnosticMessage(invoker.getLabelWithValue(
+                  addDiagnosticMessage(invoker.getLabelWithValues(
                     "diagnostics.missing_lang", m.group(1)));
                   continue;
                }
@@ -564,7 +617,7 @@ public class Glossaries
                }
                else
                {
-                  addDiagnosticMessage(invoker.getLabelWithValue(
+                  addDiagnosticMessage(invoker.getLabelWithValues(
                      "diagnostics.missing_sty", sty));
                }
 
@@ -611,7 +664,7 @@ public class Glossaries
 
                      if (!glossaryList.contains(type))
                      {
-                        addDiagnosticMessage(invoker.getLabelWithValue(
+                        addDiagnosticMessage(invoker.getLabelWithValues(
                           "diagnostics.wrong_type_noidx", type));
                      }
                   }
@@ -640,11 +693,20 @@ public class Glossaries
 
                if (m.matches())
                {
-                  addDiagnosticMessage(invoker.getLabelWithValue(
-                     m.groupCount() == 1 ?
-                     "diagnostics.shell_disabled":
-                     "diagnostics.shell_restricted",
-                     m.group(1)));
+                  String cmd = m.group(1);
+                  String rest = m.group(2);
+
+                  if (m.groupCount() == 2)
+                  {
+                     addDiagnosticMessage(invoker.getLabelWithValues(
+                        "diagnostics.shell_disabled", cmd+rest));
+                  }
+                  else
+                  {
+                     addDiagnosticMessage(invoker.getLabelWithValues(
+                        "diagnostics.shell_restricted", cmd+rest, cmd));
+                  }
+
                }
 
                continue;
@@ -679,7 +741,7 @@ public class Glossaries
                   continue;
                }
 
-               addDiagnosticMessage(invoker.getLabelWithValue(
+               addDiagnosticMessage(invoker.getLabelWithValues(
                  "diagnostics.undef_cs", line));
 
                continue;
@@ -689,7 +751,7 @@ public class Glossaries
 
             if (m.matches())
             {
-               addDiagnosticMessage(invoker.getLabelWithValue(
+               addDiagnosticMessage(invoker.getLabelWithValues(
                  "diagnostics.undef_opt", m.group(1)));
 
                continue;
@@ -729,7 +791,7 @@ public class Glossaries
 
             if (m.matches())
             {
-               addDiagnosticMessage(invoker.getLabelWithValue(
+               addDiagnosticMessage(invoker.getLabelWithValues(
                   "diagnostics.include", m.group(1)));
                continue;
             }
@@ -828,12 +890,23 @@ public class Glossaries
    {
       if (order == null) return invoker.getLabel("error.missing_order");
 
-      return isValidOrder() ? null : invoker.getLabel("error.invalid_order");
+      return isValidOrder() ? null 
+        : invoker.getLabelWithValues("error.invalid_order", order);
    }
 
    public String displayFormat()
    {
-      if (istName == null) return invoker.getLabel("error.unknown");
+      if (istName == null)
+      {
+         if (requiresBib2Gls)
+         {
+            return "bib2gls";
+         }
+         else
+         {
+            return invoker.getLabel("error.unknown");
+         }
+      }
 
       return useXindy() ? "xindy" : "makeindex";
    }
@@ -861,7 +934,9 @@ public class Glossaries
 
       if (istName == null)
       {
-         return invoker.getLabel("error.cant_determine_indexer");
+         return  
+           invoker.getLabel(requiresBib2Gls ? "error.bib2gls_indexer" :
+             "error.cant_determine_indexer");
       }
 
       if (useXindy())
@@ -915,8 +990,9 @@ public class Glossaries
 
       if (mess != null)
       {
-         return mess + "\n" + invoker.getLabelWithValue("diagnostics.no_indexer", 
-            displayFormat());
+         return String.format("%s%n%s", mess, 
+            invoker.getLabelWithValues("diagnostics.no_indexer", 
+            displayFormat()));
       }
 
       mess = getDiagnosticMessages();
@@ -1039,6 +1115,8 @@ public class Glossaries
 
    private String order;
 
+   private boolean requiresBib2Gls = false;
+
    private StringBuilder errorMessages, diagnosticMessages;
 
    private static final Pattern newGlossaryPattern
@@ -1046,6 +1124,9 @@ public class Glossaries
 
    private static final Pattern istFilePattern
       = Pattern.compile("\\\\@istfilename\\{([^\\}]+)\\}");
+
+   private static final Pattern bib2glsPattern
+      = Pattern.compile("\\\\glsxtr@resource\\{(.*)\\}\\{(.*?)\\}");
 
    private static final Pattern orderPattern
       = Pattern.compile("\\\\@glsorder\\{([^\\}]+)\\}");
@@ -1090,7 +1171,7 @@ public class Glossaries
       = Pattern.compile("runsystem\\(.*");
 
    private static final Pattern disabledSystemPattern
-      = Pattern.compile("runsystem\\((.*)\\)\\.\\.\\.disabled(\\s+\\(restricted\\))?\\.");
+      = Pattern.compile("runsystem\\(([^ ]+)(.*)\\)\\.\\.\\.disabled(\\s+\\(restricted\\))?\\.");
 
    private static final Pattern undefControlSequencePattern
       = Pattern.compile(".* Undefined control sequence.");

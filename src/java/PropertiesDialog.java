@@ -266,14 +266,14 @@ public class PropertiesDialog extends JDialog
    {
       tabbedPane.add(app.getLabel(label), comp);
       tabbedPane.setMnemonicAt(tabbedPane.getTabCount()-1, 
-         app.getMnemonicInt(label));
+         app.getMnemonic(label));
    }
 
    private JRadioButton createRadioButton(String label, String action,
      ButtonGroup bg)
    {
       JRadioButton button = new JRadioButton(app.getLabel(label));
-      button.setMnemonic(app.getMnemonicInt(label));
+      button.setMnemonic(app.getMnemonic(label));
       button.setActionCommand(action);
       button.addActionListener(this);
       bg.add(button);
@@ -407,7 +407,8 @@ public class PropertiesDialog extends JDialog
 
             if (!file.isDirectory())
             {
-               app.error(this, app.getLabelWithValue("error.no_such_directory", fileName));
+               app.error(this, 
+                app.getLabelWithValues("error.no_such_directory", fileName));
             }
 
             properties.setDefaultCustomDir(fileName);

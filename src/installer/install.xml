@@ -9,7 +9,7 @@
   <properties>
     <property name="info.appName" value="makeglossariesgui"/>
     <property name="info.url" value="http://www.dickimaw-books.com/software/makeglossariesgui/"/>
-    <property name="project.version" value="2.0" />
+    <property name="project.version" value="2.1" />
   </properties>
 
     <!-- 
