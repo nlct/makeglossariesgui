@@ -315,19 +315,31 @@ public class PropertiesDialog extends JDialog
 
             if (p.waitFor() == 0)
             {
-               BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+               BufferedReader in = null;
 
-               String line = in.readLine();
-
-               in.close();
-
-               if (line != null)
+               try
                {
-                  File dir = (new File(line)).getParentFile();
+                  in = new BufferedReader(
+                     new InputStreamReader(p.getInputStream(), 
+                       app.getCharset()));
 
-                  if (dir.isDirectory())
+                  String line = in.readLine();
+
+                  if (line != null)
                   {
-                     return dir;
+                     File dir = (new File(line)).getParentFile();
+
+                     if (dir.isDirectory())
+                     {
+                        return dir;
+                     }
+                  }
+               }
+               finally
+               {
+                  if (in != null)
+                  {
+                     in.close();
                   }
                }
             }

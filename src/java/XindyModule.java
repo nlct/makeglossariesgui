@@ -1,5 +1,6 @@
 package com.dickimawbooks.makeglossariesgui;
 
+import java.nio.charset.*;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -284,6 +285,104 @@ public class XindyModule
 
       knownModules.put("vietnamese",
         new XindyModule("vietnamese", new String[]{"utf8"}));
+   }
+
+   public static Charset getCharset(String codepage)
+    throws IllegalCharsetNameException,
+           IllegalArgumentException,
+           UnsupportedCharsetException
+   {
+      if (codepage == null)
+      {
+         throw new IllegalArgumentException("Invalid codepage (null)");
+      }
+
+      if (codepage.contains("utf8"))
+      {
+         return StandardCharsets.UTF_8;
+      }
+
+      if (codepage.contains("latin1"))
+      {
+         return StandardCharsets.ISO_8859_1;
+      }
+
+      if (codepage.contains("latin2"))
+      {
+         return Charset.forName("ISO-8859-2");
+      }
+
+      if (codepage.contains("latin3"))
+      {
+         return Charset.forName("ISO-8859-3");
+      }
+
+      if (codepage.contains("latin4"))
+      {
+         return Charset.forName("ISO-8859-4");
+      }
+
+      if (codepage.contains("latin5"))
+      {
+         return Charset.forName("ISO-8859-5");
+      }
+
+      if (codepage.contains("latin9"))
+      {
+         return Charset.forName("ISO-8859-15");
+      }
+
+      if (codepage.contains("cp1250"))
+      {
+         return Charset.forName("Cp1250");
+      }
+
+      if (codepage.contains("cp1251"))
+      {
+         return Charset.forName("Cp1251");
+      }
+
+      if (codepage.contains("cp1252"))
+      {
+         return Charset.forName("Cp1252");
+      }
+
+      if (codepage.contains("cp850"))
+      {
+         return Charset.forName("Cp850");
+      }
+
+      if (codepage.contains("iso88595"))
+      {
+         return Charset.forName("ISO-8859-5");
+      }
+
+      if (codepage.contains("iso88597"))
+      {
+         return Charset.forName("ISO-8859-7");
+      }
+
+      if (codepage.contains("iso88598"))
+      {
+         return Charset.forName("ISO-8859-8");
+      }
+
+      if (codepage.contains("isoir111"))
+      {
+         return Charset.forName("ISO-IR-111");
+      }
+
+      if (codepage.contains("koi8-r"))
+      {
+         return Charset.forName("KOI8-R");
+      }
+
+      if (codepage.contains("koi8-u"))
+      {
+         return Charset.forName("KOI8-U");
+      }
+
+      return null;
    }
 
    private String language, defVariant;

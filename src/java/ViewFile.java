@@ -49,28 +49,32 @@ public class ViewFile extends JFrame
    public void reload()
       throws IOException,BadLocationException
    {
-      BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+      BufferedReader reader = null;
 
-      String content = null;
+      StringBuilder content = new StringBuilder();
 
-      String line;
-
-      while ((line = reader.readLine()) != null)
+      try
       {
-         if (content == null)
+         reader = new BufferedReader(new InputStreamReader(
+           url.openStream(), app.getCharset()));
+
+         String line;
+
+         while ((line = reader.readLine()) != null)
          {
-            content = line;
+            content.append(String.format("%s%n", line));
          }
-         else
+      }
+      finally
+      {
+         if (reader != null)
          {
-            content += "\n" + line;
+            reader.close();
          }
       }
 
-      reader.close();
-
       StyledDocument doc = area.getStyledDocument();
-      doc.insertString(0, content, doc.getStyle("regular"));
+      doc.insertString(0, content.toString(), doc.getStyle("regular"));
 
       SwingUtilities.invokeLater(new Runnable()
       {

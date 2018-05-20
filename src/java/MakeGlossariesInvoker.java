@@ -1,8 +1,13 @@
 package com.dickimawbooks.makeglossariesgui;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
+import java.nio.charset.IllegalCharsetNameException;
 import java.net.*;
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 public class MakeGlossariesInvoker
 {
@@ -315,6 +320,29 @@ public class MakeGlossariesInvoker
       return properties.getDefaultCodePage();
    }
 
+   public Charset getCharset()
+   {
+      Charset charset = null;
+
+      try
+      {
+         charset = properties.getDefaultEncoding();
+      }
+      catch (Exception e)
+      {
+         getMessageSystem().error(e);
+      }
+
+      if (charset == null)
+      {
+         charset = Charset.defaultCharset();
+         properties.setDefaultEncoding(charset);
+      }
+
+      return charset;
+   }
+
+
    private void loadDictionary()
       throws IOException
    {
@@ -322,23 +350,75 @@ public class MakeGlossariesInvoker
 
       String lang = locale.getLanguage();
 
-      InputStream in = 
-         getClass().getResourceAsStream("/resources/dictionaries/makeglossariesgui-"+lang+".prop");
+      String resource = "/resources/dictionaries/makeglossariesgui-"
+                        +lang+".prop";
+
+      InputStream in = getClass().getResourceAsStream(resource);
 
       if (in == null && !lang.equals("en"))
       {
-         in = getClass().getResourceAsStream("/resources/dictionaries/makeglossariesgui-en.prop");
+         resource = "/resources/dictionaries/makeglossariesgui-en.prop";
+         in = getClass().getResourceAsStream(resource);
       }
 
-      BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+      BufferedReader reader = null;
 
-      Properties dictionary = new Properties();
-      dictionary.load(reader);
-      messages = new MakeGlossariesDictionary(dictionary);
+      try
+      {
+         Charset defCharset = Charset.defaultCharset();
 
-      reader.close();
+         reader = new BufferedReader(new InputStreamReader(in, defCharset));
+   
+         // First line should be # Encoding: <encoding name>
+   
+         Charset charset = null;
+         String encoding=null;
+   
+         try
+         {
+            String line = reader.readLine();
+   
+            Pattern p = Pattern.compile("# Encoding: (.+)");
+   
+            Matcher m = p.matcher(line);
+   
+            if (!m.matches())
+            {
+               throw new InvalidSyntaxException(
+                 "Missing encoding comment on line 1 of dictionary file: !"
+                 + resource);
+            }
+   
+            encoding = m.group(1);
+            charset = Charset.forName(encoding);
+         }
+         catch (UnsupportedCharsetException|IllegalCharsetNameException e)
+         {
+            throw new InvalidSyntaxException(String.format(
+              "Invalid encoding '%s' on line 1 of dictionary file: !%s",
+               encoding, resource), e);
+         }
+   
+         if (!charset.equals(defCharset))
+         {
+            reader.close();
+            reader = new BufferedReader(new InputStreamReader(in, charset));
+         }
+   
+         Properties dictionary = new Properties();
+         dictionary.load(reader);
+         messages = new MakeGlossariesDictionary(dictionary);
+   
+      }
+      finally
+      {
+         if (reader != null)
+         {
+            reader.close();
+         }
 
-      in.close();
+         in.close();
+      }
    }
 
    public Glossaries getGlossaries()

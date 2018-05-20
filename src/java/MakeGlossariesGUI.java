@@ -1,6 +1,7 @@
 package com.dickimawbooks.makeglossariesgui;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.net.*;
 import java.util.*;
 import java.util.regex.*;
@@ -1077,6 +1078,11 @@ public class MakeGlossariesGUI extends JFrame
    public String getMakeIndexApp()
    {
       return invoker.getMakeIndexApp();
+   }
+
+   public Charset getCharset()
+   {
+      return invoker.getCharset();
    }
 
    public void selectDiagnosticComponent()

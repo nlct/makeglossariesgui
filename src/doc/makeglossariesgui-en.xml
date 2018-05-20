@@ -21,7 +21,12 @@
       settings in the .aux file"/>
     <newterm tag="makeglossarieslite" text="makeglossaries-lite.lua" fmt="tt"
       description="a Lua script provided with the glossaries package
-      as a light-weight alternative to makeglossaries"/>
+      as a light-weight alternative to makeglossaries (the .lua extension
+      may be omitted or replaced with .exe, according to the 
+     TeX distribution)"/>
+    <newterm tag="bib2gls" text="bib2gls" fmt="tt"
+      description="an indexing application designed specifically for 
+      use with glossaries-extra.sty"/>
     <newterm tag="makeindex" text="makeindex" fmt="tt"
       description="an indexing application"/>
     <newterm tag="xindy" text="xindy"  fmt="tt"
@@ -41,6 +46,12 @@
      run followed by running the indexing application 
      (<term hyper="false" tag="makeindex"/>
      or <term hyper="false" tag="xindy"/>), followed by another <LaTeX/> run. 
+     The <sty>glossaries-extra</sty> package provides two more methods
+     (just using <cs tag="printunsrtglossary"/> or using
+     <cs tag="printunsrtglossary"/> with <term tag="bib2gls"/>). 
+     These last two methods aren't supported by <app/> (although it 
+     will flag documents that require <term tag="bib2gls"/> if detected, 
+     as part of its diagnostics).
      </p>
      <p>
      The <sty>glossaries</sty> package provides a Perl script called 

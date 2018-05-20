@@ -14,4 +14,5 @@ makeglossariesgui-en.tex
 *.out
 *.pdf
 *.toc
+*.1
 .*.swp

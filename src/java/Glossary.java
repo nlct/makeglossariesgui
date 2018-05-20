@@ -1,6 +1,8 @@
 package com.dickimawbooks.makeglossariesgui;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.*;
 
@@ -106,6 +108,23 @@ public class Glossary
       int exitCode = 0;
       BufferedReader in=null;
 
+      Charset charset = null;
+
+      try
+      {
+         charset = XindyModule.getCharset(codepage);
+         invoker.getProperties().setDefaultEncoding(charset);
+      }
+      catch (Exception e)
+      {
+         invoker.getMessageSystem().error(e);
+      }
+
+      if (charset == null)
+      {
+         charset = invoker.getCharset();
+      }
+
       File transFile = new File(dir, transFileName);
 
       invoker.getMessageSystem().aboutToExec(cmdArray, dir);
@@ -114,7 +133,8 @@ public class Glossary
       {
          if (transFile.exists())
          {
-            in = new BufferedReader(new FileReader(transFile));
+            in = new BufferedReader(new InputStreamReader(
+              new FileInputStream(transFile), charset));
          }
       }
       else
@@ -123,7 +143,8 @@ public class Glossary
 
          exitCode = p.waitFor();
 
-         in = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+         in = new BufferedReader(new InputStreamReader(p.getErrorStream(),
+                charset));
       }
 
       String line;
@@ -179,7 +200,8 @@ public class Glossary
 
       if (transFile.exists())
       {
-         in = new BufferedReader(new FileReader(transFile));
+         in = new BufferedReader(new InputStreamReader(
+                new FileInputStream(transFile), charset));
 
          while ((line = in.readLine()) != null)
          {
@@ -204,7 +226,8 @@ public class Glossary
 
       if (gloFile.exists())
       {
-         in = new BufferedReader(new FileReader(gloFile));
+         in = new BufferedReader(new InputStreamReader(
+                new FileInputStream(gloFile), charset));
 
          while ((line = in.readLine()) != null)
          {
@@ -373,13 +396,18 @@ public class Glossary
 
       invoker.getMessageSystem().aboutToExec(cmdArray, dir);
 
+      // makeindex is limited to the range 1 ... 255
+      Charset charset = StandardCharsets.ISO_8859_1;
+      invoker.getProperties().setDefaultEncoding(charset);
+
       if (invoker.isDryRunMode())
       {
          File transFile = new File(dir, transFileName);
 
          if (transFile.exists())
          {
-            in = new BufferedReader(new FileReader(transFile));
+            in = new BufferedReader(new InputStreamReader(
+                   new FileInputStream(transFile), charset));
          }
       }
       else
@@ -388,7 +416,8 @@ public class Glossary
 
          exitCode = p.waitFor();
 
-         in = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+         in = new BufferedReader(new InputStreamReader(p.getErrorStream(),
+               charset));
       }
 
       String line;
@@ -407,7 +436,8 @@ public class Glossary
 
       in.close();
 
-      in = new BufferedReader(new FileReader(new File(dir, transFileName)));
+      in = new BufferedReader(new InputStreamReader(
+         new FileInputStream(new File(dir, transFileName)), charset));
 
       int numAccepted = 0;
       int numRejected = 0;
@@ -467,7 +497,8 @@ public class Glossary
 
       if (gloFile.exists())
       {
-         in = new BufferedReader(new FileReader(gloFile));
+         in = new BufferedReader(new InputStreamReader(
+            new FileInputStream(gloFile), charset));
 
          while ((line = in.readLine()) != null)
          {

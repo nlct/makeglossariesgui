@@ -3,6 +3,9 @@ package com.dickimawbooks.makeglossariesgui;
 import java.io.*;
 import java.util.*;
 import java.awt.Font;
+import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.UnsupportedCharsetException;
 
 import java.awt.event.ActionListener;
 import javax.swing.JMenu;
@@ -400,6 +403,36 @@ public class MakeGlossariesProperties extends Properties
       setProperty("look_and_feel", lookAndFeel);
    }
 
+   public void setDefaultEncoding(Charset charset)
+   {
+      setProperty("encoding", charset.name());
+      defCharset = charset;
+   }
+
+   public Charset getDefaultEncoding()
+   throws IllegalCharsetNameException,
+          IllegalArgumentException,
+          UnsupportedCharsetException
+   {
+      if (defCharset != null)
+      {
+         return defCharset;
+      }
+
+      String prop = getProperty("encoding");
+
+      if (prop != null && !prop.isEmpty())
+      {
+         defCharset = Charset.forName(prop);
+      }
+      else
+      {
+         setDefaultEncoding(Charset.defaultCharset());
+      }
+
+      return defCharset;
+   }
+
    private void loadRecentFiles(BufferedReader in)
      throws IOException
    {
@@ -527,6 +560,8 @@ public class MakeGlossariesProperties extends Properties
 
       return null;
    }
+
+   private Charset defCharset = null;
 
    private File propFile, recentFile;
    private static String propName = "makeglossaries.prop";

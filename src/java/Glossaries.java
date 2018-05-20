@@ -3,6 +3,7 @@ package com.dickimawbooks.makeglossariesgui;
 import java.util.*;
 import java.util.regex.*;
 import java.io.*;
+import java.nio.charset.Charset;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.Element;
 
@@ -52,7 +53,8 @@ public class Glossaries
       return null;
    }
 
-   public static Glossaries loadGlossaries(MakeGlossariesInvoker invoker, File file)
+   public static Glossaries loadGlossaries(MakeGlossariesInvoker invoker, 
+    File file)
       throws IOException
    {
       Glossaries glossaries = new Glossaries(invoker);
@@ -62,7 +64,8 @@ public class Glossaries
 
       invoker.getMessageSystem().message(
        invoker.getLabelWithValues("message.loading", file));
-      BufferedReader in = new BufferedReader(new FileReader(file));
+      BufferedReader in = new BufferedReader(new InputStreamReader(
+              new FileInputStream(file), invoker.getCharset()));
 
       String line;
 
@@ -91,6 +94,12 @@ public class Glossaries
 
          glossaries.addDiagnosticMessage(invoker.getLabelWithValues(
            "diagnostics.bib2gls", base));
+
+         if (!glossaries.hasRecords && !glossaries.selectionAllFound)
+         {
+            glossaries.addDiagnosticMessage(invoker.getLabel(
+             "diagnostics.bib2gls_norecords"));
+         }
 
          // Is bib2gls on the system PATH?
 
@@ -150,6 +159,10 @@ public class Glossaries
          }
       }
 
+      if (glossaries.requiresBib2Gls)
+      {
+      }
+
       return glossaries;
    }
 
@@ -180,6 +193,14 @@ public class Glossaries
       if (matcher.matches())
       {
          requiresBib2Gls = true;
+
+         matcher = selectAllPattern.matcher(matcher.group(1));
+
+         if (matcher.matches())
+         {
+            selectionAllFound = true;
+         }
+
          return;
       }
 
@@ -255,6 +276,14 @@ public class Glossaries
          return;
       }
 
+      matcher = glsrecordPattern.matcher(line);
+
+      if (matcher.matches())
+      {
+         hasRecords = true;
+         return;
+      }
+
       matcher = extraMakeIndexOptsPattern.matcher(line);
 
       if (matcher.matches())
@@ -288,7 +317,8 @@ public class Glossaries
             invoker.getMessageSystem().message(
               invoker.getLabelWithValues("message.loading", f));
 
-            in = new BufferedReader(new FileReader(f));
+            in = new BufferedReader(new InputStreamReader(
+              new FileInputStream(f), invoker.getCharset()));
 
             while ((line = in.readLine()) != null)
             {
@@ -518,15 +548,25 @@ public class Glossaries
 
       String vers = null;
 
+      String build = null;
+
       try
       {
-         reader = new BufferedReader(new FileReader(log));
+         reader = new BufferedReader(new InputStreamReader(
+              new FileInputStream(log), invoker.getCharset()));
 
          String line;
 
          while ((line = reader.readLine()) != null)
          {
-            Matcher m = glossariesStyPattern.matcher(line);
+            Matcher m = formatPattern.matcher(line);
+
+            if (m.matches())
+            {
+               latexFormat = m.group(1);
+            }
+
+            m = glossariesStyPattern.matcher(line);
 
             if (m.matches())
             {
@@ -650,6 +690,39 @@ public class Glossaries
 
                   checkNonAscii = true;
                   continue;
+               }
+
+               if (requiresBib2Gls)
+               {
+                  m = missingGlsTeXPattern.matcher(msg);
+
+                  if (m.matches())
+                  {
+                     addDiagnosticMessage(invoker.getLabelWithValues(
+                      istName == null ? "diagnostics.missing_glstex" :
+                      "diagnostics.missing_glstex_hybrid",
+                      m.group(1)));
+
+                     if (build == null)
+                     {
+                        if (istName == null)
+                        {
+                           build = invoker.getLabelWithValues(
+                             "diagnostics.bib2gls_build", latexFormat, baseName
+                           );
+                        }
+                        else
+                        {
+                           build = invoker.getLabelWithValues(
+                             "diagnostics.hybrid_build", latexFormat, baseName,
+                             "makeglossaries"
+                           );
+                        }
+
+                        addDiagnosticMessage(build);
+                     }
+                     continue;
+                  }
                }
 
                addDiagnosticMessage(msg);
@@ -860,6 +933,11 @@ public class Glossaries
       return getNumGlossaries() == 0 ?
          invoker.getLabel("error.no_glossaries"):
          null;
+   }
+
+   public String displayEncoding()
+   {
+      return invoker.getCharset().name();
    }
 
    public String getOrder()
@@ -1085,6 +1163,7 @@ public class Glossaries
          case IST: return getIstName();
          case INDEXER: return displayFormat();
          case GLOSSARIES: return displayGlossaryList();
+         case ENCODING: return displayEncoding();
       }
 
       return null;
@@ -1128,6 +1207,9 @@ public class Glossaries
    private static final Pattern bib2glsPattern
       = Pattern.compile("\\\\glsxtr@resource\\{(.*)\\}\\{(.*?)\\}");
 
+   private static final Pattern selectAllPattern
+      = Pattern.compile(".*selection\\s*=\\s*(all|\\{all\\}).*");
+
    private static final Pattern orderPattern
       = Pattern.compile("\\\\@glsorder\\{([^\\}]+)\\}");
 
@@ -1139,6 +1221,9 @@ public class Glossaries
 
    private static final Pattern glsreferencePattern
       = Pattern.compile("\\\\@gls@reference\\{.*?\\}\\{.*?\\}\\{.*\\}");
+
+   private static final Pattern glsrecordPattern
+      = Pattern.compile("\\\\glsxtr@record\\{.*?\\}\\{.*?\\}\\{.*\\}");
 
    private static final Pattern extraMakeIndexOptsPattern
       = Pattern.compile("\\\\@gls@extramakeindexopts\\{(.*)\\}");
@@ -1160,6 +1245,9 @@ public class Glossaries
 
    private static final Pattern missingStyPattern
       = Pattern.compile(".*`(.*?)\\.sty' not found.*");
+
+   private static final Pattern missingGlsTeXPattern
+      = Pattern.compile(".*No file `(.*?\\.glstex)'.*");
 
    private static final Pattern warningPattern
       = Pattern.compile("Package glossaries(-extra)? Warning: .*");
@@ -1191,16 +1279,26 @@ public class Glossaries
    private static final Pattern inputPattern
       = Pattern.compile("\\\\@input\\{(.*)\\.aux\\}");
 
+   private static final Pattern formatPattern
+      = Pattern.compile(".* format=(xelatex|lualatex|pdflatex|latex) .*");
+
    private static final String[] fields =
    {
       "aux",
       "order",
       "ist",
       "indexer",
-      "list"
+      "list",
+      "encoding"
    };
 
-   public static final int AUX=0, ORDER=1, IST=2, INDEXER=3, GLOSSARIES=4;
+   public static final int AUX=0, ORDER=1, IST=2, INDEXER=3, GLOSSARIES=4,
+     ENCODING=5;
+
+   private String latexFormat = "latex";
 
    private MakeGlossariesInvoker invoker;
+
+   private boolean hasRecords = false;
+   private boolean selectionAllFound = false;
 }
