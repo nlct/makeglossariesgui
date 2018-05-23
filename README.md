@@ -10,7 +10,7 @@ Lua script supplied by the [glossaries package](http://ctan.org/pkg/glossaries).
 or show all the diagnostic information that the GUI mode
 provides.)
 
-##Third Party Libraries
+## Third Party Libraries
 
 MakeGlossariesGUI depends on the following third party libraries
 whose jar files are placed in the application's lib directory by
