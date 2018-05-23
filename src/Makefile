@@ -8,6 +8,7 @@ app	: lib lib/makeglossariesgui.jar lib/resources lib/makeglossariesgui-splash.p
 
 dist	: ../dist/makeglossariesgui-installer.jar
 	cp doc/makeglossariesgui-en.pdf ../dist
+	cp doc/makeglossariesgui.1 ../dist
 
 ../dist/makeglossariesgui-installer.jar	: app installer/install.xml
 	$(IZPACKDIR)/bin/compile installer/install.xml -b . \
