@@ -65,7 +65,7 @@ public class Glossaries
       invoker.getMessageSystem().message(
        invoker.getLabelWithValues("message.loading", file));
       BufferedReader in = new BufferedReader(new InputStreamReader(
-              new FileInputStream(file), invoker.getCharset()));
+              new FileInputStream(file), invoker.getEncoding()));
 
       String line;
 
@@ -92,8 +92,10 @@ public class Glossaries
             base = base.substring(0, base.length()-4);
          }
 
-         glossaries.addDiagnosticMessage(invoker.getLabelWithValues(
-           "diagnostics.bib2gls", base));
+         glossaries.addDiagnosticMessage(String.format("%s %s", 
+             invoker.getLabelWithValues(
+             "diagnostics.bib2gls", base), 
+             invoker.getLabel("diagnostics.build")));
 
          if (!glossaries.hasRecords && !glossaries.selectionAllFound)
          {
@@ -318,7 +320,7 @@ public class Glossaries
               invoker.getLabelWithValues("message.loading", f));
 
             in = new BufferedReader(new InputStreamReader(
-              new FileInputStream(f), invoker.getCharset()));
+              new FileInputStream(f), invoker.getEncoding()));
 
             while ((line = in.readLine()) != null)
             {
@@ -413,6 +415,8 @@ public class Glossaries
 
       File dir = file.getParentFile();
 
+      Vector<Charset> indexerEncodings = new Vector<Charset>();
+
       if (!noidx)
       {
          String mess = getIndexerError();
@@ -500,6 +504,13 @@ public class Glossaries
                   throw e;
                }
             }
+
+            Charset encoding = invoker.getEncoding();
+
+            if (!indexerEncodings.contains(encoding))
+            {
+               indexerEncodings.add(encoding);
+            }
          }
       }
 
@@ -508,6 +519,33 @@ public class Glossaries
       if (invoker.isBatchMode()) return;
 
       parseLog(dir, baseName);
+
+      // Now the log has been parsed, the document encodings should
+      // be known (if support has been provided).
+
+      if (supportedEncodings == null)
+      {
+         // No document encoding detected, assume ASCII (which is
+         // fine for makeindex). Provide advisory note for xindy.
+
+         if (useXindy())
+         {
+            addAdvisoryMessage(invoker.getLabel(
+              "diagnostics.xindy_no_doc_encoding"));
+         }
+      }
+      else
+      {
+         for (Charset encoding: indexerEncodings)
+         {
+            if (!supportedEncodings.contains(encoding))
+            {
+               addAdvisoryMessage(invoker.getLabelWithValues(
+                "diagnostics.doc_indexer_encoding_mismatch", encoding,
+                 supportedEncodings.size(), inputEnc));
+            }
+         }
+      }
    }
 
    public void parseLog(File dir, String baseName)
@@ -553,17 +591,38 @@ public class Glossaries
       try
       {
          reader = new BufferedReader(new InputStreamReader(
-              new FileInputStream(log), invoker.getCharset()));
+              new FileInputStream(log), invoker.getEncoding()));
 
          String line;
 
          while ((line = reader.readLine()) != null)
          {
-            Matcher m = formatPattern.matcher(line);
+            Matcher m;
+
+            if (latexFormat == null)
+            {
+               m = formatPattern.matcher(line);
+
+               if (m.matches())
+               {
+                  latexFormat = m.group(1);
+
+                  if (latexFormat.startsWith("xe") 
+                      || latexFormat.startsWith("lua"))
+                  {
+                     addSupportedEncoding("utf8");
+                  }
+
+                  continue;
+               }
+            }
+
+            m = inputEncPattern.matcher(line);
 
             if (m.matches())
             {
-               latexFormat = m.group(1);
+               addSupportedEncoding(m.group(1));
+               continue;
             }
 
             m = glossariesStyPattern.matcher(line);
@@ -664,6 +723,28 @@ public class Glossaries
                continue;
             }
 
+            m = glsGroupHeadingPattern.matcher(line);
+
+            if (m.matches())
+            {
+               String val = m.group(1);
+
+               if (!problemGroupLabels.contains(val))
+               {
+                  addDiagnosticMessage(String.format("%s<pre>%s</pre>%s", 
+                     invoker.getLabelWithValues(
+                     "diagnostics.problem_group_label", val),
+                     invoker.escapeHTML(line),
+                     invoker.getLabel(isUnicodeEngine() ? 
+                       "diagnostics.suggest_bib2gls" : 
+                       "diagnostics.suggest_unicode_or_bib2gls")));
+
+                  problemGroupLabels.add(val);
+               }
+
+               continue;
+            }
+
             m = warningPattern.matcher(line);
 
             if (m.matches())
@@ -708,13 +789,15 @@ public class Glossaries
                         if (istName == null)
                         {
                            build = invoker.getLabelWithValues(
-                             "diagnostics.bib2gls_build", latexFormat, baseName
+                             "diagnostics.bib2gls_build", getLaTeXFormat(), 
+                              baseName
                            );
                         }
                         else
                         {
                            build = invoker.getLabelWithValues(
-                             "diagnostics.hybrid_build", latexFormat, baseName,
+                             "diagnostics.hybrid_build", getLaTeXFormat(),
+                              baseName,
                              "makeglossaries"
                            );
                         }
@@ -771,14 +854,15 @@ public class Glossaries
 
                   if (m.groupCount() == 2)
                   {
-                     addDiagnosticMessage(invoker.getLabelWithValues(
+                     addAdvisoryMessage(invoker.getLabelWithValues(
                         "diagnostics.shell_disabled", cmd+rest));
                   }
                   else
                   {
-                     addDiagnosticMessage(invoker.getLabelWithValues(
+                     addAdvisoryMessage(invoker.getLabelWithValues(
                         "diagnostics.shell_restricted", cmd+rest, cmd));
                   }
+
 
                }
 
@@ -907,6 +991,21 @@ public class Glossaries
       }
    }
 
+   public String getLaTeXFormat()
+   {
+      return latexFormat == null ? "latex" : latexFormat;
+   }
+
+   public boolean isUnicodeEngine()
+   {
+      if (latexFormat == null)
+      {
+         return false;
+      }
+
+      return latexFormat.startsWith("xe") || latexFormat.startsWith("lua");
+   }
+
    public String displayGlossaryList()
    {
       String str = null;
@@ -937,7 +1036,41 @@ public class Glossaries
 
    public String displayEncoding()
    {
-      return invoker.getCharset().name();
+      return invoker.getEncoding().name();
+   }
+
+   private void addSupportedEncoding(String encLabel)
+   {
+      Charset charset = invoker.getCharset(encLabel);
+
+      if (charset == null)
+      {
+         addDiagnosticMessage(invoker.getLabelWithValues(
+          "diagnostics.unknown.encoding", encLabel));
+      }
+      else
+      {
+         if (supportedEncodings == null)
+         {
+            supportedEncodings = new Vector<Charset>();
+         }
+
+         supportedEncodings.add(charset);
+      }
+
+      if (inputEnc == null)
+      {
+         inputEnc = encLabel;
+      }
+      else
+      {
+         inputEnc = String.format("%s, %s", inputEnc, encLabel);
+      }
+   }
+
+   public String displayDocumentEncoding()
+   {
+      return inputEnc == null ? invoker.getLabel("error.unknown") : inputEnc;
    }
 
    public String getOrder()
@@ -1112,6 +1245,23 @@ public class Glossaries
       }
    }
 
+   public String getAdvisoryMessages()
+   {
+      return advisoryMessages == null ? null : advisoryMessages.toString();
+   }
+
+   public void addAdvisoryMessage(String mess)
+   {
+      if (advisoryMessages == null)
+      {
+         advisoryMessages = new StringBuilder(mess);
+      }
+      else
+      {
+         advisoryMessages.append(String.format("<p>%s", mess));
+      }
+   }
+
    public void addErrorMessage(String mess)
    {
       if (errorMessages == null)
@@ -1164,6 +1314,7 @@ public class Glossaries
          case INDEXER: return displayFormat();
          case GLOSSARIES: return displayGlossaryList();
          case ENCODING: return displayEncoding();
+         case DOC_ENCODING: return displayDocumentEncoding();
       }
 
       return null;
@@ -1196,7 +1347,7 @@ public class Glossaries
 
    private boolean requiresBib2Gls = false;
 
-   private StringBuilder errorMessages, diagnosticMessages;
+   private StringBuilder errorMessages, diagnosticMessages, advisoryMessages;
 
    private static final Pattern newGlossaryPattern
       = Pattern.compile("\\\\@newglossary\\{([^\\}]+)\\}\\{([^\\}]+)\\}\\{([^\\}]+)\\}\\{([^\\}]+)\\}");
@@ -1282,6 +1433,14 @@ public class Glossaries
    private static final Pattern formatPattern
       = Pattern.compile(".* format=(xelatex|lualatex|pdflatex|latex) .*");
 
+   private static final Pattern inputEncPattern
+      = Pattern.compile("File: (utf8|latin[0-9]+|cp[0-9]+(?:de)?|decmulti|applemac|macce|next|ansinew|ascii)\\.def.*");
+
+   private static final Pattern glsGroupHeadingPattern
+      = Pattern.compile(".*\\\\glsgroupheading\\{(.+?)\\}.*");
+
+   private Vector<String> problemGroupLabels = new Vector<String>();
+
    private static final String[] fields =
    {
       "aux",
@@ -1289,13 +1448,18 @@ public class Glossaries
       "ist",
       "indexer",
       "list",
-      "encoding"
+      "encoding",
+      "docencoding"
    };
 
    public static final int AUX=0, ORDER=1, IST=2, INDEXER=3, GLOSSARIES=4,
-     ENCODING=5;
+     ENCODING=5, DOC_ENCODING=6;
 
-   private String latexFormat = "latex";
+   private String latexFormat = null;
+
+   private String inputEnc = null;
+
+   private Vector<Charset> supportedEncodings;
 
    private MakeGlossariesInvoker invoker;
 

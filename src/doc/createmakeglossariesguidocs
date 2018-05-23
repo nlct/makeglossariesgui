@@ -201,6 +201,7 @@ my %counters = ();
 
 # open the TeX file
 open TEXFD, ">$texfile" or die "Can't open '$texfile' $!\n";
+binmode(TEXFD, ":$encoding_file");
  
 # initialize the parser
 my $parser = XML::Parser->new( Handlers => 

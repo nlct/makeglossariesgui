@@ -3,8 +3,8 @@
 <manual fontenc="T1">
   <preamble>
     <!-- Document Info -->
-    <title>User Manual for <dict tag="appname"/> version 
-      <dict tag="appversion" /></title>
+    <title>User Manual for <dict tag="appname"/> 
+      version<nbsp/><dict tag="appversion" /></title>
     <author>Nicola L. C. Talbot<br/><url www="www.dickimaw-books.com" /></author>
 <!--
     <author>Another Author<br />Affliation or URL</author>
@@ -51,7 +51,9 @@
      <cs tag="printunsrtglossary"/> with <term tag="bib2gls"/>). 
      These last two methods aren't supported by <app/> (although it 
      will flag documents that require <term tag="bib2gls"/> if detected, 
-     as part of its diagnostics).
+     as part of its diagnostics). Your document may require additional 
+     applications, such as bibtex, but that's outside of the scope of
+     <app/>.
      </p>
      <p>
      The <sty>glossaries</sty> package provides a Perl script called 
@@ -72,7 +74,13 @@
      </p>
      <p>
      Since <app/> is written in Java, you'll need the Java Runtime Environment 
-     installed.
+     installed. If your document build process supports the conditional
+     execution of commands, then you can test if <app/>, 
+     <term tag="makeglossaries"/> or <term tag="makeglossarieslite"/> are
+     required by searching the log file for the presence of the command
+     <cs tag="@istfilename"/>. (The argument is the style file. The extension
+     determines whether <term tag="makeindex"/> or <term tag="xindy"/>
+     is required.)
      </p>
      <p>The <app/> application runs in <acr tag="gui" /> mode by default, but 
      can be run in batch mode using the <opt tag="batch"/> command line option.
@@ -213,13 +221,16 @@ A \gls{sample} document.
    The <button tag="diagnostics.title"/> tab
    (<ref tag="basicsamplediagnostics"/>) provides information, warnings
    and suggestions. In this example, there are no errors detected, so it
-   just provides suggestions in case there are any missing entries that
-   you've detected, but there are no clues provided in the transcript files.
+   just provides suggestions and some links on how to incorporate
+   <term tag="makeglossaries"/> into your document build process. There are
+   also two buttons provided to test the <term tag="makeglossaries"/>
+   and <term tag="makeglossarieslite"/> scripts. In the first case, 
+   the action will also test if Perl is installed.
    </p>
    <p>
    <float type="figure" tag="basicsamplediagnostics"
      caption="Diagnostics Tab (Basic Sample)" pos="tbp">
-   <image src="images/basic-sample-diagnostics.png" 
+   <image scale="0.75" src="images/basic-sample-diagnostics.png" 
           alt="image of diagnostics window"/>
    </float>
    </p>
@@ -332,7 +343,7 @@ Xindy failed with exit code 1.
    </p>
    </example>
    <p>
-   <app/> actually performs more problem checking than 
+   <app/> actually performs more problem-checking than 
    <term tag="makeglossaries"/> as it also tries to parse
    the log file for certain messages (but only in <acr tag="gui"/> mode).
    This is illustrated in the next example, which won't generate any error 
@@ -691,6 +702,93 @@ contained within your entry definitions?</li>
 
 \end{document}
 </pre>
+   </example>
+   <p>The main panel shows the character encoding that <app/> believes
+   is being used by the indexing application and, if detected, the
+   document input encoding. Since <term tag="makeindex"/> only supports
+   characters in the range 1 to 255, <app/> assumes 
+   ISO-8859-1 (Latin-1) for <term tag="makeindex"/> and will add an advisory
+   note if the document class uses a different encoding.</p>
+   <example>
+   <p>Consider the following example:</p>
+<pre>
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\usepackage[style=indexgroup]{glossaries}
+
+\makeglossaries
+
+\newglossaryentry{elite}{name={élite},description={select group}}
+
+\begin{document}
+\gls{elite}
+
+\printglossary
+\end{document}
+</pre>
+   <p>This document is saved as UTF-8 and has a term where the sort
+   value starts with an extended character. This doesn't work as
+   <term tag="makeindex"/> treats the UTF-8 letter as two separate
+   characters form from the two octets. This not only affects the 
+   sorting but also causes a problem for the <tt>indexgroup</tt>
+   style.</p>
+   <p>
+   <float type="figure" tag="unsupportedencdiagnostics"
+     caption="Encoding Problems (Diagnostics Panel)" pos="htbp">
+   <image src="images/unsupported-enc-diagnostics.png" 
+          alt="image of diagnostics panel" scale="0.75"/>
+   </float>
+   </p>
+   <p>
+   The first message in the diagnostics panel  (see 
+   <ref tag="unsupportedencdiagnostics"/>) is only picked up after you
+   rerun <LaTeX/> and reload the file in <app/>, as it's only after the 
+   glossary file has been created by <term tag="makeindex"/> that the
+   <LaTeX/> call fails. The failure is caused by the first octet
+   appearing in the argument of <cs tag="glsgroupheading"/>. This 
+   causes two problems: the argument of this command is a label so 
+   special or active characters will break it, and the <sty>inputenc</sty>
+   package makes the first octet active, requiring the second octet as
+   the argument. The message reads:</p>
+   <blockquote>
+<p>There seems to be a problem with the letter group label Ã. The label is used to construct a command name, so it can't contain any special characters. (This includes extended characters if you're using inputenc.sty.)</p>
+<pre>l.3 \glsgroupheading{Ã}</pre>
+<p>You may want to consider using xindy with a LaTeX engine that has native Unicode support (XeLaTeX or LuaLaTeX) or use bib2gls instead.</p>
+   </blockquote>
+   <p>This message doesn't show up when you first attempt to create
+   the glossary files with <app/>. However, there's advisory message 
+   than points to a problem:</p>
+   <blockquote>
+   The indexer encoding <sq>ISO-8859-1</sq> doesn't seem to match the document 
+   encoding (utf8). This may not be a problem if you aren't using extended 
+   characters in the sort values.
+   </blockquote>
+   <p>In this case it is a problem. The two different encodings are
+   also shown in <ref tag="unsupportedencdiagnostics"/>. The indexer
+   encoding is listed as ISO-8859-1, and the document encoding is listed
+   as utf8.</p>
+   <p>
+   <float type="figure" tag="unsupportedencsummary"
+     caption="Encoding Problems (General Information Panel)" pos="htbp">
+   <image src="images/unsupported-enc-summary.png" 
+          alt="image of general information panel" scale="0.75"/>
+   </float>
+   </p>
+   <p>The problem shows up more clearly in the <dq>Details</dq>
+   window (see <ref tag="unsupportedencdetails"/>), which uses
+   the indexer's encoding and so displays the sort value as
+   Ã©lite instead of élite.
+   </p>
+   <p>
+   <float type="figure" tag="unsupportedencdetails"
+     caption="Encoding Problems (Details Window)" pos="htbp">
+   <image src="images/unsupported-enc-details.png" 
+          alt="image of the details window" scale="0.75"/>
+   </float>
+   </p>
    </example>
    </node>
    <node type="chapter" tag="properties" title="Settings" >

@@ -1,9 +1,7 @@
 package com.dickimawbooks.makeglossariesgui;
 
 import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.charset.UnsupportedCharsetException;
-import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.*;
 import java.net.*;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -320,28 +318,152 @@ public class MakeGlossariesInvoker
       return properties.getDefaultCodePage();
    }
 
-   public Charset getCharset()
+   // Convert xindy and inputenc encoding labels to Charset
+   // Uses String.contains rather than String.equals as
+   // the xindy codepage may contain additional information,
+   // such as din5007-
+   public static Charset getCharset(String encodingLabel)
+    throws IllegalCharsetNameException,
+           IllegalArgumentException,
+           UnsupportedCharsetException
    {
-      Charset charset = null;
-
-      try
+      if (encodingLabel == null)
       {
-         charset = properties.getDefaultEncoding();
-      }
-      catch (Exception e)
-      {
-         getMessageSystem().error(e);
+         throw new IllegalArgumentException(
+          "Illegal encoding label (null)");
       }
 
-      if (charset == null)
+      if (encodingLabel.contains("utf8"))
       {
-         charset = Charset.defaultCharset();
-         properties.setDefaultEncoding(charset);
+         return StandardCharsets.UTF_8;
       }
 
-      return charset;
+      if (encodingLabel.contains("ascii"))
+      {
+         return Charset.forName("US-ASCII");
+      }
+
+      if (encodingLabel.contains("latin10"))
+      {
+         return Charset.forName("ISO-8859-16");
+      }
+
+      if (encodingLabel.contains("latin1"))
+      {
+         return StandardCharsets.ISO_8859_1;
+      }
+
+      if (encodingLabel.contains("latin2"))
+      {
+         return Charset.forName("ISO-8859-2");
+      }
+
+      if (encodingLabel.contains("latin3"))
+      {
+         return Charset.forName("ISO-8859-3");
+      }
+
+      if (encodingLabel.contains("latin4"))
+      {
+         return Charset.forName("ISO-8859-4");
+      }
+
+      if (encodingLabel.contains("latin5"))
+      {
+         return Charset.forName("ISO-8859-9");
+      }
+
+      if (encodingLabel.contains("latin6"))
+      {
+         return Charset.forName("ISO-8859-10");
+      }
+
+      if (encodingLabel.contains("latin7"))
+      {
+         return Charset.forName("ISO-8859-13");
+      }
+
+      if (encodingLabel.contains("latin8"))
+      {
+         return Charset.forName("ISO-8859-14");
+      }
+
+      if (encodingLabel.contains("latin9"))
+      {
+         return Charset.forName("ISO-8859-15");
+      }
+
+      if (encodingLabel.contains("cp1250"))
+      {
+         return Charset.forName("Cp1250");
+      }
+
+      if (encodingLabel.contains("cp1252")
+           || encodingLabel.contains("ansinew"))
+      {
+         return Charset.forName("Cp1252");
+      }
+
+      if (encodingLabel.contains("cp1257"))
+      {
+         return Charset.forName("Cp1257");
+      }
+
+      if (encodingLabel.contains("cp437"))
+      {
+         return Charset.forName("Cp437");
+      }
+
+      if (encodingLabel.contains("cp850"))
+      {
+         return Charset.forName("Cp850");
+      }
+
+      if (encodingLabel.contains("cp852"))
+      {
+         return Charset.forName("Cp852");
+      }
+
+      if (encodingLabel.contains("cp858"))
+      {
+         return Charset.forName("Cp858");
+      }
+
+      if (encodingLabel.contains("cp865"))
+      {
+         return Charset.forName("Cp865");
+      }
+
+      if (encodingLabel.contains("decmulti"))
+      {
+         return Charset.forName("DEC-MCS");
+      }
+
+      if (encodingLabel.contains("applemac"))
+      {
+         return Charset.forName("MacRoman");
+      }
+
+      if (encodingLabel.contains("macce"))
+      {
+         return Charset.forName("MacCentralEurope");
+      }
+
+      // don't know appropriate Java name for inputenc's 'next'
+
+      return null;
    }
 
+   // indexer character encoding
+   public Charset getEncoding()
+   {
+      return defaultCharset;
+   }
+
+   public void setEncoding(Charset charset)
+   {
+      defaultCharset = charset;
+   }
 
    private void loadDictionary()
       throws IOException
@@ -706,11 +828,13 @@ public class MakeGlossariesInvoker
 
    public static final String APP_VERSION = "2.1";
 
-   public static final String APP_DATE = "2018-05-20";
+   public static final String APP_DATE = "2018-05-23";
 
    private boolean quiet=false, debug=false, batchMode=false, dryRun=false; 
 
    protected Glossaries glossaries;
+
+   private Charset defaultCharset=Charset.defaultCharset();
 
    private Hashtable<String,String> languageMap;
 

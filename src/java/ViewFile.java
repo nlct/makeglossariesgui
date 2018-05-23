@@ -56,7 +56,7 @@ public class ViewFile extends JFrame
       try
       {
          reader = new BufferedReader(new InputStreamReader(
-           url.openStream(), app.getCharset()));
+           url.openStream(), app.getEncoding()));
 
          String line;
 

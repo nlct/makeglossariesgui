@@ -112,8 +112,8 @@ public class Glossary
 
       try
       {
-         charset = XindyModule.getCharset(codepage);
-         invoker.getProperties().setDefaultEncoding(charset);
+         charset = invoker.getCharset(codepage);
+         invoker.setEncoding(charset);
       }
       catch (Exception e)
       {
@@ -122,7 +122,9 @@ public class Glossary
 
       if (charset == null)
       {
-         charset = invoker.getCharset();
+         addDiagnosticMessage(invoker.getLabelWithValues(
+          "diagnostics.unknown.encoding", codepage));
+         charset = invoker.getEncoding();
       }
 
       File transFile = new File(dir, transFileName);
@@ -398,7 +400,7 @@ public class Glossary
 
       // makeindex is limited to the range 1 ... 255
       Charset charset = StandardCharsets.ISO_8859_1;
-      invoker.getProperties().setDefaultEncoding(charset);
+      invoker.setEncoding(charset);
 
       if (invoker.isDryRunMode())
       {

@@ -20,6 +20,7 @@ public class DiagnosticPanel extends JEditorPane
       addMouseListener(app);
       setFont(app.getFont());
       setTransferHandler(app.getTransferHandler());
+      ((HTMLEditorKit)getEditorKit()).setAutoFormSubmission(false);
    }
 
    public void updateDiagnostics()
@@ -33,22 +34,56 @@ public class DiagnosticPanel extends JEditorPane
       stylesheet.addRule("body { font-weight: "+(font.isBold()?"bold":"normal")+"; }");
       stylesheet.addRule("body { font-style:  "+(font.isItalic()?"italic":"normal")+"; }");
 
+      stylesheet.addRule("input { vertical-align: baseline; }");
+
+
       MakeGlossariesInvoker invoker = app.getInvoker();
 
-      if (invoker.getGlossaries() != null)
+      String message = app.diagnosticsForm();
+
+      String results = app.getScriptTestResults();
+
+      if (results != null)
       {
+         message += results;
+      }
+            
+      if (invoker.getGlossaries() == null)
+      {
+         message = String.format("%s<p>%s",
+            invoker.getLabelWithValues("diagnostics.no_file",
+              invoker.getLabel("file"), invoker.getLabel("file.open")),
+            message);
+      }
+      else
+      {
+         String advisory = invoker.getGlossaries().getAdvisoryMessages();
          String diagnostics = invoker.getGlossaries().getDiagnostics();
 
          if (diagnostics == null)
          {
-            setText(invoker.getLabel("diagnostics.no_errors"));
+            message = String.format("%s<p>%s", 
+               invoker.getLabel("diagnostics.no_errors"),
+               message);
          }
          else
          {
-            setText(diagnostics);
             app.selectDiagnosticComponent();
+            message = String.format("%s<p>%s", diagnostics,
+               message);
          }
+
+         if (advisory != null)
+         {
+            message = String.format("%s<h2>%s</h2>%s", 
+                 message,
+                 invoker.getLabel("diagnostics.advisory"), 
+                 advisory);
+         }
+
       }
+
+      setText(message);
    }
 
    private MakeGlossariesGUI app;

@@ -1,5 +1,12 @@
 2.1 ():
 
+  * Added check for bib2gls.
+
+  * Added encoding check.
+
+  * Added buttons to test makeglossaries and makeglossaries-lite
+    scripts.
+
 2.0 (2016-06-06):
 
   * Updated for glossaries v4.0

@@ -321,7 +321,7 @@ public class PropertiesDialog extends JDialog
                {
                   in = new BufferedReader(
                      new InputStreamReader(p.getInputStream(), 
-                       app.getCharset()));
+                       app.getEncoding()));
 
                   String line = in.readLine();
 

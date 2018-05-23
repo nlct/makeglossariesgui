@@ -186,17 +186,31 @@ public class MakeGlossariesGUI extends JFrame
       diagnosticArea.getActionMap().put("copy", copyAction);
       mainPanel.getActionMap().put("copy", copyAction);
 
-      auxFileFilter = new AuxFileFilter(getLabel("filter.aux"));
-
       fileChooser = new JFileChooser(
          invoker.getProperties().getDefaultDirectory());
-      fileChooser.setFileFilter(auxFileFilter);
+
+      auxFileFilter = new AuxFileFilter(getLabel("filter.aux"));
+
+      try
+      {
+         // why does this sometimes throw a concurrent exception?
+         // It's running on the EDT. Perhaps related to bug:
+         // https://bugs.openjdk.java.net/browse/JDK-8068244 
+
+         fileChooser.setFileFilter(auxFileFilter);
+      }
+      catch (java.util.ConcurrentModificationException e)
+      {
+         invoker.getMessageSystem().debug(e);
+      }
 
       propertiesDialog = new PropertiesDialog(this);
 
       appSelector = new AppSelector(this);
 
       pack();
+      diagnosticArea.updateDiagnostics();
+
       setLocationRelativeTo(null);
       setVisible(true);
 
@@ -252,7 +266,45 @@ public class MakeGlossariesGUI extends JFrame
 
       HyperlinkEvent.EventType type = evt.getEventType();
 
+      if (evt instanceof FormSubmitEvent)
+      {
+         if (type == HyperlinkEvent.EventType.ACTIVATED)
+         {
+            // The data should only consist of one name=value
+            // and only the name is important.
+
+            String data = ((FormSubmitEvent)evt).getData();
+
+            if (data.startsWith("makeglossaries-lite="))
+            {
+               testMakeGlossariesLite();
+            }
+            else if (data.startsWith("makeglossaries="))
+            {
+               testMakeGlossaries();
+            }
+            else if (data.startsWith("cleartestresults="))
+            {
+               makeglossariesTestResults=null;
+               makeglossariesLiteTestResults=null;
+               updateDiagnostics();
+            }
+            else
+            {
+               error(invoker.getLabel("error.invalid_query", data));
+            }
+         }
+
+         return;
+      }
+
       URL url = evt.getURL();
+
+      if (url == null)
+      {
+         return;
+      }
+
       Object source = evt.getSource();
 
       if (type == HyperlinkEvent.EventType.ACTIVATED)
@@ -854,6 +906,217 @@ public class MakeGlossariesGUI extends JFrame
          KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), null);
    }
 
+   private void testMakeGlossaries()
+   {
+      makeglossariesTestResults=null;
+
+      StringBuilder results = new StringBuilder();
+
+      try
+      {
+         int exitCode = testApplication("perl", "perl.exe", null, results);
+
+         if (exitCode == -1)
+         {
+            results.append(invoker.getLabelWithValues("error.no_perl",
+              "makeglossaries"));
+         }
+         else
+         {
+            results.append("<p>");
+
+            exitCode = testApplication("makeglossaries", "makeglossaries.exe",
+               "makeglossaries.bat", results);
+
+            if (exitCode == -1)
+            {
+               results.append(invoker.getLabelWithValues(
+                 "error.no_makeglossaries", "makeglossaries"));
+            }
+         }
+      }
+      catch (Exception e)
+      {
+         results.append("<p>");
+         results.append(invoker.escapeHTML(e.getMessage()));
+      }
+
+      makeglossariesTestResults=results.toString();
+
+      updateDiagnostics();
+   }
+
+   private void testMakeGlossariesLite()
+   {
+      makeglossariesLiteTestResults=null;
+      StringBuilder results = new StringBuilder();
+
+      try
+      {
+         int exitCode = testApplication("makeglossaries-lite", 
+           "makeglossaries-lite.exe", "makeglossaries-lite.lua", results);
+
+         if (exitCode == -1)
+         {
+            results.append(invoker.getLabelWithValues(
+              "error.no_makeglossaries", "makeglossaries-lite"));
+            results.append(invoker.getLabelWithValues(
+              "diagnostics.at_least_version", "4.16", "glossaries.sty"));
+         }
+      }
+      catch (Exception e)
+      {
+         results.append("<p>");
+         results.append(invoker.escapeHTML(e.getMessage()));
+      }
+
+      makeglossariesLiteTestResults=results.toString();
+
+      updateDiagnostics();
+   }
+
+   private int testApplication(String name, String altName1, String altName2,
+     StringBuilder results)
+    throws IOException,InterruptedException
+   {
+      File file = invoker.findApp(name, altName1, altName2);
+
+      if (file == null)
+      {
+         results.append(invoker.getLabelWithValues("error.missing_application",
+           name));
+         results.append("<p>");
+         return -1;
+      }
+
+      results.append(String.format("%s --version<p>", file));
+
+      ProcessBuilder pb = new ProcessBuilder(file.getAbsolutePath(), 
+        "--version");
+      pb.redirectErrorStream(true);
+      Process p = pb.start();
+
+      int exitCode = p.waitFor();
+
+      InputStream stream = p.getInputStream();
+
+      if (stream == null)
+      {
+         results.append("Unable to open input stream from process.<p>");
+         return exitCode;
+      }
+
+      results.append("<pre>");
+
+      BufferedReader reader = null;
+
+      try
+      {
+         reader = new BufferedReader(new InputStreamReader(stream));
+
+         String line;
+
+         while ((line = reader.readLine()) != null)
+         {
+            results.append(String.format("%s%n", invoker.escapeHTML(line)));
+         }
+      }
+      finally
+      {
+         results.append("</pre>");
+
+         if (reader != null)
+         {
+            reader.close();
+         }
+      }
+
+      if (exitCode == 0)
+      {
+         results.append(invoker.getLabelWithValues(
+           "diagnostics.test_successful", file.getName()));
+         results.append("<p>");
+      }
+
+      return exitCode;
+   }
+
+   public String getScriptTestResults()
+   {
+      if (makeglossariesTestResults == null
+         && makeglossariesLiteTestResults == null)
+      {
+         return null;
+      }
+
+      StringBuilder builder = new StringBuilder();
+
+      builder.append("<dl>");
+
+      if (makeglossariesTestResults != null)
+      {
+         builder.append(String.format(
+            "<dt>makeglossaries</dt><dd>%s</dd>", 
+            makeglossariesTestResults));
+      }
+
+      if (makeglossariesLiteTestResults != null)
+      {
+         builder.append(String.format(
+            "<dt>makeglossaries-lite</dt><dd>%s</dd>", 
+            makeglossariesLiteTestResults));
+      }
+
+      builder.append("</dl>");
+
+      return builder.toString();
+   }
+
+   public String diagnosticsForm()
+   {
+      StringBuilder builder = new StringBuilder(String.format(
+         "%s<p><form action=\"#\">", invoker.getLabel("diagnostics.build")));
+
+      if (makeglossariesTestResults == null 
+           && makeglossariesLiteTestResults == null)
+      {
+         builder.append(invoker.getLabelWithValues("diagnostics.query_two",
+             diagnosticsActionButton("makeglossaries"),
+             diagnosticsActionButton("makeglossaries-lite")));
+      }
+      else if (makeglossariesTestResults == null)
+      {
+         builder.append(invoker.getLabelWithValues("diagnostics.query_one",
+             diagnosticsActionButton("makeglossaries")));
+      }
+      else if (makeglossariesLiteTestResults == null)
+      {
+         builder.append(invoker.getLabelWithValues("diagnostics.query_one",
+             diagnosticsActionButton("makeglossaries-lite")));
+      }
+
+      if (makeglossariesTestResults != null 
+           || makeglossariesLiteTestResults != null)
+      {
+          builder.append(String.format(
+           "<p><input type=submit name=\"cleartestresults\" value=\"%s\">",
+             invoker.getLabel("diagnostics.clear_test_results")
+          ));
+      }
+
+      builder.append("</form>");
+
+      return builder.toString();
+   }
+
+   private String diagnosticsActionButton(String name)
+   {
+      return String.format(
+        "<input type=submit name=\"%s\" value=\"%s\">",
+        name, invoker.getLabelWithValues("diagnostics.test_script", name)
+      );
+   }
+
    public void showMessages()
    {
       try
@@ -1080,9 +1343,9 @@ public class MakeGlossariesGUI extends JFrame
       return invoker.getMakeIndexApp();
    }
 
-   public Charset getCharset()
+   public Charset getEncoding()
    {
-      return invoker.getCharset();
+      return invoker.getEncoding();
    }
 
    public void selectDiagnosticComponent()
@@ -1215,6 +1478,9 @@ public class MakeGlossariesGUI extends JFrame
    private PropertiesDialog propertiesDialog;
 
    private String mainInfoTemplate, glossaryInfoTemplate;
+
+   private String makeglossariesTestResults=null;
+   private String makeglossariesLiteTestResults=null;
 
    private JToolBar toolBar;
 

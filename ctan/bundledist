@@ -18,5 +18,5 @@ rm tmp.tar
 cp ../README source/support/makeglossariesgui
 mv source/support/makeglossariesgui/src/README source/support/makeglossariesgui/src/README-src
 mv makeglossariesgui/src/README makeglossariesgui/src/README-src
-zip -r makeglossariesgui.tds.zip source scripts doc
-zip -r makeglossariesgui.zip makeglossariesgui makeglossariesgui.tds.zip
+zip --exclude="*.swp" --exclude="*.gitignore" -r makeglossariesgui.tds.zip source scripts doc
+zip --exclude="*.swp" --exclude="*.gitignore" -r makeglossariesgui.zip makeglossariesgui makeglossariesgui.tds.zip

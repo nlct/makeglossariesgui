@@ -27,7 +27,7 @@ $(TARGETDIR)/makeglossariesgui-en/makeglossariesgui.html	: $(TARGETDIR) \
 $(TARGETDIR)	:
 	mkdir $(TARGETDIR)
 
-makeglossariesgui-en.pdf	: makeglossariesgui-en.tex
+makeglossariesgui-en.pdf	: makeglossariesgui-en.tex makeglossariesgui.cls
 	arara makeglossariesgui-en
 
 makeglossariesgui-en.tex	: createmakeglossariesguidocs makeglossariesgui-en.xml \

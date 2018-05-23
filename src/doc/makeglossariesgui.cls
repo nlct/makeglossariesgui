@@ -115,4 +115,11 @@
 {\begin{quote}\sffamily\raggedright}%
 {\end{quote}}
 
+\renewcommand{\title}[1]{%
+  \gdef\@title{#1}%
+  \ifdef\hypersetup
+  {\hypersetup{pdftitle={#1}}}%
+  {}%
+}
+
 \endinput

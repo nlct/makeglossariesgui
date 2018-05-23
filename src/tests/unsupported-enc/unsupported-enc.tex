@@ -1,0 +1,18 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+% makeindex doesn't support UTF-8, so this will break
+\usepackage[style=indexgroup]{glossaries}
+
+\makeglossaries
+
+\newglossaryentry{elite}{name={élite},description={select group}}
+
+\begin{document}
+\gls{elite}
+
+\printglossary
+\end{document}
+

@@ -11,6 +11,11 @@ public class GlossaryBatchMessage implements GlossaryMessage
 
    public void message(String msg)
    {
+      if (msg == null)
+      {
+         throw new NullPointerException();
+      }
+
       if (!invoker.isQuiet())
       {
          System.out.println(msg);
@@ -19,6 +24,11 @@ public class GlossaryBatchMessage implements GlossaryMessage
 
    public void debug(String msg)
    {
+      if (msg == null)
+      {
+         throw new NullPointerException();
+      }
+
       if (invoker.isDebugMode())
       {
          System.out.println(msg);
@@ -38,7 +48,18 @@ public class GlossaryBatchMessage implements GlossaryMessage
       if (!invoker.isQuiet())
       {
          System.out.println(e.getMessage());
-         System.out.println(e.getDiagnosticMessage());
+
+         String msg = e.getDiagnosticMessage();
+
+         if (msg != null)
+         {
+            System.out.println(msg);
+         }
+
+         if (invoker.isDebugMode())
+         {
+            e.printStackTrace();
+         }
       }
    }
 
@@ -49,6 +70,11 @@ public class GlossaryBatchMessage implements GlossaryMessage
 
    public void error(String message)
    {
+      if (message == null)
+      {
+         throw new NullPointerException();
+      }
+
       System.err.println(message);
    }
 
