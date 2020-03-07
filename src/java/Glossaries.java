@@ -602,7 +602,7 @@ public class Glossaries
          {
             Matcher m;
 
-            if (line.startsWith("Package glossaries Info:") && !line.endsWith("."))
+            if (istName == null && line.startsWith("Package glossaries Info:") && !line.endsWith("."))
             {
                String nextLine;
 
@@ -616,6 +616,9 @@ public class Glossaries
                   }
                }
 
+               // Need to determine which option was the last in
+               // effect but line numbers may refer to different files.
+
                m = makeglossDisabledPattern.matcher(line);
 
                if (m.matches())
@@ -625,12 +628,11 @@ public class Glossaries
                   addDiagnosticMessage(invoker.getLabelWithValues(
                      "diagnostics.makeglossdisabled", lineRef));
 
-                  try
+                  makeglossDisabledLine = 1;
+
+                  if (makeglossRestoredLine > -1)
                   {
-                     makeglossDisabledLine = Integer.parseInt(lineRef);
-                  }
-                  catch (NumberFormatException e)
-                  {// shouldn't happen, pattern enforces correct format
+                     makeglossRestoredLine = 0;
                   }
                }
 
@@ -643,12 +645,11 @@ public class Glossaries
                   addDiagnosticMessage(invoker.getLabelWithValues(
                      "diagnostics.makeglossrestored", lineRef));
 
-                  try
+                  makeglossRestoredLine = 1;
+
+                  if (makeglossDisabledLine > -1)
                   {
-                     makeglossRestoredLine = Integer.parseInt(lineRef);
-                  }
-                  catch (NumberFormatException e)
-                  {// shouldn't happen, pattern enforces correct format
+                     makeglossDisabledLine = 0;
                   }
                }
             }
@@ -1025,7 +1026,7 @@ public class Glossaries
          }
       }     
 
-      if (makeglossDisabledLine > -1 && istName == null)
+      if (makeglossDisabledLine > -1)
       {
          if (makeglossRestoredLine == -1)
          {
