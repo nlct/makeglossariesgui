@@ -588,6 +588,9 @@ public class Glossaries
 
       String build = null;
 
+      int makeglossDisabledLine = -1;
+      int makeglossRestoredLine = -1;
+
       try
       {
          reader = new BufferedReader(new InputStreamReader(
@@ -598,6 +601,57 @@ public class Glossaries
          while ((line = reader.readLine()) != null)
          {
             Matcher m;
+
+            if (line.startsWith("Package glossaries Info:") && !line.endsWith("."))
+            {
+               String nextLine;
+
+               while ((nextLine = reader.readLine()) != null)
+               {
+                  line += nextLine;
+
+                  if (nextLine.endsWith("."))
+                  {
+                     break;
+                  }
+               }
+
+               m = makeglossDisabledPattern.matcher(line);
+
+               if (m.matches())
+               {
+                  String lineRef = m.group(1);
+
+                  addDiagnosticMessage(invoker.getLabelWithValues(
+                     "diagnostics.makeglossdisabled", lineRef));
+
+                  try
+                  {
+                     makeglossDisabledLine = Integer.parseInt(lineRef);
+                  }
+                  catch (NumberFormatException e)
+                  {// shouldn't happen, pattern enforces correct format
+                  }
+               }
+
+               m = makeglossRestoredPattern.matcher(line);
+
+               if (m.matches())
+               {
+                  String lineRef = m.group(1);
+
+                  addDiagnosticMessage(invoker.getLabelWithValues(
+                     "diagnostics.makeglossrestored", lineRef));
+
+                  try
+                  {
+                     makeglossRestoredLine = Integer.parseInt(lineRef);
+                  }
+                  catch (NumberFormatException e)
+                  {// shouldn't happen, pattern enforces correct format
+                  }
+               }
+            }
 
             if (latexFormat == null)
             {
@@ -970,6 +1024,24 @@ public class Glossaries
             reader.close();
          }
       }     
+
+      if (makeglossDisabledLine > -1 && istName == null)
+      {
+         if (makeglossRestoredLine == -1)
+         {
+            addDiagnosticMessage(invoker.getLabel("diagnostics.restoremakegloss"));
+         }
+         else if (makeglossRestoredLine < makeglossDisabledLine)
+         {
+            addDiagnosticMessage(
+               invoker.getLabel("diagnostics.restoremakegloss.cancelled"));
+         }
+         else
+         {
+            addDiagnosticMessage(
+               invoker.getLabel("diagnostics.restoremakegloss.late"));
+         }
+      }
 
       if (vers == null)
       {
@@ -1438,6 +1510,12 @@ public class Glossaries
 
    private static final Pattern glsGroupHeadingPattern
       = Pattern.compile(".*\\\\glsgroupheading\\{(.+?)\\}.*");
+
+   private static final Pattern makeglossDisabledPattern = Pattern.compile(
+      "Package glossaries Info: \\\\makeglossaries and \\\\makenoidxglossaries have been disabled on input line ([0-9]+)\\.");
+
+   private static final Pattern makeglossRestoredPattern = Pattern.compile(
+      "Package glossaries Info: \\\\makeglossaries and \\\\makenoidxglossaries have been restored on input line ([0-9]+)\\.");
 
    private Vector<String> problemGroupLabels = new Vector<String>();
 

@@ -61,7 +61,7 @@
 <!ELEMENT meta (%basic.content;)+>
 <!ELEMENT sty (%basic.content;)+>
 <!ELEMENT em (%basic.content;)+>
-<!ELEMENT b (%basic.content;)+>
+<!ELEMENT strong (%basic.content;)+>
 <!ELEMENT pre (%basic.content;)+>
 <!ELEMENT float (%basic.content;)+>
 <!ATTLIST float type (#PCDATA)+ #REQUIRED>

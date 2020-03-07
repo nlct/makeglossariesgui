@@ -826,9 +826,9 @@ public class MakeGlossariesInvoker
 
    public static final String APP_NAME = "MakeGlossariesGUI";
 
-   public static final String APP_VERSION = "2.1";
+   public static final String APP_VERSION = "2.2";
 
-   public static final String APP_DATE = "2018-05-23";
+   public static final String APP_DATE = "2020-03-07";
 
    private boolean quiet=false, debug=false, batchMode=false, dryRun=false; 
 

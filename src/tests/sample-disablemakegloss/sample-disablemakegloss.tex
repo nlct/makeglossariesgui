@@ -1,0 +1,18 @@
+\documentclass[disablemakegloss]{article}
+
+\usepackage{glossaries}
+
+\makeglossaries
+
+\setupglossaries{restoremakegloss}
+
+\newglossaryentry{sample}{name={sample},
+ description={an example}}
+
+\begin{document}
+A \gls{sample} document.
+
+\printglossaries
+
+\end{document}
+

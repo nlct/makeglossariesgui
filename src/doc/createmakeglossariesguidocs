@@ -34,15 +34,28 @@ if ($#ARGV == 1)
   $locale .= "-".$ARGV[1];
 }
 
+my $wwwpath;
+
+if (defined($ENV{'MAKEJMLRBOOKGUI_MANUAL_HTML'}))
+{
+   $wwwpath  = $ENV{'MAKEJMLRBOOKGUI_MANUAL_HTML'};
+
+   if ($lang ne 'en')
+   {
+      $wwwpath .= "-$lang";
+   }
+}
+
 my $encoding_file = 'utf8';
 my $encoding_xml  = 'UTF-8';
 
-open FD, "$mainclass" or die "Can't open '$mainclass' $!\n";
-binmode(FD, ":$encoding_file");
+my $fd;
+
+open $fd, "<:encoding($encoding_xml)", $mainclass or die "Can't open '$mainclass' $!\n";
 
 my %dict = ();
 
-while (<FD>)
+while (<$fd>)
 {
    if (/\bstatic +final +String +APP_NAME *= *"(.+)";/)
    {
@@ -58,7 +71,7 @@ while (<FD>)
    }
 }
 
-close FD;
+close $fd;
 
 my $propfile = "$dictdir/$base-$locale.prop";
 
@@ -78,13 +91,16 @@ unless (-e $propfile)
    die "Can't find '$propfile'\n";
 }
 
-open FD, "$propfile" or die "Can't open '$propfile' $!\n";
+open $fd, "<:encoding($encoding_xml)", "$propfile" or die "Can't open '$propfile' $!\n";
 
-$_ = <FD>;
+$_ = <$fd>;
 
 if (/# Encoding: ([^s]+)/)
 {
-   binmode(FD, ":encoding($1)");
+   if ($1 ne $encoding_xml)
+   {
+      binmode($fd, ":encoding($1)");
+   }
 }
 else
 {
@@ -96,7 +112,7 @@ my $linenum = 1;
 my $openquote = chr(hex(2018));
 my $closequote = chr(hex(2019));
 
-while (<FD>)
+while (<$fd>)
 {
    $linenum++;
 
@@ -133,7 +149,7 @@ while (<FD>)
    }
 }
 
-close FD;
+close $fd;
 
 my %docinfo = ();
 my @nodes   = ();
@@ -200,8 +216,10 @@ my @tabular_specs = ();
 my %counters = ();
 
 # open the TeX file
-open TEXFD, ">$texfile" or die "Can't open '$texfile' $!\n";
-binmode(TEXFD, ":$encoding_file");
+
+my $texfd;
+
+open $texfd, ">:encoding($encoding_xml)", $texfile or die "Can't open '$texfile' $!\n";
  
 # initialize the parser
 my $parser = XML::Parser->new( Handlers => 
@@ -212,20 +230,21 @@ my $parser = XML::Parser->new( Handlers =>
                                      });
 $parser->parsefile( $xmlfile );
  
-close TEXFD;
+close $texfd;
 
 # Write helpset files
 
-open HSFD, ">$helpsetdir/$base.hs"
+my $hsfd;
+
+open $hsfd, ">:encoding($encoding_xml)", "$helpsetdir/$base.hs"
   or die "Can't open '$helpsetdir/$base.hs' $!\n";
-binmode(HSFD, ":$encoding_file");
 
 my $toctitle = &get_label('manual.toc');
 my $manualtitle = &get_label('manual.title');
 my $indextitle = &get_label('manual.index');
 my $searchtitle = &get_label('manual.search');
 
-print HSFD <<_END_HS_HEAD;
+print $hsfd <<_END_HS_HEAD;
 <?xml version='1.0' encoding='$encoding_xml' ?>
 <!DOCTYPE helpset
 PUBLIC "-//Sun Microsystems Inc.//DTD JavaHelp HelpSet Version 2.0//EN"
@@ -294,41 +313,69 @@ PUBLIC "-//Sun Microsystems Inc.//DTD JavaHelp HelpSet Version 2.0//EN"
 </helpset>
 _END_HS_HEAD
 
-close HSFD;
+close $hsfd;
 
-open HTMLFD, ">$helpsetdir/$base.html"
+my $htmlfd;
+
+open $htmlfd, ">:encoding($encoding_xml)", "$helpsetdir/$base.html"
   or die "Can't open '$helpsetdir/$base.html' $!\n";
-binmode(HTMLFD, ":$encoding_file");
 
-print HTMLFD &html_head($docinfo{Title}, '', $nodes[0]->{Tag});
+print $htmlfd &html_head($docinfo{Title}, '', $nodes[0]->{Tag});
 
-print HTMLFD "<body>\n";
+print $htmlfd "<body>\n";
 
-print HTMLFD 
-   "<div class=\"title\" \"><p>",
-   $docinfo{Title}, "</p>\n";
+print $htmlfd "<div class=\"title\" \"><p>", $docinfo{Title}, "</p>\n";
 
-print HTMLFD "<p>$docinfo{Author}</p>\n" if ($docinfo{Author});
+print $htmlfd "<p>$docinfo{Author}</p>\n" if ($docinfo{Author});
 
-print HTMLFD "</div><div class=\"date\">";
+print $htmlfd "</div><div class=\"date\">";
 
-print HTMLFD "<p>$docinfo{Date}</p>\n" if ($docinfo{Date});
+print $htmlfd "<p>$docinfo{Date}</p>\n" if ($docinfo{Date});
 
-print HTMLFD "</div>";
+print $htmlfd "</div>";
 
-print HTMLFD &html_nav('', $nodes[0]);
+print $htmlfd &html_nav('', $nodes[0]);
 
-print HTMLFD "</body>\n</html>\n";
+print $htmlfd "</body>\n</html>\n";
 
-close HTMLFD;
+close $htmlfd;
+
+my $wwwfd;
+my $wwwsidebarfd;
+
+if (defined($wwwpath))
+{
+   open $wwwfd, ">:encoding($encoding_xml)", "$wwwpath/index.shtml"
+     or die "Can't open '$wwwpath/index.shtml' $!\n";
+
+   print "Writing '$wwwpath/index.shtml'\n";
+
+   print $wwwfd &html_www_head($docinfo{Title}, '', $nodes[0]->{Tag});
+
+   print $wwwfd "<div class=\"title\"><h1>", $docinfo{Title}, "</h1>\n";
+
+   print $wwwfd "<p>$docinfo{Author}</p>\n" if ($docinfo{Author});
+
+   print $wwwfd "</div><div class=\"date\">";
+
+   print $wwwfd "<p>$docinfo{Date}</p>\n" if ($docinfo{Date});
+
+   print $wwwfd "</div>";
+
+   open $wwwsidebarfd, ">:encoding($encoding_xml)", "$wwwpath/sidebar.shtml"
+     or die "Can't open '$wwwpath/sidebar.shtml' $!\n";
+
+   print $wwwsidebarfd "<a href=\"..\">$dict{appname}</a>";
+}
 
 my $prev = $base;
 
-open TOCFD, ">$helpsetdir/${base}TOC.xml" 
-   or die "Can't open '$helpsetdir/${base}TOC.xml' $!\n";
-binmode(TOCFD, ":$encoding_file");
+my $tocfd;
 
-print TOCFD <<_END_TOC_HEAD;
+open $tocfd, ">:encoding($encoding_xml)", "$helpsetdir/${base}TOC.xml" 
+   or die "Can't open '$helpsetdir/${base}TOC.xml' $!\n";
+
+print $tocfd <<_END_TOC_HEAD;
 <?xml version='1.0' encoding='$encoding_xml' ?>
    <!DOCTYPE toc
      PUBLIC "-//Sun Microsystems Inc.//DTD JavaHelp TOC Version
@@ -349,36 +396,84 @@ for (my $idx = 0; $idx <= $#nodes; $idx++)
    {
       if ($section_levels{$node->{Type}}+$level <= $prevlevel)
       {
-         print TOCFD "</tocitem>\n";
+         print $tocfd "</tocitem>\n";
+      }
+
+      if (defined($wwwfd) and $section_levels{$node->{Type}}+$level < $prevlevel)
+      {
+         print $wwwfd "\n</ul>\n";
+
+         print $wwwsidebarfd "\n</ul>\n";
       }
    }
 
-   print TOCFD "<tocitem text=\"$node->{Title}\" target=\"$node->{Tag}\">\n";
+   print $tocfd "<tocitem text=\"$node->{Title}\" target=\"$node->{Tag}\">\n";
+
+   if (defined($wwwfd))
+   {
+      if ($section_levels{$node->{Type}} > $prevlevel)
+      {
+         print $wwwfd "\n<ul>";
+
+         if ($prevlevel == 0)
+         {
+            print $wwwsidebarfd "\n<ul class=\"listnav\">";
+         }
+         else
+         {
+            print $wwwsidebarfd "\n<ul>";
+         }
+      }
+
+      print $wwwfd "\n<li><a href=\"$node->{Tag}.shtml\">$node->{Title}</a>";
+
+      print $wwwsidebarfd <<_END_SIDEBAR_LI;
+<!--#if expr="\%{DOCUMENT_URI} =~ /$node->{Tag}.shtml/" -->
+<li class="current">
+<!--#else -->
+<li>
+<!--#endif -->
+_END_SIDEBAR_LI
+      print $wwwsidebarfd "<a href=\"$node->{Tag}.shtml\">$node->{Title}</a>";
+   }
 
    my $next = ($idx == $#nodes ? '' : $nodes[$idx+1]);
 
    my $tag = $node->{Tag};
 
-   open HTMLFD, ">$helpsetdir/$tag.html"
+   open $htmlfd, ">:encoding($encoding_xml)", "$helpsetdir/$tag.html"
      or die "Can't open '$helpsetdir/$tag.html' $!\n";
 
-   binmode(HTMLFD, ":$encoding_file");
+   my $prevtag = ($prev eq $base ? $base : $prev->{Tag});
+   my $nexttag = ($next ? $next->{Tag} : '');
 
-   print HTMLFD &html_head($node->{Title}, 
-     ($prev eq $base ? $base : $prev->{Tag}),
-     ($next ? $next->{Tag} : ''));
+   print $htmlfd &html_head($node->{Title}, $prevtag, $nexttag);
 
-   print HTMLFD "<body>\n";
+   print $htmlfd "<body>\n";
 
    my $header = 'h'.$section_levels{$node->{Type}};
 
-   print HTMLFD "<$header>", $node->{Title}, "</$header>\n";
+   print $htmlfd "<$header>", $node->{Title}, "</$header>\n";
 
    my $content = $node->{Contents};
 
    $content=~s/<ref>([^<]+)<\/ref>/&get_ref($1)/eg;
 
-   print HTMLFD "<div>$content</div>";
+   print $htmlfd "<div>$content</div>";
+
+   my $wwwnodefd;
+
+   if (defined($wwwpath))
+   {
+      open $wwwnodefd, ">:encoding($encoding_xml)", "$wwwpath/$tag.shtml"
+        or die "Can't open '$wwwpath/$tag.shtml' $!\n";
+
+      print $wwwnodefd &html_www_head($node->{Title}, $prevtag, $nexttag);
+
+      $content=~s/<!-- POPUP "(.+?)" -->.+?<\/object>\s*(.+?)\s*<!-- END POPUP "\1" -->/<a href="$1">$2<\/a>/sg;
+
+      print $wwwnodefd "<$header>", $node->{Title}, "</$header>\n", $content;
+   }
 
    if ($node->{Footnotes})
    {
@@ -386,14 +481,22 @@ for (my $idx = 0; $idx <= $#nodes; $idx++)
 
       $content=~s/<ref>([^<]+)<\/ref>/&get_ref($1)/eg;
 
-      print HTMLFD "<hr />$content";
+      print $htmlfd "<hr />$content";
+
+      print $wwwnodefd "<hr />$content" if (defined($wwwpath));
    }
 
-   print HTMLFD &html_nav($prev, $next);
+   print $htmlfd &html_nav($prev, $next);
 
-   print HTMLFD "</body>\n</html>\n";
+   print $htmlfd "</body>\n</html>\n";
 
-   close HTMLFD;
+   close $htmlfd;
+
+   if (defined($wwwpath))
+   {
+      print $wwwnodefd &html_www_foot($prev, $next);
+      close $wwwnodefd;
+   }
 
    $prev = $node;
    $prevlevel = $section_levels{$node->{Type}};
@@ -403,21 +506,34 @@ for (my $level = scalar(keys %section_levels); $level >= 0; $level--)
 {
    if ($level < $prevlevel)
    {
-      print TOCFD "</tocitem>\n";
+      print $tocfd "</tocitem>\n";
+
+      print $wwwfd "</ul>\n" if defined($wwwfd);
+      print $wwwsidebarfd "</ul>\n" if defined($wwwsidebarfd);
    }
 }
 
-print TOCFD "</tocitem>\n</toc>\n";
+print $tocfd "</tocitem>\n</toc>\n";
 
-close TOCFD;
+close $tocfd;
+
+if (defined($wwwfd))
+{
+   print $wwwfd &html_www_foot('', $nodes[0]);
+
+   close $wwwfd;
+
+   close $wwwsidebarfd;
+}
 
 # write map file
 
-open MAPFD, ">$helpsetdir/Map.jhm"
-  or die "Can't open '$helpsetdir/Map.jhm' $!\n";
-binmode(MAPFD, ":$encoding_file");
+my $mapfd;
 
-print MAPFD <<_END_MAP_HEAD;
+open $mapfd, ">:encoding($encoding_xml)", "$helpsetdir/Map.jhm"
+  or die "Can't open '$helpsetdir/Map.jhm' $!\n";
+
+print $mapfd <<_END_MAP_HEAD;
 <?xml version='1.0' encoding='utf-8' ?>
 <!DOCTYPE map
  PUBLIC "-//Sun Microsystems Inc.//DTD JavaHelp Map Version 2.0//EN"
@@ -425,25 +541,26 @@ print MAPFD <<_END_MAP_HEAD;
 <map version="2.0" xml:lang="$locale">
 _END_MAP_HEAD
 
-print MAPFD "<mapID target=\"top\" url=\"$base.html\" />\n";
-print MAPFD "<mapID target=\"appIcon\" url=\"../../icons/makeglossariesgui-logosmall.png\" />\n";
-print MAPFD "<mapID target=\"homeIcon\" url=\"../../icons/home.png\" />\n";
-print MAPFD "<mapID target=\"backIcon\" url=\"../../icons/back.png\" />\n";
-print MAPFD "<mapID target=\"forwardIcon\" url=\"../../icons/forward.png\" />\n";
+print $mapfd "<mapID target=\"top\" url=\"$base.html\" />\n";
+print $mapfd "<mapID target=\"appIcon\" url=\"../../icons/makeglossariesgui-logosmall.png\" />\n";
+print $mapfd "<mapID target=\"homeIcon\" url=\"../../icons/home.png\" />\n";
+print $mapfd "<mapID target=\"backIcon\" url=\"../../icons/back.png\" />\n";
+print $mapfd "<mapID target=\"forwardIcon\" url=\"../../icons/forward.png\" />\n";
 
 &hs_map_id(\%tags);
 &hs_map_id(\%terms);
 
-print MAPFD "</map>\n";
-close MAPFD;
+print $mapfd "</map>\n";
+close $mapfd;
 
 # Write the helpset index file
 
-open IDXFD, ">$helpsetdir/${base}Index.xml"
- or die "Can't open '$helpsetdir/${base}Index.xml' $!\n";
-binmode(IDXFD, ":$encoding_file");
+my $idxfd;
 
-print IDXFD <<_END_IDX_HEAD;
+open $idxfd, ">:encoding($encoding_xml)", "$helpsetdir/${base}Index.xml"
+ or die "Can't open '$helpsetdir/${base}Index.xml' $!\n";
+
+print $idxfd <<_END_IDX_HEAD;
 <?xml version='1.0' encoding='$encoding_xml' ?>
    <!DOCTYPE index
      PUBLIC "-//Sun Microsystems Inc.//DTD JavaHelp Index Version 2.0//EN"
@@ -454,8 +571,8 @@ _END_IDX_HEAD
 
 &print_idx_entries(\%terms);
 
-print IDXFD "</index>\n";
-close IDXFD;
+print $idxfd "</index>\n";
+close $idxfd;
 
 sub print_idx_entries{
    my ($hash) = @_;
@@ -468,7 +585,7 @@ sub print_idx_entries{
 
          $text=~s/<\/?[^>]*>//g;
 
-         print IDXFD "<indexitem text=\"",
+         print $idxfd "<indexitem text=\"",
            $text, "\" target=\"",
            $key, "\">\n";
 
@@ -477,7 +594,7 @@ sub print_idx_entries{
             &print_idx_entries($hash->{$key}->{Children});
          }
 
-         print IDXFD "</indexitem>\n";
+         print $idxfd "</indexitem>\n";
       }
       else
       {
@@ -491,7 +608,7 @@ sub handle_char{
 
    &handle_html($string);
 
-   print TEXFD $string;
+   print $texfd $string;
 }
 
 sub hs_map_id{
@@ -501,7 +618,7 @@ sub hs_map_id{
    {
       if ($hash->{$tag}->{Ref})
       {
-         print MAPFD "<mapID target=\"$tag\" url=\"$hash->{$tag}->{Ref}\" />\n";
+         print $mapfd "<mapID target=\"$tag\" url=\"$hash->{$tag}->{Ref}\" />\n";
       }
       else
       {
@@ -535,7 +652,8 @@ sub hs_index_term{
 sub hs_popup{
    my ($href, $text) = @_;
 
-   my $html = <<_END_POPUP;
+   return <<_END_POPUP;
+<!-- POPUP "$href" -->
   <object classid="java:com.sun.java.help.impl.JHSecondaryViewer">
     <param name="viewerStyle" value="javax.help.Popup" />
     <param name="viewerSize" value="400,200" />
@@ -544,9 +662,9 @@ sub hs_popup{
     <param name="text" value="&#x261B;" />
     <param name="textColor" value="blue" />
   </object>
+  $text
+<!-- END POPUP "$href" -->
 _END_POPUP
-
-   $html.$text
 }
 
 sub handle_html{
@@ -652,12 +770,12 @@ sub start_manual{
       $fontenc = $attrs{'fontenc'};
    }
 
-   print TEXFD "% arara: pdflatex\n";
-   print TEXFD "% arara: makeglossaries\n";
-   print TEXFD "% arara: pdflatex\n";
-   print TEXFD "% arara: makeindex\n";
-   print TEXFD "% arara: pdflatex\n";
-   print TEXFD "\\documentclass[index=totoc,$babel{$locale}]{makeglossariesgui}\n";
+   print $texfd "% arara: pdflatex\n";
+   print $texfd "% arara: makeglossaries\n";
+   print $texfd "% arara: pdflatex\n";
+   print $texfd "% arara: makeindex\n";
+   print $texfd "% arara: pdflatex\n";
+   print $texfd "\\documentclass[index=totoc,$babel{$locale}]{makeglossariesgui}\n";
 }
 
 sub end_manual{
@@ -667,7 +785,7 @@ sub end_manual{
 sub start_preamble{
    my ($expat, %attrs) = @_;
 
-   print TEXFD "\\usepackage[$inputenc]{inputenc}\n",
+   print $texfd "\\usepackage[$inputenc]{inputenc}\n",
       "\\usepackage[$fontenc]{fontenc}\n",
       "\\usepackage{lmodern}\n",
       "\\usepackage{graphicx}\n",
@@ -691,7 +809,7 @@ sub start_title{
 
    push @current, 'Title';
 
-   print TEXFD "\\title{";
+   print $texfd "\\title{";
 }
 
 sub end_title{
@@ -699,7 +817,7 @@ sub end_title{
 
    pop @current;
 
-   print TEXFD "}\n";
+   print $texfd "}\n";
 }
 
 sub start_date{
@@ -707,7 +825,7 @@ sub start_date{
 
    push @current, 'Date';
 
-   print TEXFD "\\date{";
+   print $texfd "\\date{";
 }
 
 sub end_date{
@@ -715,7 +833,7 @@ sub end_date{
 
    pop @current;
 
-   print TEXFD "}\n";
+   print $texfd "}\n";
 }
 
 sub start_author{
@@ -730,7 +848,7 @@ sub start_author{
 
    $docinfo{Author} .= "<table class=\"author\"><tr><td>";
 
-   print TEXFD "\\Author{";
+   print $texfd "\\Author{";
 }
 
 sub end_author{
@@ -740,19 +858,19 @@ sub end_author{
 
    pop @current;
 
-   print TEXFD "}\n";
+   print $texfd "}\n";
 }
 
 sub start_document{
    my ($expat, %attrs) = @_;
 
-   print TEXFD "\\begin{document}\n\\maketitle\n\\tableofcontents\n";
+   print $texfd "\\begin{document}\n\\maketitle\n\\tableofcontents\n";
 }
 
 sub end_document{
    my ($expat) = @_;
 
-   print TEXFD "\\end{document}\n";
+   print $texfd "\\end{document}\n";
 }
 
 sub start_node{
@@ -816,7 +934,7 @@ sub start_node{
    $tags{$attrs{tag}}->{Ref} = $attrs{tag}.'.html';
    $tags{$attrs{tag}}->{Text} = $attrs{title};
 
-   print TEXFD "\\", $attrs{type}, "{",
+   print $texfd "\\", $attrs{type}, "{",
       $attrs{title}, "}\\label{",
       $attrs{tag}, "}\n";
 }
@@ -859,19 +977,19 @@ sub start_newacro{
 
    # write html file used by popup window
 
-   open FD, ">$helpsetdir/acr_$tag.html" 
+   open $fd, ">:encoding($encoding_file)", "$helpsetdir/acr_$tag.html" 
       or die "Can't open '$helpsetdir/acr_$tag.html' $!\n";
 
-   print FD &html_head($attrs{short});
+   print $fd &html_head($attrs{short});
 
-   print FD "<body>\n<h1>$attrs{short}</h1>\n",
+   print $fd "<body>\n<h1>$attrs{short}</h1>\n",
       ucfirst($attrs{long}), ".\n";
 
-   print FD "</body>\n</html>\n";
+   print $fd "</body>\n</html>\n";
 
-   close FD;
+   close $fd;
 
-   print TEXFD "\\newacronym{$tag}{$attrs{short}}{$attrs{long}}\n";
+   print $texfd "\\newacronym{$tag}{$attrs{short}}{$attrs{long}}\n";
 }
 
 sub end_newacro{
@@ -910,31 +1028,31 @@ sub start_newterm{
       # write html file used by popup window if a description has been
       # supplied
 
-      open FD, ">$helpsetdir/$tag.html" 
+      open $fd, ">:encoding($encoding_file)", "$helpsetdir/$tag.html" 
          or die "Can't open '$helpsetdir/$tag.html' $!\n";
 
-      print FD &html_head($attrs{text});
+      print $fd &html_head($attrs{text});
 
-      print FD "<body>\n<h1>";
+      print $fd "<body>\n<h1>";
 
       if ($attrs{fmt})
       {
-         print FD "<$attrs{fmt}>$attrs{text}</$attrs{fmt}>";
+         print $fd "<$attrs{fmt}>$attrs{text}</$attrs{fmt}>";
       }
       else
       {
-         print FD $attrs{text};
+         print $fd $attrs{text};
       }
 
-      print FD "</h1>\n", ucfirst($attrs{description}), ".\n";
+      print $fd "</h1>\n", ucfirst($attrs{description}), ".\n";
 
-      print FD "</body>\n</html>\n";
+      print $fd "</body>\n</html>\n";
 
-      close FD;
+      close $fd;
 
       if ($attrs{fmt})
       {
-         print TEXFD "\\newglossaryentry{$attrs{tag}}{name={",
+         print $texfd "\\newglossaryentry{$attrs{tag}}{name={",
           "\\html$attrs{fmt}\{", 
           $attrs{text}, "}},sort={",
           $attrs{text}, "},description={",
@@ -944,7 +1062,7 @@ sub start_newterm{
       }
       else
       {
-         print TEXFD "\\newglossaryentry{$attrs{tag}}{name={",
+         print $texfd "\\newglossaryentry{$attrs{tag}}{name={",
           $attrs{text}, "},description={", $attrs{description}, "\\index{$attrs{text}}}}\n";
       }
    }
@@ -984,17 +1102,17 @@ sub start_p{
 
       if ($attrs{align} eq 'left')
       {
-         print TEXFD "\\begin{flushleft}";
+         print $texfd "\\begin{flushleft}";
          $endtag="\\end{flushleft}";
       }
       elsif ($attrs{align} eq 'right')
       {
-         print TEXFD "\\begin{flushright}";
+         print $texfd "\\begin{flushright}";
          $endtag="\\end{flushright}";
       }
       elsif ($attrs{align} eq 'center')
       {
-         print TEXFD "\\begin{center}";
+         print $texfd "\\begin{center}";
          $endtag="\\end{center}";
       }
       else
@@ -1006,9 +1124,9 @@ sub start_p{
    else
    {
       &handle_html("<p>");
-      print TEXFD "\n\n";
+      print $texfd "\n\n";
 
-      print TEXFD "\\noindent " if $attrs{noindent};
+      print $texfd "\\noindent " if $attrs{noindent};
    }
 
    push @paragraph, $endtag;
@@ -1019,7 +1137,7 @@ sub end_p{
 
    &handle_html("</p>");
 
-   print TEXFD pop @paragraph;
+   print $texfd pop @paragraph;
 }
 
 sub start_dl{
@@ -1027,7 +1145,7 @@ sub start_dl{
 
    &handle_html("<dl>");
 
-   print TEXFD "\\begin{description}";
+   print $texfd "\\begin{description}";
 }
 
 sub end_dl{
@@ -1035,7 +1153,7 @@ sub end_dl{
 
    &handle_html("</dl>");
 
-   print TEXFD "\\end{description}";
+   print $texfd "\\end{description}";
 }
 
 sub start_ul{
@@ -1043,7 +1161,7 @@ sub start_ul{
 
    &handle_html("<ul>");
 
-   print TEXFD "\\begin{itemize}";
+   print $texfd "\\begin{itemize}";
 }
 
 sub end_ul{
@@ -1051,7 +1169,7 @@ sub end_ul{
 
    &handle_html("</ul>");
 
-   print TEXFD "\\end{itemize}";
+   print $texfd "\\end{itemize}";
 }
 
 sub start_tt{
@@ -1059,7 +1177,7 @@ sub start_tt{
 
    &handle_html("<tt>");
 
-   print TEXFD "\\texttt{";
+   print $texfd "\\texttt{";
 }
 
 sub end_tt{
@@ -1067,23 +1185,55 @@ sub end_tt{
 
    &handle_html('</tt>');
 
-   print TEXFD "}";
+   print $texfd "}";
 }
 
-sub start_b{
+sub start_file{
    my ($expat, %attrs) = @_;
 
-   &handle_html("<b>");
+   &handle_html("<span class=\"file\">");
 
-   print TEXFD "\\textbf{";
+   print $texfd "\\texttt{";
 }
 
-sub end_b{
+sub end_file{
    my ($expat) = @_;
 
-   &handle_html('</b>');
+   &handle_html('</span>');
 
-   print TEXFD "}";
+   print $texfd "}";
+}
+
+sub start_code{
+   my ($expat, %attrs) = @_;
+
+   &handle_html("<code>");
+
+   print $texfd "\\texttt{";
+}
+
+sub end_code{
+   my ($expat) = @_;
+
+   &handle_html('</code>');
+
+   print $texfd "}";
+}
+
+sub start_strong{
+   my ($expat, %attrs) = @_;
+
+   &handle_html("<strong>");
+
+   print $texfd "\\textbf{";
+}
+
+sub end_strong{
+   my ($expat) = @_;
+
+   &handle_html('</strong>');
+
+   print $texfd "}";
 }
 
 sub start_em{
@@ -1091,7 +1241,7 @@ sub start_em{
 
    &handle_html("<em>");
 
-   print TEXFD "\\emph{";
+   print $texfd "\\emph{";
 }
 
 sub end_em{
@@ -1099,7 +1249,7 @@ sub end_em{
 
    &handle_html('</em>');
 
-   print TEXFD "}";
+   print $texfd "}";
 }
 
 sub start_li{
@@ -1107,7 +1257,7 @@ sub start_li{
 
    &handle_html("<li>");
 
-   print TEXFD "\\item ";
+   print $texfd "\\item ";
 }
 
 sub end_li{
@@ -1122,7 +1272,7 @@ sub start_dt{
 
    &handle_html("<dt>");
 
-   print TEXFD "\\item[{";
+   print $texfd "\\item[{";
 }
 
 sub end_dt{
@@ -1130,7 +1280,7 @@ sub end_dt{
 
    &handle_html("</dt>");
 
-   print TEXFD "}]";
+   print $texfd "}]";
 }
 
 sub start_dd{
@@ -1152,7 +1302,7 @@ sub start_meta{
 
    &handle_html("&#x27E8;<em>");
 
-   print TEXFD "\\meta{";
+   print $texfd "\\meta{";
 }
 
 sub end_meta{
@@ -1160,7 +1310,7 @@ sub end_meta{
 
    &handle_html('</em>&#x27E9;');
 
-   print TEXFD "}";
+   print $texfd "}";
 }
 
 sub start_marg{
@@ -1168,7 +1318,7 @@ sub start_marg{
 
    &handle_html('{');
 
-   print TEXFD "\\marg{";
+   print $texfd "\\marg{";
 }
 
 sub end_marg{
@@ -1176,7 +1326,7 @@ sub end_marg{
 
    &handle_html('}');
 
-   print TEXFD "}";
+   print $texfd "}";
 }
 
 sub start_dq{
@@ -1184,7 +1334,7 @@ sub start_dq{
 
    &handle_html('"');
 
-   print TEXFD "\\dq{";
+   print $texfd "\\dq{";
 }
 
 sub end_dq{
@@ -1192,7 +1342,7 @@ sub end_dq{
 
    &handle_html('"');
 
-   print TEXFD "}";
+   print $texfd "}";
 }
 
 sub start_sq{
@@ -1200,7 +1350,7 @@ sub start_sq{
 
    &handle_html("'");
 
-   print TEXFD "\\sq{";
+   print $texfd "\\sq{";
 }
 
 sub end_sq{
@@ -1208,7 +1358,7 @@ sub end_sq{
 
    &handle_html("'");
 
-   print TEXFD "}";
+   print $texfd "}";
 }
 
 sub start_url{
@@ -1227,12 +1377,12 @@ sub start_url{
 
    if ($attrs{text})
    {
-      print TEXFD "\\href{", $attrs{www}, "}{", $attrs{text}, "}";
+      print $texfd "\\href{", $attrs{www}, "}{", $attrs{text}, "}";
       $string = "<a href=\"$uri\">$attrs{text}</a>";
    }
    else
    {
-      print TEXFD "\\url{", $attrs{www}, "}";
+      print $texfd "\\url{", $attrs{www}, "}";
       $string = "<a href=\"$uri\"><tt>$attrs{www}</tt></a>";
    }
 
@@ -1248,7 +1398,7 @@ sub start_sty{
 
    push @current, 'sty';
 
-   print TEXFD "\\sty{";
+   print $texfd "\\sty{";
 }
 
 sub end_sty{
@@ -1261,7 +1411,7 @@ sub end_sty{
 
    &hs_index_term("sty_$sty", "<tt>$sty</tt>", "$sty.sty", \%terms);
 
-   print TEXFD "}";
+   print $texfd "}";
 }
 
 sub start_footnote{
@@ -1281,7 +1431,7 @@ sub start_footnote{
 
    push @current, 'Footnote';
 
-   print TEXFD "\\footnote{";
+   print $texfd "\\footnote{";
 }
 
 sub end_footnote{
@@ -1296,13 +1446,13 @@ sub end_footnote{
 
    $docinfo{Footnote} = '';
 
-   print TEXFD "}";
+   print $texfd "}";
 }
 
 sub start_blockquote{
    my ($expat, %attrs) = @_;
 
-   print TEXFD "\\begin{blockquote}";
+   print $texfd "\\begin{blockquote}";
 
    &handle_html('<blockquote>');
 }
@@ -1310,7 +1460,7 @@ sub start_blockquote{
 sub end_blockquote{
    my ($expat) = @_;
 
-   print TEXFD "\\end{blockquote}";
+   print $texfd "\\end{blockquote}";
 
    &handle_html('</blockquote>');
 }
@@ -1333,11 +1483,11 @@ sub start_example{
     . ($attrs{title}? "($attrs{title})." : '.')
     . '</b></p>');
 
-   print TEXFD "\\begin{example}";
+   print $texfd "\\begin{example}";
 
    if ($attrs{title})
    {
-      print TEXFD '[', $attrs{title}, ']';
+      print $texfd '[', $attrs{title}, ']';
    }
 }
 
@@ -1346,7 +1496,7 @@ sub end_example{
 
    &handle_html('</blockquote>');
 
-   print TEXFD "\\end{example}";
+   print $texfd "\\end{example}";
 }
 
 sub start_seealso{
@@ -1364,17 +1514,17 @@ sub start_seealso{
 
    &handle_html("<p>$seealso<ul>");
 
-   print TEXFD "\n\n\\minisec{$seealso}\n";
+   print $texfd "\n\n\\minisec{$seealso}\n";
 
-   print TEXFD "\\begin{itemize}\n";
+   print $texfd "\\begin{itemize}\n";
 
    foreach my $tag (@tags)
    {
       &handle_html("<li><ref>$tag</ref>");
-      print TEXFD "\\item \\nameref{$tag}\n";
+      print $texfd "\\item \\nameref{$tag}\n";
    }
 
-   print TEXFD "\\end{itemize}\n";
+   print $texfd "\\end{itemize}\n";
 
    &handle_html('</ul>');
 }
@@ -1388,7 +1538,7 @@ sub start_pre{
 
    &handle_html('<pre>');
 
-   print TEXFD "\\begin{verbatim}";
+   print $texfd "\\begin{verbatim}";
 }
 
 sub end_pre{
@@ -1396,7 +1546,7 @@ sub end_pre{
 
    &handle_html('</pre>');
 
-   print TEXFD "\\end{verbatim}";
+   print $texfd "\\end{verbatim}";
 }
 
 sub start_alltt{
@@ -1404,7 +1554,7 @@ sub start_alltt{
 
    &handle_html('<pre>');
 
-   print TEXFD "\\begin{alltt}";
+   print $texfd "\\begin{alltt}";
 }
 
 sub end_alltt{
@@ -1412,7 +1562,7 @@ sub end_alltt{
 
    &handle_html('</pre>');
 
-   print TEXFD "\\end{alltt}";
+   print $texfd "\\end{alltt}";
 }
 
 sub start_verbinput{
@@ -1426,9 +1576,9 @@ sub start_verbinput{
 
    &handle_html('<pre>');
 
-   open FD, $attrs{src} or die "Can't open '$attrs{src}' $!\n";
+   open $fd, "<:encoding($encoding_file)", $attrs{src} or die "Can't open '$attrs{src}' $!\n";
 
-   while (<FD>)
+   while (<$fd>)
    {
       s/\&/\&amp;/g;
       s/</\&lt;/g;
@@ -1437,11 +1587,11 @@ sub start_verbinput{
       &handle_html($_);
    }
 
-   close FD;
+   close $fd;
 
    &handle_html('</pre>');
 
-   print TEXFD "\\verbatiminput{$attrs{src}}";
+   print $texfd "\\verbatiminput{$attrs{src}}";
 }
 
 sub end_verbinput{
@@ -1459,9 +1609,9 @@ sub start_verbtabinput{
 
    &handle_html('<pre>');
 
-   open FD, $attrs{src} or die "Can't open '$attrs{src}' $!\n";
+   open $fd, $attrs{src} or die "Can't open '$attrs{src}' $!\n";
 
-   while (<FD>)
+   while (<$fd>)
    {
       s/\&/\&amp;/g;
       s/</\&lt;/g;
@@ -1470,11 +1620,11 @@ sub start_verbtabinput{
       &handle_html($_);
    }
 
-   close FD;
+   close $fd;
 
    &handle_html('</pre>');
 
-   print TEXFD "\\verbatimtabinput{$attrs{src}}";
+   print $texfd "\\verbatimtabinput{$attrs{src}}";
 }
 
 sub end_verbtabinput{
@@ -1530,15 +1680,15 @@ sub start_float{
         . $attrs{caption} . '</p>');
    }
 
-   print TEXFD "\\begin{", $attrs{type}, "}$pos\n";
-   print TEXFD "\\floatconts{", $attrs{tag}, "}{\\caption";
+   print $texfd "\\begin{", $attrs{type}, "}$pos\n";
+   print $texfd "\\floatconts{", $attrs{tag}, "}{\\caption";
 
    if ($attrs{listcaption})
    {
-      print TEXFD "[", $attrs{listcaption}, "]";
+      print $texfd "[", $attrs{listcaption}, "]";
    }
 
-   print TEXFD "{", $attrs{caption}, "}}{";
+   print $texfd "{", $attrs{caption}, "}}{";
 }
 
 sub end_float{
@@ -1554,7 +1704,7 @@ sub end_float{
 
    &handle_html('</div>');
 
-   print TEXFD "}%\n\\end{", $attrs->{type}, "}\n";
+   print $texfd "}%\n\\end{", $attrs->{type}, "}\n";
 }
 
 sub start_nbsp{
@@ -1562,7 +1712,7 @@ sub start_nbsp{
 
    &handle_html('&nbsp;');
 
-   print TEXFD "~";
+   print $texfd "~";
 }
 
 sub end_nbsp{
@@ -1574,7 +1724,7 @@ sub start_emdash{
 
    &handle_html('&#x2014;');
 
-   print TEXFD "---";
+   print $texfd "---";
 }
 
 sub end_emdash{
@@ -1586,7 +1736,7 @@ sub start_hash{
 
    &handle_html('<tt>#</tt>');
 
-   print TEXFD "\\texttt{\\#}";
+   print $texfd "\\texttt{\\#}";
 }
 
 sub end_hash{
@@ -1598,7 +1748,7 @@ sub start_tilde{
 
    &handle_html('~');
 
-   print TEXFD "\\textasciitilde ";
+   print $texfd "\\textasciitilde ";
 }
 
 sub end_tilde{
@@ -1610,7 +1760,7 @@ sub start_lt{
 
    &handle_html('&lt;');
 
-   print TEXFD "\\textless ";
+   print $texfd "\\textless ";
 }
 
 sub end_lt{
@@ -1622,7 +1772,7 @@ sub start_gt{
 
    &handle_html('&gt;');
 
-   print TEXFD "\\textgreater ";
+   print $texfd "\\textgreater ";
 }
 
 sub end_gt{
@@ -1634,7 +1784,7 @@ sub start_element{
 
    &handle_html('<tt>&lt;');
 
-   print TEXFD "\\element{";
+   print $texfd "\\element{";
 }
 
 sub end_element{
@@ -1642,7 +1792,7 @@ sub end_element{
 
    &handle_html('&gt;</tt>');
 
-   print TEXFD "}";
+   print $texfd "}";
 }
 
 sub start_image{
@@ -1709,7 +1859,7 @@ sub start_image{
 
    &handle_html($html);
 
-   print TEXFD "\\includegraphics[",
+   print $texfd "\\includegraphics[",
      join(',', @opts), "]{$imgfile}";
 }
 
@@ -1722,7 +1872,7 @@ sub start_LaTeX{
 
    &handle_html('LaTeX');
 
-   print TEXFD "\\LaTeX{}";
+   print $texfd "\\LaTeX{}";
 }
 
 sub end_LaTeX{
@@ -1734,7 +1884,7 @@ sub start_TeX{
 
    &handle_html('TeX');
 
-   print TEXFD "\\TeX{}";
+   print $texfd "\\TeX{}";
 }
 
 sub end_TeX{
@@ -1744,7 +1894,7 @@ sub end_TeX{
 sub start_relax{
    my ($expat, %attrs) = @_;
 
-   print TEXFD "\\relax ";
+   print $texfd "\\relax ";
 }
 
 sub end_relax{
@@ -1760,7 +1910,7 @@ sub start_app{
 
    &handle_html("<font class=\"appname\">$text</font>");
 
-   print TEXFD "\\appfmt{$text}";
+   print $texfd "\\appfmt{$text}";
 }
 
 sub end_app{
@@ -1780,7 +1930,7 @@ sub start_dict{
 
    &handle_html($text);
 
-   print TEXFD $text;
+   print $texfd $text;
 }
 
 sub end_dict{
@@ -1802,7 +1952,7 @@ sub start_button{
 
    &handle_html("<font class=\"button\">$text</font>");
 
-   print TEXFD "\\button{$text}";
+   print $texfd "\\button{$text}";
 }
 
 sub end_button{
@@ -1829,7 +1979,7 @@ sub start_menu{
       if ($currentlabel)
       {
          $currentlabel .= ".$item";
-         print TEXFD "\\mto ";
+         print $texfd "\\mto ";
          $index .= '!';
          $html .= '&#x279C;';
       }
@@ -1842,7 +1992,7 @@ sub start_menu{
 
       $html .= $text;
 
-      print TEXFD "\\menu{$text}";
+      print $texfd "\\menu{$text}";
 
       my $termtag = 'menu_'.$currentlabel;
 
@@ -1863,7 +2013,7 @@ sub start_menu{
 
    &handle_html("<font class=\"menu\">$html</font>");
 
-   print TEXFD "\\index{$index}";
+   print $texfd "\\index{$index}";
 }
 
 sub end_menu{
@@ -1903,7 +2053,7 @@ sub start_acr{
       &hs_index_term('acr_'.$attrs{tag}, $html, ucfirst($html), \%terms);
    }
 
-   print TEXFD "\\gls{", $attrs{tag}, "}";
+   print $texfd "\\gls{", $attrs{tag}, "}";
 }
 
 sub end_acr{
@@ -1944,13 +2094,13 @@ sub start_term{
    {
       if ($attrs{hyper} and $attrs{hyper} eq 'false')
       {
-         print TEXFD "\\gls*{", $attrs{tag}, "}";
+         print $texfd "\\gls*{", $attrs{tag}, "}";
       }
       else
       {
          $html = &hs_popup("gls_".$attrs{tag}.".html", $html);
 
-         print TEXFD "\\gls{", $attrs{tag}, "}";
+         print $texfd "\\gls{", $attrs{tag}, "}";
       }
    }
    else
@@ -1966,7 +2116,7 @@ sub start_term{
          $idx = "$idx\@\\html$fmt\{$idx\}";
       }
 
-      print TEXFD "$text\\index{$idx}";
+      print $texfd "$text\\index{$idx}";
    }
 
    &hs_index_term($hstag, $html, $terms{$hstag}->{Text}, 
@@ -1991,11 +2141,11 @@ sub start_ref{
 
    if ($attrs{text})
    {
-      print TEXFD "\\hyperref[$attrs{tag}]{$attrs{text}}";
+      print $texfd "\\hyperref[$attrs{tag}]{$attrs{text}}";
    }
    else
    {
-      print TEXFD "\\autoref{", $attrs{tag}, "}";
+      print $texfd "\\autoref{", $attrs{tag}, "}";
    }
 }
 
@@ -2023,10 +2173,10 @@ sub start_opt{
       $terms{options}->{Children} = \%hash;
    }
 
-   &hs_index_term('opt_'.$attrs{tag}, "<tt>$text</tt>", $text, 
+   &hs_index_term('opt_'.$attrs{tag}, "<code>$text</code>", $text, 
       $terms{options}->{Children});
 
-   print TEXFD "\\opt{", $attrs{tag}, "}";
+   print $texfd "\\opt{", $attrs{tag}, "}";
 }
 
 sub end_opt{
@@ -2038,7 +2188,7 @@ sub start_backslash{
 
    &handle_html("<tt>\\</tt>");
 
-   print TEXFD "\\texttt{\\char`\\\\}";
+   print $texfd "\\texttt{\\char`\\\\}";
 }
 
 sub end_backslash{
@@ -2050,7 +2200,7 @@ sub start_doublebackslash{
 
    &handle_html("<tt>\\\\</tt>");
 
-   print TEXFD "\\cs{\\char`\\\\}";
+   print $texfd "\\cs{\\char`\\\\}";
 }
 
 sub end_doublebackslash{
@@ -2068,7 +2218,7 @@ sub start_cs{
 
    my $text = "\\".$attrs{tag};
 
-   print TEXFD '\\cs{', $attrs{tag}, '}';
+   print $texfd '\\cs{', $attrs{tag}, '}';
 
    &hs_index_term('cs_'.$attrs{tag}, "<tt>$text</tt>", $text, \%terms);
 
@@ -2089,7 +2239,7 @@ sub start_env{
 
    my $text = $attrs{tag};
 
-   print TEXFD '\\env{', $attrs{tag}, '}';
+   print $texfd '\\env{', $attrs{tag}, '}';
 
    &hs_index_term('env_'.$attrs{tag}, "<tt>$text</tt>", $text, \%terms);
 
@@ -2110,7 +2260,7 @@ sub start_tabular{
 
    &handle_html('<table>');
 
-   print TEXFD "\\begin{tabular}{", $attrs{spec}, '}';
+   print $texfd "\\begin{tabular}{", $attrs{spec}, '}';
 
    my %hash =
    (
@@ -2128,7 +2278,7 @@ sub end_tabular{
 
    pop @tabular_specs;
 
-   print TEXFD "\\end{tabular}";
+   print $texfd "\\end{tabular}";
 }
 
 sub start_tr{
@@ -2144,7 +2294,7 @@ sub end_tr{
 
    &handle_html('</tr>');
 
-   print TEXFD "\\tabularnewline ";
+   print $texfd "\\tabularnewline ";
 }
 
 sub start_td{
@@ -2190,7 +2340,7 @@ sub start_td{
 
    unless ($tabular_specs[$#tabular_specs]->{column} == 1)
    {
-      print TEXFD "&";
+      print $texfd "&";
    }
 
    if (($orgcolspec eq $colspec) and $colspan == 1)
@@ -2199,7 +2349,7 @@ sub start_td{
    }
    else
    {
-      print TEXFD "\\multicolumn{$colspan}{$colspec}{";
+      print $texfd "\\multicolumn{$colspan}{$colspec}{";
       $tabular_specs[$#tabular_specs]->{egroup} = '}';
    }
 
@@ -2211,13 +2361,13 @@ sub end_td{
 
    &handle_html('</td>');
 
-   print TEXFD $tabular_specs[$#tabular_specs]->{egroup};
+   print $texfd $tabular_specs[$#tabular_specs]->{egroup};
 }
 
 sub start_printglossary{
    my ($expat, %attrs) = @_;
 
-   print TEXFD "\\printglossary";
+   print $texfd "\\printglossary";
 }
 
 sub end_printglossary{
@@ -2227,7 +2377,7 @@ sub end_printglossary{
 sub start_printacronyms{
    my ($expat, %attrs) = @_;
 
-   print TEXFD "\\printglossary[type=acronym]";
+   print $texfd "\\printglossary[type=acronym]";
 }
 
 sub end_printacronyms{
@@ -2237,7 +2387,7 @@ sub end_printacronyms{
 sub start_printindex{
    my ($expat, %attrs) = @_;
 
-   print TEXFD "\\printindex ";
+   print $texfd "\\printindex ";
 }
 
 sub end_printindex{
@@ -2249,7 +2399,7 @@ sub start_br{
 
    &handle_html("<br />");
 
-   print TEXFD "\\\\";
+   print $texfd "\\\\";
 }
 
 sub end_br{
@@ -2261,7 +2411,7 @@ sub start_hr{
 
    &handle_html("<hr />");
 
-   print TEXFD "\\hrulefill ";
+   print $texfd "\\hrulefill ";
 }
 
 sub end_hr{
@@ -2271,7 +2421,7 @@ sub end_hr{
 sub start_cont{
    my ($expat, %attrs) = @_;
 
-   print TEXFD "\\continueline ";
+   print $texfd "\\continueline ";
 }
 
 sub end_cont{
@@ -2281,7 +2431,7 @@ sub end_cont{
 sub start_contexplan{
    my ($expat, %attrs) = @_;
 
-  print TEXFD &get_label('manual.cont_explanation');
+  print $texfd &get_label('manual.cont_explanation');
 }
 
 
@@ -2293,12 +2443,15 @@ sub start_percent{
    my ($expat, %attrs) = @_;
 
    &handle_html("%");
-   print TEXFD "\\%";
+   print $texfd "\\%";
 }
 
 sub end_percent{
    my ($expat) = @_;
 }
+
+# Java JEditorPane (used by the helpset) only has very limited HTML
+# support.
 
 sub html_head{
   my ($title, $prev, $next) = @_;
@@ -2307,8 +2460,8 @@ sub html_head{
 <!DOCTYPE html  html public "-//w3c//dtd xhtml 1.0 Transitional//en"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
 >
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en-GB"
-xml:lang="en-GB">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="$locale"
+xml:lang="$locale">
 <head>
   <style type="text/css">
     .title
@@ -2351,6 +2504,10 @@ xml:lang="en-GB">
     .appname
     {
       font-family: sans-serif;
+    }
+    .file
+    {
+      font-family: monospace;
     }
   </style>
   <title>$title</title>
@@ -2405,6 +2562,144 @@ sub html_nav{
   }
 
   "$nav</td></tr></table>"
+}
+
+# This is for actual HTML files for the Dickimaw site so not
+# restricted by the JEditorPane limitations
+sub html_www_head{
+  my ($title, $prev, $next) = @_;
+
+  my $nextlink = '';
+  my $prevlink = '';
+
+  if ($next)
+  {
+     $nextlink = "<link rel=\"next\" href=\"$next.html\" />";
+  }
+
+  if ($prev)
+  {
+     $prevlink = "<link rel=\"prev\" href=\"$prev.html\" />";
+  }
+
+  return <<_END_HTML_HEAD;
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <!--#include virtual="/navigation/styles.shtml" -->
+  <style type="text/css">
+    .title
+    {
+      display: inline;
+      font-weight: bold;
+      font-size: xx-large;
+      text-align: center;
+    }
+    .author
+    {
+      display: inline;
+      font-weight: bold;
+      font-size: large;
+      text-align: center;
+      padding: 2em;
+    }
+    .date
+    {
+      display: inline;
+      font-weight: bold;
+      font-size: normal;
+      text-align: center;
+    }
+    .float
+    {
+       text-align: center;
+       padding-top: 16;
+    }
+    .menu
+    {
+      font-weight: bold;
+      font-family: sans-serif;
+    }
+    .button
+    {
+      font-weight: bold;
+      font-family: sans-serif;
+    }
+    .appname
+    {
+      font-family: sans-serif;
+    }
+  </style>
+  <title>$title</title>
+  $nextlink
+  $prevlink
+</head>
+  <body>
+    <!--#include virtual="/navigation/header5.shtml" -->
+
+    <div id="sidebar"><!--#include virtual="/navigation/sidebarheader.shtml" -->
+<!--#include file="sidebar.shtml" -->
+    </div>
+    <div id="main">
+_END_HTML_HEAD
+}
+
+sub html_www_nav{
+  my ($prevNode, $nextNode) = @_;
+
+  my $nav = '<hr /><div class="navline"><div class="navleft">';
+
+  if ($prevNode)
+  {
+     my $prev;
+     my $title;
+
+     if ($prevNode eq 'index' or $prevNode eq $base)
+     {
+        $prev = 'index';
+        $title = &get_label('manual.home');
+     } 
+     elsif ($prevNode)
+     {
+        $prev = $prevNode->{Tag};
+        $title = $prevNode->{Title};
+     }
+
+     $nav .= "<a href=\"$prev.html\">&#x21E6; " .
+      $title . "</a>";
+  }
+
+  $nav .= '</div><div class="navright">';
+
+  if ($nextNode)
+  {
+     $nav .= "<a href=\"$nextNode->{Tag}.html\">"
+          . $nextNode->{Title}
+          . " &#x21E8;</a>";
+  }
+
+  "$nav</div></div>"
+}
+
+sub html_www_foot{
+  my $nav = &html_www_nav(@_);
+
+  my $year = '';
+
+  if ($dict{appdate}=~m/^(\d{4})/)
+  {
+     $year = $1;
+  }
+
+  return <<_END_HTML_FOOT;
+$nav
+</div>
+     <!--#set var="CopyYear" value="$year" -->
+     <!--#include virtual="/navigation/footer5.shtml" -->
+</body>
+</html>
+_END_HTML_FOOT
 }
 
 sub arg_placeholder{

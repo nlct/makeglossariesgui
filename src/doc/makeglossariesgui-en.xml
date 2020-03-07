@@ -87,14 +87,14 @@
      Command line invocation:
      </p>
      <p align="center">
-      <tt>makeglossariesgui</tt> [<meta>options</meta>] [<meta>filename</meta>]
+      <code>makeglossariesgui</code> [<meta>options</meta>] [<meta>filename</meta>]
      </p>
      <p noindent="true">
      The <meta>filename</meta> must be supplied when run in batch mode
-     (the <tt>.aux</tt> extension may be omitted), but
+     (the <file>.aux</file> extension may be omitted), but
      is optional in <acr tag="gui"/> mode. The <meta>filename</meta> should
      be the auxiliary file produced by the <LaTeX/> run, but may also be
-     the <tt>.tex</tt> or <tt>.log</tt> file if it has the same basename as
+     the <file>.tex</file> or <file>.log</file> file if it has the same basename as
      the auxiliary file and is located in the same directory.
      Unlike <term tag="makeglossaries"/> and <term tag="makeglossarieslite"/>, 
      <meta>filename</meta> may include the directory path.
@@ -102,7 +102,7 @@
      <p>
      Available options:
      <dl>
-       <dt><opt tag="batch"/> (or <tt>-b</tt>)</dt>
+       <dt><opt tag="batch"/> (or <code>-b</code>)</dt>
        <dd>
        Invoke <app/> in batch mode (<meta>filename</meta> must be supplied).
        Note that the extra checks that parse the log file aren't performed
@@ -115,15 +115,15 @@
        <dt><opt tag="quiet"/></dt>
        <dd>Suppress (non-error) messages that would otherwise have been written
        to STDOUT.</dd>
-       <dt><opt tag="dry-run"/> (or <tt>-n</tt>)</dt>
+       <dt><opt tag="dry-run"/> (or <code>-n</code>)</dt>
        <dd>Dry run mode (don't run the indexing application).</dd>
        <dt><opt tag="nodry-run"/></dt>
        <dd>Not dry run mode (default).</dd>
        <dt><opt tag="debug"/></dt>
        <dd>Print debug messages to STDOUT.</dd>
-       <dt><opt tag="version"/> (or <tt>-v</tt>)</dt>
+       <dt><opt tag="version"/> (or <code>-v</code>)</dt>
        <dd>Print the version details to STDOUT and exit.</dd>
-       <dt><opt tag="help"/> (or <tt>-h</tt>)</dt>
+       <dt><opt tag="help"/> (or <code>-h</code>)</dt>
        <dd>Print a brief summary of available options to STDOUT and exit.</dd>
      </dl>
      </p>
@@ -141,17 +141,17 @@
    (see <ref tag="introduction"/>) or in the <acr tag="gui"/> using the 
    <menu tag="file.open"/> menu item. You can also use the load file button
    on the toolbar or (if permitted by your operating system) drag and drop 
-   the file onto the main window. The input file should be the <tt>.aux</tt> 
+   the file onto the main window. The input file should be the <file>.aux</file> 
    file created by <LaTeX/>, but if you try to load the main document 
-   <tt>.tex</tt> file or the <tt>.log</tt> transcript file,
-   <app/> will assume you meant the associated <tt>.aux</tt> file.
-   (If you have used <LaTeX/>'s <tt>-jobname</tt> or <tt>-output-directory</tt>
-   options, then you won't be able to use the <tt>.tex</tt> file and will have 
-   to use either the <tt>.aux</tt> or <tt>.log</tt> file.)
+   <file>.tex</file> file or the <file>.log</file> transcript file,
+   <app/> will assume you meant the associated <file>.aux</file> file.
+   (If you have used <LaTeX/>'s <file>-jobname</file> or <file>-output-directory</file>
+   options, then you won't be able to use the <file>.tex</file> file and will have 
+   to use either the <file>.aux</file> or <file>.log</file> file.)
    </p>
    <example>
    <p>
-   Suppose you have the following document (called, say, <tt>basic-sample.tex</tt>):
+   Suppose you have the following document (called, say, <file>basic-sample.tex</file>):
    </p>
    <pre>
 \documentclass{article}
@@ -172,23 +172,23 @@ A \gls{sample} document.
    </pre>
    <p>
    First run <LaTeX/> the usual way. This should create the auxiliary file
-   <tt>basic-sample.aux</tt> as well as some other files including 
-   <tt>basic-sample.glo</tt> and <tt>basic-sample.ist</tt>. Now load the auxiliary file
-   (<tt>basic-sample.aux</tt>) into <app/>. (Since the main <tt>.tex</tt> file
-   has the same basename as the <tt>.aux</tt> file, you can also use that, as
+   <file>basic-sample.aux</file> as well as some other files including 
+   <file>basic-sample.glo</file> and <file>basic-sample.ist</file>. Now load the auxiliary file
+   (<file>basic-sample.aux</file>) into <app/>. (Since the main <file>.tex</file> file
+   has the same basename as the <file>.aux</file> file, you can also use that, as
    mentioned above.)
    </p>
    <p>
-   Once <app/> has successfully loaded the <tt>.aux</tt> file, it will run 
-   <term tag="makeindex"/> on the associated <tt>.glo</tt> file (with the
-   <tt>.ist</tt> file as the style).
+   Once <app/> has successfully loaded the <file>.aux</file> file, it will run 
+   <term tag="makeindex"/> on the associated <file>.glo</file> file (with the
+   <file>.ist</file> file as the style).
    In this case, there are no problems with the document and the
-   <tt>.tex</tt> file is now ready for another <LaTeX/> run. The general
+   <file>.tex</file> file is now ready for another <LaTeX/> run. The general
    information panel (<ref tag="basicsample"/>) shows a summary of the
    document glossaries. In this case, there's only one glossary (the
-   <tt>main</tt> one). If you edit the document source code (<tt>.tex</tt> file)
+   <file>main</file> one). If you edit the document source code (<file>.tex</file> file)
    you can use the <menu tag="file.reload"/> menu item to reload the updated
-   <tt>.aux</tt> file in <app/>.
+   <file>.aux</file> file in <app/>.
    </p>
    <p>
    <float type="figure" tag="basicsample"
@@ -198,7 +198,7 @@ A \gls{sample} document.
    </float>
    </p>
    <p>
-   In this example, only one entry has been indexed in the <tt>main</tt> glossary. You
+   In this example, only one entry has been indexed in the <file>main</file> glossary. You
    can find out more information by clicking on the <dq>Details</dq>
    link, which will open the window shown in <ref tag="basicsampledetails"/>.
    </p>
@@ -241,8 +241,8 @@ A \gls{sample} document.
    in your document. Remember that the commands described in section<nbsp/>9
    (<dq>Using Glossary Terms Without Links</dq>) of the <sty>glossaries</sty>
    manual don't index the terms. These essentially are all the commands in the
-   form <backslash/><tt>glsentry</tt><meta>field</meta> or
-   <backslash/><tt>glossentryname</tt><meta>field</meta>, such as
+   form <backslash/><file>glsentry</file><meta>field</meta> or
+   <backslash/><file>glossentryname</file><meta>field</meta>, such as
    <cs tag="glsentrytext"/>,  <cs tag="glsentryshort"/>,
    <cs tag="glsentrylong"/> or <cs tag="glossentryname"/>, and their 
    case-changing variants.  Also <cs tag="glsentrytitlecase"/> and
@@ -250,12 +250,12 @@ A \gls{sample} document.
    </p>
    <p>
    If you're using the <sty>glossaries-extra</sty> package, remember that
-   the <tt>noindex</tt> option will suppress indexing.
+   the <file>noindex</file> option will suppress indexing.
    </p>
    <example>
    <p>
    Now let's consider the following document (called, say, 
-   <tt>missing-sort.tex</tt>):
+   <file>missing-sort.tex</file>):
    </p>
    <pre>
 \documentclass{article}
@@ -282,20 +282,20 @@ Test: \gls{S}, $\gls{alpha}$, $\gls{beta}$.
 \end{document}
    </pre>
    <p>
-   As before, run <LaTeX/> as usual on this document. Since the <tt>xindy</tt>
-   package option has been used, this will create a <tt>.xdy</tt> file
-   instead of a <tt>.ist</tt> file and the <tt>.glo</tt>
+   As before, run <LaTeX/> as usual on this document. Since the <file>xindy</file>
+   package option has been used, this will create a <file>.xdy</file> file
+   instead of a <file>.ist</file> file and the <file>.glo</file>
    file is now in <term tag="xindy"/>'s format. There are, however, problems
    with this document. The <sty>glossaries</sty> manual advises using the
-   <tt>sort</tt> key for entries that contain special characters or commands
+   <file>sort</file> key for entries that contain special characters or commands
    in the entry's name. This document hasn't followed that advice, and
-   xindy will complain. The <tt>S</tt> entry just causes a warning:
+   xindy will complain. The <file>S</file> entry just causes a warning:
    </p>
 <blockquote>
 Would replace complete index key with empty string, ignoring
 </blockquote>
    <p noindent="true">
-   and the <tt>S</tt> entry is ignored. The <tt>alpha</tt> and <tt>beta</tt>
+   and the <file>S</file> entry is ignored. The <file>alpha</file> and <file>beta</file>
    entries cause an error:
    </p>
 <blockquote>
@@ -303,7 +303,7 @@ index 0 should be less than the length of the string
 </blockquote>
    <p noindent="true">
    Again the entries are ignored, but the message is fairly cryptic.
-   If we load the auxiliary file (<tt>missing-sort.aux</tt>) into
+   If we load the auxiliary file (<file>missing-sort.aux</file>) into
    <app/>, these problems are detected, and the following error message is 
    displayed:
    </p>
@@ -316,7 +316,7 @@ Xindy failed with exit code 1.
    <button tag="diagnostics.title"/> tab
    should automatically be selected (see <ref tag="missingsortdiagnostics"/>).
    This identifies the problem entries and recommends a solution, in this case, 
-   add the <tt>sort</tt> key to the entry definition. The actual warning and
+   add the <file>sort</file> key to the entry definition. The actual warning and
    error message reported by <term tag="xindy"/> are shown at the end.
    (You can adjust the font used by these messages if you like,
     see <ref tag="properties"/>.)
@@ -394,8 +394,8 @@ A \gls{sample} document.
    <p>
    The <sty>glossaries-extra</sty> package is stricter than
    the base <sty>glossaries</sty> package. The problem here
-   is that I've used <tt>type=acronym</tt>, but there's no
-   glossary with that label. (I haven't used the <tt>acronym</tt>
+   is that I've used <file>type=acronym</file>, but there's no
+   glossary with that label. (I haven't used the <file>acronym</file>
    option.) If you're not using the extension package, this is
    harder to pick up, but <app/> will notify you of the problem.
    This example document will trigger the error
@@ -408,8 +408,8 @@ No glossary <sq>acronym</sq>.
   </p>
 <blockquote>
 It looks as though you might have done something like 
-<tt><cs tag="printglossary"/>[type=<marg>acronym</marg>]</tt>, but there's no 
-<tt>acronym</tt> glossary.
+<code><cs tag="printglossary"/>[type=<marg>acronym</marg>]</code>, but there's no 
+<file>acronym</file> glossary.
 </blockquote>
    <p>
    If you switch to the <button tag="main.title"/> panel,
@@ -456,7 +456,7 @@ A sample document.
 </pre>
    <p>
    My first step, as usual, is to run <LaTeX/> on this document, which will
-   create the <tt>.aux</tt> file. Now if I try loading this file into <app/> 
+   create the <file>.aux</file> file. Now if I try loading this file into <app/> 
    I get the error message:
    </p>
    <blockquote>
@@ -466,11 +466,11 @@ A sample document.
    The diagnostics panel shows the following message:
    </p>
    <blockquote>
-There were no entries listed for the <tt>main</tt> glossary. Remember that you 
+There were no entries listed for the <file>main</file> glossary. Remember that you 
 must index entries for them to appear in the glossary using the commands 
 provided by the glossaries package. Entries that have been defined but not 
 indexed won't be listed. If you don't want to use this glossary, 
-add the <tt>nomain</tt> package option to your document. Check the following:
+add the <file>nomain</file> package option to your document. Check the following:
 <ul>
 <li>Have you used commands like <cs tag="gls"/> or <cs tag="glsadd"/> in the
 document? (If you haven't, you need to add them.)</li>
@@ -481,8 +481,8 @@ in the preamble, have you remembered to put them <em>after</em>
 </ul>
    </blockquote>
    <p>
-   (The sentence referencing <tt>nomain</tt> only appears if there are 
-   no entries for the <tt>main</tt> glossary, but not for any other glossaries.)
+   (The sentence referencing <file>nomain</file> only appears if there are 
+   no entries for the <file>main</file> glossary, but not for any other glossaries.)
    </p>
    </example>
    <p>
@@ -511,7 +511,7 @@ A \gls{sample} document.
 </pre>
    </p>
    <p>
-   If I load the <tt>.aux</tt> file for this document into <app/>, I get
+   If I load the <file>.aux</file> file for this document into <app/>, I get
    the following message in the diagnostics panel:
    </p>
    <blockquote>
@@ -547,14 +547,14 @@ A \gls{sample} document.
    <blockquote>
 <p>
 Package glossaries Warning: Empty glossary for 
-<tt><cs tag="printnoidxglossary"/>[type=<marg>acronym</marg>]</tt> Rerun may be 
+<code><cs tag="printnoidxglossary"/>[type=<marg>acronym</marg>]</code> Rerun may be 
 required (or you may have forgotten to use commands like <cs tag="gls"/>) on input 
 line 13.
 </p>
 <p>
 It looks as though you might have done something like 
-<tt><cs tag="printnoidxglossary"/>[type=<marg>acronym</marg>]</tt>, but there's no
-<tt>acronym</tt> glossary.
+<code><cs tag="printnoidxglossary"/>[type=<marg>acronym</marg>]</code>, but there's no
+<file>acronym</file> glossary.
 </p>
    </blockquote>
    <p>
@@ -564,7 +564,7 @@ It looks as though you might have done something like
    <p>
    Note that <app/> also looks for warnings from the <sty>glossaries</sty>
    package, so if you are encountering any problems, make sure you
-   haven't suppressed the warnings with the <tt>nowarn</tt> package option.
+   haven't suppressed the warnings with the <file>nowarn</file> package option.
    </p>
    <example>
    <p>
@@ -604,7 +604,7 @@ if you don't want any glossaries.) This document will not have a glossary.
    </example>
    <p>
    Sometimes things can go so badly wrong that <LaTeX/> doesn't even
-   generate an auxiliary file. In this case you can load the <tt>.log</tt>
+   generate an auxiliary file. In this case you can load the <file>.log</file>
    file instead. (You'll need to change the file selector filter to 
    show all files.) <app/> will parse the log file to see if it recognises
    any of the error messages. Some <LaTeX/> error messages can be quite
@@ -660,20 +660,20 @@ It's possible that there's an expansion issue involving a fragile command.
 Things to check for:
 </p>
 <ul>
-<li>Have you used a class like <tt>beamer</tt> that doesn't make common 
+<li>Have you used a class like <file>beamer</file> that doesn't make common 
 formatting commands like <cs tag="textit"/> robust?</li>
 <li>Have you tried using <cs tag="protect"/> in front of fragile commands
 contained within your entry definitions?</li>
 <li>Have you tried switching off the expansion using commands like 
 <cs tag="glsnoexpandfields"/>? (See section 4.6 Expansion in the 
-<tt>glossaries</tt> user manual.)</li>
+<file>glossaries</file> user manual.)</li>
 </ul>
 </blockquote>
    <p>
    The problem here is that a fragile command has been used in the entry 
    definition. The problematic command in this example is 
    <cs tag="textit"/>, which is normally robust, but it happens to be
-   fragile with the <tt>beamer</tt> class. The solution is to either 
+   fragile with the <file>beamer</file> class. The solution is to either 
    protect the problematic command with <cs tag="protect"/> or
    use <cs tag="glsnoexpandfields"/> before you define the entries.
    For example:
@@ -733,7 +733,7 @@ contained within your entry definitions?</li>
    value starts with an extended character. This doesn't work as
    <term tag="makeindex"/> treats the UTF-8 letter as two separate
    characters form from the two octets. This not only affects the 
-   sorting but also causes a problem for the <tt>indexgroup</tt>
+   sorting but also causes a problem for the <file>indexgroup</file>
    style.</p>
    <p>
    <float type="figure" tag="unsupportedencdiagnostics"
@@ -878,7 +878,7 @@ contained within your entry definitions?</li>
    </p>
    <p>
    <app/> will try to determine the language and input encoding from the
-   <tt>.aux</tt> file to pass to <term tag="xindy"/>, but you can override 
+   <file>.aux</file> file to pass to <term tag="xindy"/>, but you can override 
    this if you want to. Make sure that the <button tag="properties.override"/> 
    check box is selected, and change the language and encoding as appropriate.
    Note that the batch mode will also use these settings, although they can
@@ -945,7 +945,7 @@ contained within your entry definitions?</li>
    <p>
    <app/> is licensed under the terms of the GNU General Public License.
    <app/> depends on the following third party libraries whose jar files are
-   in the <tt>lib</tt> directory: Java Help 
+   in the <file>lib</file> directory: Java Help 
    (<url www="https://javahelp.java.net/"/>) and
    the Java Look and Feel Graphics Repository (<url www="http://www.oracle.com/technetwork/java/index-138612.html"/>).
    </p>

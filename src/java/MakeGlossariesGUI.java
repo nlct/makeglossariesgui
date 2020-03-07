@@ -656,8 +656,11 @@ public class MakeGlossariesGUI extends JFrame
    public void updateFont()
    {
       MakeGlossariesProperties properties = invoker.getProperties();
-      setFont(new Font(properties.getFontName(),
-        properties.getFontStyle(), properties.getFontSize()));
+
+      Font f = new Font(properties.getFontName(),
+        properties.getFontStyle(), properties.getFontSize());
+
+      setFont(f);
 
       updateAll();
    }
