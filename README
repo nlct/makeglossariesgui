@@ -3,8 +3,9 @@ Application	: MakeGlossariesGUI
 Author		: Nicola L. C. Talbot
 
 License         : GPLv3+ <http://gnu.org/licenses/gpl.html>
+		  Copyright Nicola L. C. Talbot 2011-2020
 
-Home Page       : http://www.dickimaw-books.com/software/makeglossariesgui/
+Home Page       : https://www.dickimaw-books.com/software/makeglossariesgui/
 
 Requirements	: Java Runtime Environment (JRE 8)
 
@@ -30,6 +31,9 @@ Run the installer:
 
 java -jar makeglossariesgui-installer.jar
 
+If you want to run makeglossariesgui in batch mode then add the bin
+subdirectory your system's PATH environment variable.
+
 Third Party Libraries
 =====================
 
@@ -37,12 +41,12 @@ MakeGlossariesGUI depends on the following third party libraries
 whose jar files are placed in the application's lib directory by
 the installer:
 
- - Java Help (https://javahelp.java.net/) GPL
- - The Java Look and Feel Graphics Repository
+ - javahelp2.jar: Java Help (https://javahelp.java.net/) GPL
+ - jlfgr-1_0.jar: The Java Look and Feel Graphics Repository
    (http://www.oracle.com/technetwork/java/index-138612.html)
    JLFGR License
 
 If you want to build the application, you will need to fetch those
 jar files and add them to the lib directory.
 
-http://www.dickimaw-books.com/
+https://www.dickimaw-books.com/

@@ -352,23 +352,53 @@ if (defined($wwwpath))
 
    print $wwwfd &html_www_head($docinfo{Title}, '', $nodes[0]->{Tag});
 
-   print $wwwfd "<div class=\"title\"><h1>", $docinfo{Title}, "</h1>\n";
+   print $wwwfd '<h1 class="doctitle">', $docinfo{Title}, "</h1>\n";
 
-   print $wwwfd "<p>$docinfo{Author}</p>\n" if ($docinfo{Author});
+   if ($docinfo{Author})
+   {
+      my $docauthor = $docinfo{Author};
 
-   print $wwwfd "</div><div class=\"date\">";
+      $docauthor=~s~<table class="author"><tr>(.*?)</tr></table>~$1~sg;
 
-   print $wwwfd "<p>$docinfo{Date}</p>\n" if ($docinfo{Date});
+      $docauthor=~s~<td>(.*?)</td>~<div class="author">$1</div>~sg;
 
-   print $wwwfd "</div>";
+      $docauthor=~s~<tt>(.*?)</tt>~<span class="file">$1</span>~sg;
+
+      print $wwwfd "$docauthor\n";
+   }
+
+   print $wwwfd "<div class=\"date\">";
+
+   print $wwwfd "$docinfo{Date}</div>\n" if ($docinfo{Date});
+
 
    open $wwwsidebarfd, ">:encoding($encoding_xml)", "$wwwpath/sidebar.shtml"
      or die "Can't open '$wwwpath/sidebar.shtml' $!\n";
 
    print $wwwsidebarfd "<a href=\"..\">$dict{appname}</a>";
+
+   print $wwwsidebarfd <<_END_SIDEBAR_LI;
+<ul class="listnav">
+<!--#if expr="\%{DOCUMENT_URI}=~/index.shtml/"-->
+<li class="current">
+<!--#else-->
+<li>
+<!--#endif-->
+_END_SIDEBAR_LI
+      print $wwwsidebarfd "<a href=\"index.shtml\">", &get_label("manual.toc"), "</a>";
+
+   print $wwwsidebarfd <<_END_SIDEBAR_LI;
+<!--#if expr="\%{DOCUMENT_URI}=~/glossary.shtml/"-->
+<li class="current">
+<!--#else-->
+<li>
+<!--#endif-->
+_END_SIDEBAR_LI
+      print $wwwsidebarfd "<a href=\"glossary.shtml\">", &get_label("manual.glossary"), "</a>";
 }
 
 my $prev = $base;
+my $wwwprev = 'glossary';
 
 my $tocfd;
 
@@ -415,11 +445,7 @@ for (my $idx = 0; $idx <= $#nodes; $idx++)
       {
          print $wwwfd "\n<ul>";
 
-         if ($prevlevel == 0)
-         {
-            print $wwwsidebarfd "\n<ul class=\"listnav\">";
-         }
-         else
+         unless ($prevlevel == 0)
          {
             print $wwwsidebarfd "\n<ul>";
          }
@@ -428,11 +454,11 @@ for (my $idx = 0; $idx <= $#nodes; $idx++)
       print $wwwfd "\n<li><a href=\"$node->{Tag}.shtml\">$node->{Title}</a>";
 
       print $wwwsidebarfd <<_END_SIDEBAR_LI;
-<!--#if expr="\%{DOCUMENT_URI} =~ /$node->{Tag}.shtml/" -->
+<!--#if expr="\%{DOCUMENT_URI}=~/$node->{Tag}.shtml/"-->
 <li class="current">
-<!--#else -->
+<!--#else-->
 <li>
-<!--#endif -->
+<!--#endif-->
 _END_SIDEBAR_LI
       print $wwwsidebarfd "<a href=\"$node->{Tag}.shtml\">$node->{Title}</a>";
    }
@@ -459,7 +485,11 @@ _END_SIDEBAR_LI
 
    $content=~s/<ref>([^<]+)<\/ref>/&get_ref($1)/eg;
 
-   print $htmlfd "<div>$content</div>";
+   my $hs_content = $content;
+
+   $hs_content=~s/<(\/?)code>/<$1tt>/g;
+
+   print $htmlfd $hs_content;
 
    my $wwwnodefd;
 
@@ -468,9 +498,19 @@ _END_SIDEBAR_LI
       open $wwwnodefd, ">:encoding($encoding_xml)", "$wwwpath/$tag.shtml"
         or die "Can't open '$wwwpath/$tag.shtml' $!\n";
 
+      $prevtag = (($wwwprev eq $base or $wwwprev eq 'glossary') ? $wwwprev : $prev->{Tag});
+
       print $wwwnodefd &html_www_head($node->{Title}, $prevtag, $nexttag);
 
-      $content=~s/<!-- POPUP "(.+?)" -->.+?<\/object>\s*(.+?)\s*<!-- END POPUP "\1" -->/<a href="$1">$2<\/a>/sg;
+      $content=~s/<a name=/<a id=/g;
+
+      $content=~s~<tt>(.*?)</tt>~<span class="file">$1</span>~g;
+
+      $content=~s~<font class="(.*?)">(.*?)</font>~<span class="$1">$2</span>~g;
+
+      $content=~s~(?:<p>\s*)?<div class="figure">(.*?)<div class="figcaption">(.*?)</div>(<p></p>)*</div>(?:\s*</p>)?~<figure>$1<figcaption>$2</figcaption></figure>~sg;
+
+      $content=~s/<!-- POPUP "(.+?)" -->.+?<\/object>\s*(.+?)\s*<!-- END POPUP "\1" -->/<a href="glossary.shtml#$1">$2<\/a>/sg;
 
       print $wwwnodefd "<$header>", $node->{Title}, "</$header>\n", $content;
    }
@@ -481,7 +521,11 @@ _END_SIDEBAR_LI
 
       $content=~s/<ref>([^<]+)<\/ref>/&get_ref($1)/eg;
 
-      print $htmlfd "<hr />$content";
+      $hs_content = $content;
+
+      $hs_content=~s/<(\/?)code>/<$1tt>/g;
+
+      print $htmlfd "<hr />$hs_content";
 
       print $wwwnodefd "<hr />$content" if (defined($wwwpath));
    }
@@ -494,8 +538,9 @@ _END_SIDEBAR_LI
 
    if (defined($wwwpath))
    {
-      print $wwwnodefd &html_www_foot($prev, $next);
+      print $wwwnodefd &html_www_foot($wwwprev, $next);
       close $wwwnodefd;
+      $wwwprev = $node;
    }
 
    $prev = $node;
@@ -519,11 +564,14 @@ close $tocfd;
 
 if (defined($wwwfd))
 {
-   print $wwwfd &html_www_foot('', $nodes[0]);
+   print $wwwfd &html_www_foot('', 'glossary');
 
    close $wwwfd;
 
    close $wwwsidebarfd;
+
+   # write glossary file
+   &write_www_glossary($nodes[0]);
 }
 
 # write map file
@@ -652,8 +700,15 @@ sub hs_index_term{
 sub hs_popup{
    my ($href, $text) = @_;
 
-   return <<_END_POPUP;
-<!-- POPUP "$href" -->
+   my $tag = $href;
+
+   if ($href=~/(.*)\.html/)
+   {
+      $tag = $1;
+   }
+
+   my $html = <<_END_POPUP;
+<!-- POPUP "$tag" -->
   <object classid="java:com.sun.java.help.impl.JHSecondaryViewer">
     <param name="viewerStyle" value="javax.help.Popup" />
     <param name="viewerSize" value="400,200" />
@@ -662,9 +717,10 @@ sub hs_popup{
     <param name="text" value="&#x261B;" />
     <param name="textColor" value="blue" />
   </object>
-  $text
-<!-- END POPUP "$href" -->
 _END_POPUP
+
+   # no EOL after text
+   return "$html$text<!-- END POPUP \"$tag\" -->";
 }
 
 sub handle_html{
@@ -1191,7 +1247,7 @@ sub end_tt{
 sub start_file{
    my ($expat, %attrs) = @_;
 
-   &handle_html("<span class=\"file\">");
+   &handle_html("<font class=\"file\">");
 
    print $texfd "\\texttt{";
 }
@@ -1199,7 +1255,7 @@ sub start_file{
 sub end_file{
    my ($expat) = @_;
 
-   &handle_html('</span>');
+   &handle_html('</font>');
 
    print $texfd "}";
 }
@@ -1667,7 +1723,7 @@ sub start_float{
 
    push @float_elements, \%attrs;
 
-   &handle_html("<div class=\"float\"><a name=\"$attrs{tag}\"></a>");
+   &handle_html("<div class=\"$attrs{type}\"><a name=\"$attrs{tag}\"></a>");
 
    $tags{$attrs{tag}}->{Ref} = $nodes[$#nodes]->{Tag}
      .'.html#'.$attrs{tag};
@@ -1676,8 +1732,9 @@ sub start_float{
 
    unless ($attrs{type} eq 'figure')
    {
-      &handle_html('<p></p><p>' . $tags{$attrs{tag}}->{Text} . ': '
-        . $attrs{caption} . '</p>');
+      &handle_html('<p></p><div class="caption">'
+        . $tags{$attrs{tag}}->{Text} . ': '
+        . $attrs{caption} . '</div>');
    }
 
    print $texfd "\\begin{", $attrs{type}, "}$pos\n";
@@ -1698,8 +1755,8 @@ sub end_float{
 
    if ($attrs->{type} eq 'figure')
    {
-      &handle_html('<p>'. $tags{$attrs->{tag}}->{Text} . ': '
-        . $attrs->{caption} . '</p><p></p>');
+      &handle_html('<div class="figcaption">'. $tags{$attrs->{tag}}->{Text} . ': '
+        . $attrs->{caption} . '</div><p></p>');
    }
 
    &handle_html('</div>');
@@ -2220,7 +2277,7 @@ sub start_cs{
 
    print $texfd '\\cs{', $attrs{tag}, '}';
 
-   &hs_index_term('cs_'.$attrs{tag}, "<tt>$text</tt>", $text, \%terms);
+   &hs_index_term('cs_'.$attrs{tag}, "<code>$text</code>", $text, \%terms);
 
 }
 
@@ -2483,13 +2540,18 @@ xml:lang="$locale">
     {
       display: inline;
       font-weight: bold;
-      font-size: normal;
+      font-size: medium;
       text-align: center;
     }
-    .float
+    .figure
     {
        text-align: center;
-       padding-top: 16;
+       padding-top: 16px;
+    }
+    .table
+    {
+       text-align: center;
+       padding-top: 16px;
     }
     .menu
     {
@@ -2574,13 +2636,15 @@ sub html_www_head{
 
   if ($next)
   {
-     $nextlink = "<link rel=\"next\" href=\"$next.html\" />";
+     $nextlink = "<link rel=\"next\" href=\"$next.shtml\" />";
   }
 
   if ($prev)
   {
-     $prevlink = "<link rel=\"prev\" href=\"$prev.html\" />";
+     $prevlink = "<link rel=\"prev\" href=\"$prev.shtml\" />";
   }
+
+  $title=~s/&nbsp;/ /g;
 
   return <<_END_HTML_HEAD;
 <!DOCTYPE html>
@@ -2588,17 +2652,13 @@ sub html_www_head{
 <head>
   <meta charset="UTF-8">
   <!--#include virtual="/navigation/styles.shtml" -->
-  <style type="text/css">
-    .title
+  <style>
+    h1.doctitle
     {
-      display: inline;
-      font-weight: bold;
-      font-size: xx-large;
-      text-align: center;
+       text-align: center;
     }
     .author
     {
-      display: inline;
       font-weight: bold;
       font-size: large;
       text-align: center;
@@ -2606,15 +2666,14 @@ sub html_www_head{
     }
     .date
     {
-      display: inline;
       font-weight: bold;
-      font-size: normal;
+      font-size: medium;
       text-align: center;
     }
     .float
     {
        text-align: center;
-       padding-top: 16;
+       padding-top: 16px;
     }
     .menu
     {
@@ -2660,23 +2719,39 @@ sub html_www_nav{
         $prev = 'index';
         $title = &get_label('manual.home');
      } 
+     elsif  ($prevNode eq 'glossary')
+     {
+        $prev = 'glossary';
+        $title = &get_label('manual.glossary');
+     }
      elsif ($prevNode)
      {
         $prev = $prevNode->{Tag};
         $title = $prevNode->{Title};
      }
 
-     $nav .= "<a href=\"$prev.html\">&#x21E6; " .
-      $title . "</a>";
+     $nav .= "<a href=\"$prev.shtml\">&#x21E6; $title </a>";
   }
 
   $nav .= '</div><div class="navright">';
 
   if ($nextNode)
   {
-     $nav .= "<a href=\"$nextNode->{Tag}.html\">"
-          . $nextNode->{Title}
-          . " &#x21E8;</a>";
+     my $next;
+     my $title;
+
+     if ($nextNode eq 'glossary')
+     {
+        $next = 'glossary';
+        $title = &get_label('manual.glossary');
+     }
+     else
+     {
+        $next = $nextNode->{Tag};
+        $title = $nextNode->{Title};
+     }
+
+     $nav .= "<a href=\"$next.shtml\">$title &#x21E8;</a>";
   }
 
   "$nav</div></div>"
@@ -2700,6 +2775,77 @@ $nav
 </body>
 </html>
 _END_HTML_FOOT
+}
+
+sub write_www_glossary{
+   my ($nextnode) = @_;
+
+   my $title = &get_label('manual.glossary');
+
+   my $fd;
+
+   open $fd, ">:encoding($encoding_xml)", "$wwwpath/glossary.shtml"
+     or die "Can't open '$wwwpath/glossary.shtml' $!\n";
+
+   print "Writing '$wwwpath/glossary.shtml'\n";
+
+   print $fd &html_www_head($title, 'index', $nextnode->{Tag});
+
+   print $fd "<h1>$title</h1>\n";
+
+   &write_www_terms($fd, \%terms, \%acros);
+
+   print $fd &html_www_foot('index', $nextnode);
+
+   close $fd;
+}
+
+sub write_www_terms{
+   my ($fd, $terms, $acros) = @_;
+
+   my %hash = ();
+
+   foreach my $tag ( keys %$terms )
+   {
+      if ($tag=~/^gls_/)
+      {
+         $hash{$tag} = ();
+
+         $hash{$tag}{Text} = $terms->{$tag}->{Text};
+         $hash{$tag}{Description} = $terms->{$tag}->{Description};
+      }
+   }
+
+   foreach my $tag ( keys %$acros )
+   {
+      $hash{$tag} = ();
+
+      $hash{$tag}{Text} = $acros->{$tag}->{Short};
+      $hash{$tag}{Description} = $acros->{$tag}->{Long};
+   }
+
+   my @tags = keys %hash;
+
+   if ($#tags == -1)
+   {
+      return;
+   }
+
+   my @sorted_tags = sort {lc($hash{$a}{Text}) cmp lc($hash{$b}{Text})} @tags;
+
+   print $fd "<dl class=\"boldspaced\">";
+
+   foreach my $tag ( @sorted_tags )
+   {
+      print $fd "<dt id=\"$tag\">$hash{$tag}{Text}</dt>\n", "<dd>";
+
+      print $fd $hash{$tag}{Description};
+
+      print $fd "</dd>\n";
+   }
+
+   print $fd "</dl>";
+
 }
 
 sub arg_placeholder{

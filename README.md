@@ -22,4 +22,4 @@ the installer:
 If you want to build the application, you will need to fetch those
 jar files and add them to the lib directory.
 
-http://www.dickimaw-books.com/
+https://www.dickimaw-books.com/

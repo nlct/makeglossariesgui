@@ -1,3 +1,21 @@
+/*
+    Copyright (C) 2013-2020 Nicola L.C. Talbot
+    www.dickimaw-books.com
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+*/
 package com.dickimawbooks.makeglossariesgui;
 
 import java.io.*;
@@ -121,6 +139,11 @@ public class MakeGlossariesGUI extends JFrame
       scrollPane = new JScrollPane(mainPanel);
       scrollPane.setPreferredSize(new Dimension(800,600));
 
+      /*
+       * The font is only set for the main window not for the
+       * manual. HelpBroker.setFont(Font) is lost whenever a new
+       * HTML file is loaded. 
+       */
       setFont(new Font(invoker.getProperties().getFontName(),
          invoker.getProperties().getFontStyle(),
          invoker.getProperties().getFontSize()));

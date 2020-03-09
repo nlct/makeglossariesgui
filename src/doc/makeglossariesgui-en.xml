@@ -491,7 +491,7 @@ in the preamble, have you remembered to put them <em>after</em>
    </p>
    <example>
    <p>
-   Consider the following document:
+   Consider the following document:</p>
 <pre>
 \documentclass{article}
 
@@ -509,7 +509,6 @@ A \gls{sample} document.
 
 \end{document}
 </pre>
-   </p>
    <p>
    If I load the <file>.aux</file> file for this document into <app/>, I get
    the following message in the diagnostics panel:

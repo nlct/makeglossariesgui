@@ -1,3 +1,8 @@
+2.2 (2020-03-09):
+
+  * Added check for disablemakegloss and restoremakegloss
+    (new to glossaries.sty v4.45).
+
 2.1 (2018-05-23):
 
   * Added check for bib2gls.
